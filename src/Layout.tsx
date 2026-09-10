@@ -1,14 +1,29 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { LayoutDashboard, Filter, Calendar, Bot, Car, Settings, TrendingUp } from 'lucide-react'
 
-const navItems = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/marketing', label: 'Marketing', icon: TrendingUp },
-  { to: '/funil', label: 'Funil de Vendas', icon: Filter },
-  { to: '/planeamento', label: 'Planeamento', icon: Calendar },
-  { to: '/assistente', label: 'Assistente', icon: Bot },
-  { to: '/operacoes', label: 'Operações', icon: Car },
-  { to: '/configuracoes', label: 'Configurações', icon: Settings },
+const navGroups = [
+  {
+    label: 'Aquisição (Mkt & Vendas)',
+    items: [
+      { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
+      { to: '/marketing', label: 'Marketing', icon: TrendingUp },
+      { to: '/funil', label: 'Funil de Vendas', icon: Filter },
+      { to: '/planeamento', label: 'Planeamento', icon: Calendar },
+    ],
+  },
+  {
+    label: 'Operações',
+    items: [
+      { to: '/operacoes', label: 'Gestão de Frota', icon: Car },
+    ],
+  },
+  {
+    label: 'Geral',
+    items: [
+      { to: '/assistente', label: 'Assistente', icon: Bot },
+      { to: '/configuracoes', label: 'Configurações', icon: Settings },
+    ],
+  },
 ]
 
 function Layout() {
@@ -27,16 +42,21 @@ function Layout() {
           </div>
         </div>
         <nav className="sidebar-nav">
-          {navItems.map(({ to, label, icon: Icon, end }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-            >
-              <Icon size={16} />
-              <span>{label}</span>
-            </NavLink>
+          {navGroups.map(group => (
+            <div key={group.label} className="sidebar-group">
+              <div className="sidebar-group-label">{group.label}</div>
+              {group.items.map(({ to, label, icon: Icon, end }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  end={end}
+                  className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                >
+                  <Icon size={16} />
+                  <span>{label}</span>
+                </NavLink>
+              ))}
+            </div>
           ))}
         </nav>
       </aside>
