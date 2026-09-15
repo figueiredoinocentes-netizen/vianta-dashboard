@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" crossorigin href="/assets/index-DBm4vQ15.css">
+    <link rel="stylesheet" crossorigin href="/assets/index-DBm4vQ15.css" />
     <style>
       :root { --sidebar-w: 256px; }
       * { box-sizing: border-box; }
@@ -27,10 +27,10 @@
       .stat-card { background: #1a1a1a; border: 1px solid #1e293b; border-radius: 12px; padding: 16px; }
       .stat-card .label { font-size: 12px; color: #718096; margin-bottom: 4px; }
       .stat-card .value { font-size: 24px; font-weight: 700; }
-      .tabs { display: flex; gap: 4px; margin-bottom: 16px; background: #1a1a1a; border-radius: 8px; padding: 4px; overflow-x: auto; }
-      .tab-btn { padding: 8px 16px; border: none; background: transparent; color: #718096; border-radius: 6px; cursor: pointer; font-size: 13px; white-space: nowrap; transition: all 0.15s; }
-      .tab-btn:hover { color: #e2e8f0; }
-      .tab-btn.active { background: #2d2d2d; color: #e2e8f0; font-weight: 500; }
+      .section-tabs { display: flex; gap: 4px; margin-bottom: 12px; background: #1a1a1a; border-radius: 8px; padding: 4px; overflow-x: auto; flex-wrap: nowrap; }
+      .section-btn { padding: 8px 14px; border: none; background: transparent; color: #718096; border-radius: 6px; cursor: pointer; font-size: 12px; white-space: nowrap; transition: all 0.15s; }
+      .section-btn:hover { color: #e2e8f0; background: #2a2a2a; }
+      .section-btn.active { background: #2d2d2d; color: #e2e8f0; font-weight: 600; }
       .filters { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; position: relative; }
       .filters input[type="text"] { flex: 1; background: #1a1a1a; border: 1px solid #1e293b; border-radius: 8px; padding: 10px 12px; color: #e2e8f0; font-size: 13px; outline: none; }
       .filters input[type="text"]:focus { border-color: #3b82f6; }
@@ -44,13 +44,14 @@
       th { padding: 10px 14px; font-size: 11px; font-weight: 600; color: #718096; text-transform: uppercase; letter-spacing: 0.05em; text-align: left; white-space: nowrap; }
       td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid #1e293b; }
       tr:hover td { background: #1e1e1e; }
-      tr.inactive td { opacity: 0.5; }
       .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
-      .badge-active { background: #064e3b; color: #6ee7b7; }
-      .badge-stand { background: #1e3a5f; color: #93c5fd; }
-      .badge-inactive { background: #3d2e00; color: #fde68a; }
-      .badge-maint { background: #3d2e00; color: #fde68a; }
-      .badge-sold { background: #1f2937; color: #9ca3af; }
+      .badge-alugado { background: #064e3b; color: #6ee7b7; }
+      .badge-venda { background: #1e3a5f; color: #93c5fd; }
+      .badge-inativo { background: #3d2e00; color: #fde68a; }
+      .badge-maint { background: #78350f; color: #fbbf24; }
+      .badge-vendido { background: #1f2937; color: #9ca3af; }
+      .badge-prep { background: #312e81; color: #a5b4fc; }
+      .badge-aluguer { background: #14532d; color: #86efac; }
       .status-badge { cursor: pointer; transition: filter 0.15s; }
       .status-badge:hover { filter: brightness(1.2); }
       .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: none; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-decoration: none; }
@@ -58,6 +59,9 @@
       .btn-primary:hover { background: #2563eb; }
       .btn-outline { background: transparent; border: 1px solid #1e293b; color: #94a3b8; }
       .btn-outline:hover { background: #1a1a1a; color: #e2e8f0; }
+      .btn-danger { background: #dc2626; color: white; }
+      .btn-danger:hover { background: #b91c1c; }
+      .btn-sm { padding: 4px 10px; font-size: 11px; }
       .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 100; }
       .modal { background: #1a1a1a; border: 1px solid #1e293b; border-radius: 12px; padding: 24px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
       .modal h2 { font-size: 18px; font-weight: 600; margin: 0 0 20px; }
@@ -67,11 +71,20 @@
       .modal input, .modal select { width: 100%; background: #141414; border: 1px solid #1e293b; border-radius: 6px; padding: 8px 10px; color: #e2e8f0; font-size: 13px; outline: none; }
       .modal input:focus, .modal select:focus { border-color: #3b82f6; }
       .modal .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+      .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+      .kpi-card { background: #1a1a1a; border: 1px solid #1e293b; border-radius: 12px; padding: 16px; }
+      .kpi-card .val { font-size: 28px; font-weight: 700; }
+      .kpi-card .sub { font-size: 11px; color: #718096; margin-top: 2px; }
+      .low-stock { color: #ef4444; }
+      .warning-stock { color: #f59e0b; }
+      .ok-stock { color: #22c55e; }
       @media (max-width: 768px) {
         .sidebar { width: 60px; }
         .sidebar-logo h1, .sidebar-logo p, .sidebar-link span { display: none; }
         .main-content { margin-left: 60px; padding: 16px; }
         .stats-grid { grid-template-columns: 1fr 1fr; }
+        .section-tabs { gap: 2px; }
+        .section-btn { font-size: 11px; padding: 6px 8px; }
       }
     </style>
   </head>
@@ -83,54 +96,31 @@
           <div><h1>VIANTA</h1><p>Fleet Success Hub</p></div>
         </div>
         <nav class="sidebar-nav">
-          <a href="/" class="sidebar-link"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="9" x="14" y="3" rx="1"/><rect width="7" height="9" x="3" y="14" rx="1"/><rect width="7" height="9" x="14" y="14" rx="1"/></svg><span>Dashboard</span></a>
-          <a href="/marketing" class="sidebar-link"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg><span>Marketing</span></a>
-          <a href="/funil" class="sidebar-link"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg><span>Funil de Vendas</span></a>
-          <a href="/planeamento" class="sidebar-link"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg><span>Planeamento</span></a>
-          <a href="/assistente" class="sidebar-link"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M11 3v18"/><path d="M3 11h18"/></svg><span>Assistente</span></a>
-          <a href="/operacoes" class="sidebar-link active"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg><span>Operações</span></a>
-          <a href="/configuracoes" class="sidebar-link" style="margin-top:auto"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Configurações</span></a>
+          <div style="display:flex;gap:4px;padding:4px;border-radius:8px;background:rgba(255,255,255,0.04);margin-bottom:8px">
+            <a href="/" style="flex:1;text-align:center;font-size:12px;font-weight:600;padding:8px;border-radius:6px;color:#94a3b8;text-decoration:none;transition:all 0.15s">Aquisição</a>
+            <div style="flex:1;text-align:center;font-size:12px;font-weight:600;padding:8px;border-radius:6px;background:rgba(59,130,246,0.12);color:#3b82f6">Operações</div>
+          </div>
+          <a href="/operacoes" class="sidebar-link active"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg><span>Gestão de Frota</span></a>
         </nav>
       </aside>
       <main class="main-content">
         <div id="app">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
             <div>
               <h2 style="font-size:20px;font-weight:700;margin:0">Gestão de Frota</h2>
-              <p style="margin:4px 0 0;color:#718096;font-size:13px">Stock, operações e viaturas • <span id="totalCount">0</span> registos</p>
+              <p style="margin:4px 0 0;color:#718096;font-size:13px"><span id="sectionLabel">Visão geral</span> • <span id="totalCount">0</span> registos</p>
             </div>
             <div style="display:flex;gap:8px">
               <button class="btn btn-outline" onclick="fetchData()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg> Atualizar
               </button>
-              <button class="btn btn-primary" onclick="document.getElementById('vehicleModal').style.display='flex'">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Nova Viatura
+              <button class="btn btn-primary" id="newBtn" onclick="document.getElementById('vehicleModal').style.display='flex'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg> <span id="newBtnLabel">Nova Viatura</span>
               </button>
             </div>
           </div>
-          <div class="stats-grid">
-            <div class="stat-card"><div class="label">Total Frota</div><div class="value" id="statTotal">0</div></div>
-            <div class="stat-card"><div class="label">Na Frota</div><div class="value" id="statFrota" style="color:#38a169">0</div></div>
-            <div class="stat-card"><div class="label">Em Stock</div><div class="value" id="statStock" style="color:#2b6cb0">0</div></div>
-            <div class="stat-card"><div class="label">Inativos</div><div class="value" id="statInativos" style="color:#d69e2e">0</div></div>
-            <div class="stat-card"><div class="label">Vendidos</div><div class="value" id="statVendidos" style="color:#a0aec0">0</div></div>
-          </div>
-          <div class="tabs" id="tabsContainer"></div>
-          <div class="filters">
-            <svg style="position:absolute;left:10px;color:#a0aec0" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            <input type="text" id="searchInput" placeholder="Buscar por modelo, matrícula, proprietário..." style="padding-left:30px" oninput="applyFilters()"/>
-            <select id="gestaoFilter" onchange="applyFilters()"><option value="">Todas as gestões</option></select>
-            <select id="fuelFilter" onchange="applyFilters()"><option value="">Todos combustíveis</option></select>
-            <span class="count" id="filteredCount">0 veículos</span>
-          </div>
-          <div class="card">
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>Matrícula</th><th>Modelo</th><th>Ano</th><th>Comb.</th><th>KMs</th><th>Proprietário</th><th>Gestão</th><th>Estado</th><th>Preço Venda</th><th>Aluguer/Sem</th></tr></thead>
-                <tbody id="tableBody"></tbody>
-              </table>
-            </div>
-          </div>
+          <div class="section-tabs" id="sectionTabs"></div>
+          <div id="sectionContent"></div>
         </div>
         <div id="vehicleModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
           <div class="modal">
@@ -143,11 +133,30 @@
                 <div><label>Combustível</label><select name="combustivel"><option value="">Selecionar</option><option value="Elétrico">Elétrico</option><option value="Gasóleo/Diesel">Gasóleo/Diesel</option><option value="Gasolina">Gasolina</option><option value="Híbrido">Híbrido</option></select></div>
                 <div><label>KMs</label><input name="kms" type="number"/></div>
                 <div><label>Cor</label><input name="cor"/></div>
-                <div><label>Proprietário</label><select name="proprietario"><option value="VIANTA">VIANTA</option><option value="Investidor">Investidor</option><option value="Miguel Brito Comércio Auto Lda">Miguel Brito</option><option value="Vinod Carsane">Vinod Carsane</option><option value="Ricardo Duarte">Ricardo Duarte</option><option value="Outro">Outro</option></select></div>
-                <div><label>Tipo Gestão</label><select name="gestao"><option value="Vianta — Frota Aluguer">Vianta — Frota Aluguer</option><option value="Vianta — Venda">Vianta — Venda</option><option value="Investidor — Frota Aluguer">Investidor — Frota Aluguer</option><option value="Investidor — Venda">Investidor — Venda</option></select></div>
-                <div><label>Estado</label><select name="estado"><option value="Em Stock Stand">Em Stock Stand</option><option value="Na Frota Aluguer">Na Frota Aluguer</option><option value="Inativo">Inativo</option><option value="Manutenção">Manutenção</option><option value="Vendido">Vendido</option></select></div>
+                <div><label>Proprietário</label><select name="proprietario"><option value="VIANTA">VIANTA</option><option value="Investidor">Investidor</option><option value="Miguel Brito Comércio Auto Lda">Miguel Brito</option><option value="Vinod Carsane">Vinod Carsane</option><option value="Ricardo Duarte">Ricardo Duarte</option><option value="EMPRESA">EMPRESA</option><option value="Outro">Outro</option></select></div>
+                <div><label>Tipo Gestão</label><select name="gestao"><option value="Aluguer">Aluguer</option><option value="Venda">Venda</option><option value="Slot">Slot</option></select></div>
+                <div><label>Estado</label><select name="estado"><option value="Alugado">Alugado</option><option value="Para Venda">Para Venda</option><option value="Para Aluguer">Para Aluguer</option><option value="Em Preparação">Em Preparação</option><option value="Inativo">Inativo</option><option value="Manutenção">Manutenção</option><option value="Vendido">Vendido</option></select></div>
                 <div><label>Preço Venda (€)</label><input name="precoVenda" type="number"/></div>
                 <div><label>Valor Aluguer (€/sem)</label><input name="precoAluguer" type="number"/></div>
+              </div>
+              <div class="actions">
+                <button type="button" class="btn btn-outline" onclick="this.closest('.modal-overlay').style.display='none'">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div id="armazemModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+          <div class="modal">
+            <h2>Novo Item</h2>
+            <form onsubmit="event.preventDefault();alert('Item adicionado.');this.closest('.modal-overlay').style.display='none'">
+              <div class="grid">
+                <div class="full"><label>Item <span style="color:#e53e3e">*</span></label><input name="item" required/></div>
+                <div><label>Categoria</label><select name="categoria"><option value="Lubrificantes">Lubrificantes</option><option value="Filtros">Filtros</option><option value="Travões">Travões</option><option value="Pneus">Pneus</option><option value="Fluidos">Fluidos</option><option value="Documentação">Documentação</option><option value="Segurança">Segurança</option><option value="Limpeza">Limpeza</option><option value="Outro">Outro</option></select></div>
+                <div><label>Stock Atual</label><input name="stock" type="number"/></div>
+                <div><label>Stock Mínimo</label><input name="minimo" type="number"/></div>
+                <div><label>Unidade</label><input name="unidade"/></div>
+                <div><label>Fornecedor</label><input name="fornecedor"/></div>
               </div>
               <div class="actions">
                 <button type="button" class="btn btn-outline" onclick="this.closest('.modal-overlay').style.display='none'">Cancelar</button>
@@ -161,14 +170,213 @@
     <script>
       const DB_SHEET_ID='1j5RCxSjd24QlPaquRX7C7eeiHrzPo1c6Wsb0OQWFRjQ';
       const CSV_URL='https://docs.google.com/spreadsheets/d/'+DB_SHEET_ID+'/export?format=csv';
+      const ARMAZEM_CSV_URL='https://docs.google.com/spreadsheets/d/1oEKDArSrjfpf8xvpWSJVKcCcTfyZKKz5b5AB8Mh8-u8/export?format=csv';
       const API_URL='https://vianta-transfers.netlify.app/.netlify/functions/sheets?type=fleet';
-      let allVehicles=[],currentTab='all',searchQuery='',gestaoFilter='',fuelFilter='',editingRow=null;
+      let allVehicles=[],inventory=[],currentSection='visao';
+
+      const SECTIONS=[
+        {id:'visao',label:'📊 Visão Geral'},
+        {id:'frota',label:'🚗 Frota Ativa'},
+        {id:'stock',label:'🏪 Stock'},
+        {id:'manutencao',label:'🔧 Manutenções'},
+        {id:'checkin',label:'✅ Check-ins'},
+        {id:'pagamentos',label:'💰 Pagamentos'},
+        {id:'armazem',label:'📦 Armazém'},
+      ];
+
+      const STATUS_MAP={'Na Frota Aluguer':'Alugado','Em Stock Stand':'Para Venda','Vendido':'Vendido','Inativo':'Inativo','Manutenção':'Manutenção','Em Preparação':'Em Preparação','Para Aluguer':'Para Aluguer'};
+      const BADGE_MAP={'Alugado':'badge-alugado','Para Venda':'badge-venda','Inativo':'badge-inativo','Manutenção':'badge-maint','Vendido':'badge-vendido','Em Preparação':'badge-prep','Para Aluguer':'badge-aluguer'};
+      const STATUSES=['Alugado','Para Venda','Para Aluguer','Em Preparação','Inativo','Manutenção','Vendido'];
+
       function parseCSVLine(l){const r=[];let c='',iq=0;for(let i=0;i<l.length;i++){const ch=l[i];if(iq){if(ch=='"'&&l[i+1]=='"'){c+='"';i++}else if(ch=='"')iq=0;else c+=ch}else{if(ch=='"')iq=1;else if(ch==','){r.push(c);c=''}else c+=ch}}r.push(c);return r}
-      async function fetchData(){try{const r=await fetch(CSV_URL),csv=await r.text(),lines=csv.trim().split('\n'),headers=parseCSVLine(lines[0]);allVehicles=lines.slice(1).map((l,idx)=>{const v=parseCSVLine(l),o={_idx:idx+2};headers.forEach((h,i)=>{o[h]=(v[i]||'').trim()});return o}).filter(v=>v['Marca/Modelo']||v['Matrícula']);render()}catch(e){console.error(e)}}
-      function getFiltered(){let f=[...allVehicles];if(currentTab==='frota')f=f.filter(v=>v['Estado']==='Na Frota Aluguer');else if(currentTab==='stock')f=f.filter(v=>v['Estado']==='Em Stock Stand');else if(currentTab==='inactive')f=f.filter(v=>['Inativo','Manutenção'].includes(v['Estado']));else if(currentTab==='vendas')f=f.filter(v=>v['Estado']==='Vendido');if(gestaoFilter)f=f.filter(v=>v['Tipo Gestão']===gestaoFilter);if(fuelFilter)f=f.filter(v=>v['Combustível']===fuelFilter);if(searchQuery){const q=searchQuery.toLowerCase();f=f.filter(v=>['Marca/Modelo','Matrícula','Proprietário','Tipo Gestão','Estado'].some(k=>String(v[k]||'').toLowerCase().includes(q)))}return f}
-      function getStats(){return{total:allVehicles.length,frota:allVehicles.filter(v=>v['Estado']==='Na Frota Aluguer').length,stock:allVehicles.filter(v=>v['Estado']==='Em Stock Stand').length,inativos:allVehicles.filter(v=>v['Estado']==='Inativo').length,manutencao:allVehicles.filter(v=>v['Estado']==='Manutenção').length,vendidos:allVehicles.filter(v=>v['Estado']==='Vendido').length}}
-      function eB(s){return{'Na Frota Aluguer':'badge badge-active','Em Stock Stand':'badge badge-stand','Inativo':'badge badge-inactive','Manutenção':'badge badge-maint','Vendido':'badge badge-sold'}[s]||'badge'}
-      const STATUSES=['Na Frota Aluguer','Em Stock Stand','Inativo','Manutenção','Vendido'];
+
+      async function fetchData(){
+        try{
+          const [r1,r2]=await Promise.all([fetch(CSV_URL),fetch(ARMAZEM_CSV_URL)]);
+          const csv1=await r1.text(),csv2=await r2.text();
+          const lines1=csv1.trim().split('\n'),headers1=parseCSVLine(lines1[0]);
+          allVehicles=lines1.slice(1).map((l,idx)=>{const v=parseCSVLine(l),o={_idx:idx+2};headers1.forEach((h,i)=>{o[h]=(v[i]||'').trim()});return o}).filter(v=>v['Marca/Modelo']||v['Matrícula']);
+          // Normalize estado to new names
+          allVehicles.forEach(v=>{const e=v['Estado'];if(STATUS_MAP[e])v['Estado']=STATUS_MAP[e]});
+          // Parse inventory
+          const lines2=csv2.trim().split('\n');
+          if(lines2.length>1){
+            const h2=parseCSVLine(lines2[0]);
+            inventory=lines2.slice(1).map((l,idx)=>{const v=parseCSVLine(l),o={_idx:idx+2};h2.forEach((h,i)=>{o[h]=(v[i]||'').trim()});return o}).filter(v=>v['Item']);
+          }
+          render();
+        }catch(e){console.error(e)}
+      }
+
+      function setSection(id){
+        currentSection=id;
+        document.getElementById('sectionLabel').textContent=SECTIONS.find(s=>s.id===id).label;
+        render();
+      }
+
+      function renderSections(){
+        document.getElementById('sectionTabs').innerHTML=SECTIONS.map(s=>'<button class="section-btn'+(currentSection===s.id?' active':'')+'" onclick="setSection(\''+s.id+'\')">'+s.label+'</button>').join('');
+      }
+
+      function render(){
+        renderSections();
+        const fn={'visao':renderVisao,'frota':renderFrota,'stock':renderStock,'manutencao':renderManutencao,'checkin':renderCheckin,'pagamentos':renderPagamentos,'armazem':renderArmazem};
+        const view=fn[currentSection]||renderVisao;
+        view();
+      }
+
+      // ── Visão Geral ──
+      function renderVisao(){
+        const s=getStats();
+        const totalRenda=allVehicles.filter(v=>v['Estado']==='Alugado'||v['Estado']==='Para Aluguer').reduce((sum,v)=>{const p=parseFloat(String(v['Valor Aluguer (semanal)']||'0').replace(/[^\d.,]/g,''));return sum+(isNaN(p)?0:p*4.33)},0);
+        document.getElementById('totalCount').textContent=s.total;
+        document.getElementById('sectionContent').innerHTML='<div class="kpi-grid">'+
+          '<div class="kpi-card"><div class="val" style="color:#6ee7b7">'+s.frota+'</div><div class="label">🚗 Frota Ativa</div><div class="sub">Alugados na rua</div></div>'+
+          '<div class="kpi-card"><div class="val" style="color:#93c5fd">'+s.stock+'</div><div class="label">🏪 Em Stock</div><div class="sub">Para venda / aluguer</div></div>'+
+          '<div class="kpi-card"><div class="val" style="color:#fbbf24">'+(s.inativos+s.manutencao)+'</div><div class="label">🔧 Parados</div><div class="sub">Inativo + Manutenção</div></div>'+
+          '<div class="kpi-card"><div class="val" style="color:#9ca3af">'+s.vendidos+'</div><div class="label">💰 Vendidos</div><div class="sub">Este ano</div></div>'+
+          '<div class="kpi-card"><div class="val" style="color:#22c55e">€'+Math.round(totalRenda).toLocaleString()+'</div><div class="label">📈 Receita Aluguer/mês</div><div class="sub">Estimada (34 alugados)</div></div>'+
+          '<div class="kpi-card"><div class="val" style="color:#60a5fa">'+s.total+'</div><div class="label">Total Frota</div><div class="sub">Todas as viaturas</div></div>'+
+        '</div><div class="stats-grid">'+
+          '<div class="stat-card"><div class="label">Proprietário VIANTA</div><div class="value">'+allVehicles.filter(v=>v['Proprietário']==='VIANTA').length+'</div></div>'+
+          '<div class="stat-card"><div class="label">Proprietário EMPRESA</div><div class="value">'+allVehicles.filter(v=>v['Proprietário']==='EMPRESA').length+'</div></div>'+
+          '<div class="stat-card"><div class="label">Investidores</div><div class="value">'+allVehicles.filter(v=>v['Proprietário']&&v['Proprietário']!=='VIANTA'&&v['Proprietário']!=='EMPRESA').length+'</div></div>'+
+          '<div class="stat-card"><div class="label">Slot</div><div class="value">'+allVehicles.filter(v=>v['Tipo Gestão']==='Slot').length+'</div></div>'+
+        '</div>';
+      }
+
+      // ── Frota Ativa ──
+      function renderFrota(){
+        const f=allVehicles.filter(v=>v['Estado']==='Alugado');
+        document.getElementById('totalCount').textContent=f.length;
+        document.getElementById('newBtnLabel').textContent='Nova Viatura';
+        document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
+        if(!f.length){
+          document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#718096">Nenhum carro alugado de momento</div>';
+          return;
+        }
+        let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Matrícula</th><th>Modelo</th><th>Motorista</th><th>Gestão</th><th>Proprietário</th><th>Aluguer/Sem</th><th>Estado</th></tr></thead><tbody>';
+        f.forEach(v=>{
+          html+='<tr><td><strong>'+(v['Matrícula']||'-')+'</strong></td><td>'+(v['Marca/Modelo']||'')+'</td><td>'+(v['Motorista Atual']||'-')+'</td><td style="font-size:12px">'+(v['Tipo Gestão']||'')+'</td><td style="font-size:12px">'+(v['Proprietário']||'')+'</td><td>'+(v['Valor Aluguer (semanal)']||'-')+'</td><td><span class="badge badge-alugado status-badge" onclick="editStatus(this,'+v._idx+',\'Alugado\')" title="Clique para alterar">Alugado</span></td></tr>';
+        });
+        html+='</tbody></table></div></div>';
+        document.getElementById('sectionContent').innerHTML=html;
+      }
+
+      // ── Stock ──
+      function renderStock(){
+        const f=allVehicles.filter(v=>v['Estado']==='Para Venda'||v['Estado']==='Para Aluguer');
+        document.getElementById('totalCount').textContent=f.length;
+        document.getElementById('newBtnLabel').textContent='Nova Viatura';
+        document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
+        if(!f.length){
+          document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#718096">Nenhum carro em stock</div>';
+          return;
+        }
+        let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Matrícula</th><th>Modelo</th><th>Ano</th><th>KMs</th><th>Proprietário</th><th>Preço Venda</th><th>Aluguer/Sem</th><th>Estado</th></tr></thead><tbody>';
+        f.forEach(v=>{
+          html+='<tr><td><strong>'+(v['Matrícula']||'-')+'</strong></td><td>'+(v['Marca/Modelo']||'')+'</td><td>'+(v['Ano']||'')+'</td><td>'+(v['KMs Atuais']||'-')+'</td><td style="font-size:12px">'+(v['Proprietário']||'')+'</td><td>'+(v['Preço Venda (€)']?v['Preço Venda (€)']+'€':'-')+'</td><td>'+(v['Valor Aluguer (semanal)']||'-')+'</td><td><span class="badge '+(v['Estado']==='Para Venda'?'badge-venda':'badge-aluguer')+' status-badge" onclick="editStatus(this,'+v._idx+',\''+v['Estado']+'\')" title="Clique para alterar">'+(v['Estado']||'')+'</span></td></tr>';
+        });
+        html+='</tbody></table></div></div>';
+        document.getElementById('sectionContent').innerHTML=html;
+      }
+
+      // ── Manutenções ──
+      function renderManutencao(){
+        const f=allVehicles.filter(v=>v['Estado']==='Manutenção'||v['Estado']==='Inativo');
+        document.getElementById('totalCount').textContent=f.length;
+        document.getElementById('newBtnLabel').textContent='Nova Viatura';
+        document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
+        if(!f.length){
+          document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#718096">Nenhum carro em manutenção</div>';
+          return;
+        }
+        let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Matrícula</th><th>Modelo</th><th>Proprietário</th><th>Estado</th><th>Ação</th></tr></thead><tbody>';
+        f.forEach(v=>{
+          html+='<tr><td><strong>'+(v['Matrícula']||'-')+'</strong></td><td>'+(v['Marca/Modelo']||'')+'</td><td style="font-size:12px">'+(v['Proprietário']||'')+'</td><td><span class="badge '+(v['Estado']==='Manutenção'?'badge-maint':'badge-inativo')+' status-badge" onclick="editStatus(this,'+v._idx+',\''+v['Estado']+'\')">'+(v['Estado']||'')+'</span></td><td><button class="btn btn-sm btn-outline" onclick="setStatus('+v._idx+',\'Para Venda\')">Marcar Disponível</button></td></tr>';
+        });
+        html+='</tbody></table></div></div>';
+        document.getElementById('sectionContent').innerHTML=html;
+      }
+
+      // ── Check-ins ──
+      function renderCheckin(){
+        const f=allVehicles.filter(v=>v['Estado']==='Em Preparação');
+        document.getElementById('totalCount').textContent=f.length;
+        document.getElementById('newBtnLabel').textContent='Check-in Manual';
+        document.getElementById('newBtn').setAttribute('onclick','alert("Função: registar chegada de viatura + iniciar checklist de preparação");');
+        let html='<div class="card" style="padding:40px;text-align:center;color:#718096">';
+        if(!f.length){
+          html+='Nenhuma viatura em preparação';
+        }else{
+          html+='<div class="table-wrap"><table><thead><tr><th>Matrícula</th><th>Modelo</th><th>Ação</th></tr></thead><tbody>';
+          f.forEach(v=>{
+            html+='<tr><td><strong>'+(v['Matrícula']||'-')+'</strong></td><td>'+(v['Marca/Modelo']||'')+'</td><td><button class="btn btn-sm btn-primary" onclick="setStatus('+v._idx+',\'Para Venda\')">Concluir Preparação</button></td></tr>';
+          });
+          html+='</tbody></table></div>';
+        }
+        html+='</div>';
+        document.getElementById('sectionContent').innerHTML=html;
+      }
+
+      // ── Pagamentos ──
+      function renderPagamentos(){
+        const f=allVehicles.filter(v=>v['Estado']==='Alugado'||v['Tipo Gestão']==='Slot');
+        document.getElementById('totalCount').textContent=f.length;
+        document.getElementById('newBtnLabel').textContent='Nova Viatura';
+        document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
+        if(!f.length){
+          document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#718096">Sem dados de pagamento</div>';
+          return;
+        }
+        let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Motorista</th><th>Viatura</th><th>Matrícula</th><th>Gestão</th><th>Valor/Semana</th><th>Estado</th></tr></thead><tbody>';
+        f.forEach(v=>{
+          const val=v['Tipo Gestão']==='Slot'?'35€ (slot)':(v['Valor Aluguer (semanal)']||'-');
+          html+='<tr><td><strong>'+(v['Motorista Atual']||'?')+'</strong></td><td>'+(v['Marca/Modelo']||'')+'</td><td>'+(v['Matrícula']||'-')+'</td><td style="font-size:12px">'+(v['Tipo Gestão']||'')+'</td><td>'+val+'</td><td><span class="badge '+(v['Estado']==='Alugado'?'badge-alugado':(v['Estado']==='Slot'?'badge-venda':'badge-inativo'))+'">'+(v['Estado']||'')+'</span></td></tr>';
+        });
+        html+='</tbody></table></div></div>';
+        document.getElementById('sectionContent').innerHTML=html;
+      }
+
+      // ── Armazém ──
+      function renderArmazem(){
+        document.getElementById('totalCount').textContent=inventory.length;
+        document.getElementById('newBtnLabel').textContent='Novo Item';
+        document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('armazemModal').style.display='flex'");
+        if(!inventory.length){
+          document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#718096">Nenhum item no armazém</div>';
+          return;
+        }
+        let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Item</th><th>Categoria</th><th>Stock</th><th>Mínimo</th><th>Unidade</th><th>Fornecedor</th><th>Última Compra</th></tr></thead><tbody>';
+        inventory.forEach(v=>{
+          const stock=parseInt(v['Stock Atual']||'0');
+          const minimo=parseInt(v['Stock Mínimo']||'0');
+          const statusClass=stock<minimo?'low-stock':(stock<=minimo?'warning-stock':'ok-stock');
+          html+='<tr><td><strong>'+(v['Item']||'')+'</strong></td><td>'+(v['Categoria']||'')+'</td><td class="'+statusClass+'"><strong>'+(v['Stock Atual']||'0')+'</strong></td><td>'+(v['Stock Mínimo']||'0')+'</td><td>'+(v['Unidade']||'')+'</td><td>'+(v['Fornecedor']||'')+'</td><td>'+(v['Última Compra']||'')+'</td></tr>';
+        });
+        html+='</tbody></table></div></div>';
+        document.getElementById('sectionContent').innerHTML=html;
+      }
+
+      // ── Helpers ──
+      function getStats(){
+        return{
+          total:allVehicles.length,
+          frota:allVehicles.filter(v=>v['Estado']==='Alugado').length,
+          stock:allVehicles.filter(v=>v['Estado']==='Para Venda'||v['Estado']==='Para Aluguer').length,
+          inativos:allVehicles.filter(v=>v['Estado']==='Inativo').length,
+          manutencao:allVehicles.filter(v=>v['Estado']==='Manutenção').length,
+          vendidos:allVehicles.filter(v=>v['Estado']==='Vendido').length,
+          preparacao:allVehicles.filter(v=>v['Estado']==='Em Preparação').length,
+        };
+      }
+
+      async function setStatus(rowId,newStatus){
+        const v=allVehicles.find(x=>x._idx===rowId);
+        if(!v)return;
+        await updateCell(v,'Estado',newStatus);
+      }
+
       async function updateCell(v,column,value){
         try{
           const r=await fetch(API_URL,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({row:v._idx,column,value})});
@@ -177,42 +385,31 @@
           else{alert('Erro: '+d.error);return false}
         }catch(e){alert('Erro ao guardar: '+e.message);return false}
       }
+
       function editStatus(el,rowId,currentValue){
-        if(editingRow===rowId)return;
-        editingRow=rowId;
-        const origClass=el.className;
+        if(document.querySelector('.status-edit-select'))return;
         const sel=document.createElement('select');
         sel.className='status-edit-select';
         sel.style.cssText='background:#141414;border:1px solid #3b82f6;border-radius:4px;color:#e2e8f0;font-size:11px;font-weight:500;padding:2px 6px;outline:none;cursor:pointer';
         STATUSES.forEach(s=>{
           const opt=document.createElement('option');
-          opt.value=s;
-          opt.textContent=s;
+          opt.value=s;opt.textContent=s;
           if(s===currentValue)opt.selected=true;
           sel.appendChild(opt);
         });
         sel.addEventListener('change',async()=>{
           const newVal=sel.value;
-          editingRow=null;
-          if(newVal===currentValue){el.className=origClass;el.textContent=currentValue;return}
+          sel.remove();
+          if(newVal===currentValue)return;
           const v=allVehicles.find(x=>x._idx===rowId);
           if(v)await updateCell(v,'Estado',newVal);
         });
-        sel.addEventListener('blur',()=>{
-          if(editingRow===rowId){editingRow=null;el.className=origClass;el.textContent=currentValue}
-        });
+        sel.addEventListener('blur',()=>sel.remove());
         el.textContent='';
         el.appendChild(sel);
         sel.focus();
       }
-      function render(){const s=getStats();document.getElementById('totalCount').textContent=s.total;document.getElementById('statTotal').textContent=s.total;document.getElementById('statFrota').textContent=s.frota;document.getElementById('statStock').textContent=s.stock;document.getElementById('statInativos').textContent=s.inativos+s.manutencao;document.getElementById('statVendidos').textContent=s.vendidos;
-        document.getElementById('tabsContainer').innerHTML=[{k:'all',l:'Todas',c:s.total},{k:'frota',l:'Na Frota',c:s.frota},{k:'stock',l:'Em Stock',c:s.stock},{k:'inactive',l:'Inativos',c:s.inativos+s.manutencao},{k:'vendas',l:'Vendidos',c:s.vendidos}].map(t=>'<button class="tab-btn'+(currentTab===t.k?' active':'')+'" onclick="currentTab=\''+t.k+'\';render()">'+t.l+' ('+t.c+')</button>').join('');
-        const g=[...new Set(allVehicles.map(v=>v['Tipo Gestão']).filter(Boolean))];document.getElementById('gestaoFilter').innerHTML='<option value="">Todas as gestões</option>'+g.map(v=>'<option'+(gestaoFilter===v?' selected':'')+' value="'+v.replace(/"/g,'&quot;')+'">'+v+'</option>').join('');
-        const u=[...new Set(allVehicles.map(v=>v['Combustível']).filter(Boolean))];document.getElementById('fuelFilter').innerHTML='<option value="">Todos combustíveis</option>'+u.map(v=>'<option'+(fuelFilter===v?' selected':'')+' value="'+v.replace(/"/g,'&quot;')+'">'+v+'</option>').join('');
-        const f=getFiltered();document.getElementById('filteredCount').textContent=f.length+' veículos';
-        if(!f.length){document.getElementById('tableBody').innerHTML='<tr><td colspan="10" style="text-align:center;padding:40px;color:#718096">Nenhum veículo encontrado</td></tr>';return}
-        document.getElementById('tableBody').innerHTML=f.map(v=>'<tr class="'+(['Vendido','Inativo'].includes(v['Estado'])?'inactive':'')+'"><td><strong>'+(v['Matrícula']||'-')+'</strong></td><td>'+(v['Marca/Modelo']||'')+'</td><td>'+(v['Ano']||'')+'</td><td>'+(v['Combustível']||'')+'</td><td>'+(v['KMs Atuais']||'-')+'</td><td style="font-size:12px">'+(v['Proprietário']||'')+'</td><td style="font-size:12px">'+(v['Tipo Gestão']||'')+'</td><td><span class="'+eB(v['Estado'])+' status-badge" onclick="editStatus(this,'+v._idx+',\''+(v['Estado']||'').replace(/'/g,"\\'")+'\')" title="Clique para alterar">'+(v['Estado']||'')+'</span></td><td>'+(v['Preço Venda (€)']?v['Preço Venda (€)']+'€':'-')+'</td><td>'+(v['Valor Aluguer (semanal)']||'-')+'</td></tr>').join('')}
-      function applyFilters(){searchQuery=document.getElementById('searchInput').value;gestaoFilter=document.getElementById('gestaoFilter').value;fuelFilter=document.getElementById('fuelFilter').value;render()}
+
       fetchData();
     </script>
   </body>
