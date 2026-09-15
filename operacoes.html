@@ -233,14 +233,15 @@
       // ── Visão Geral ──
       function renderVisao(){
         const s=getStats();
-        const totalRenda=allVehicles.filter(v=>v['Estado']==='Alugado'||v['Estado']==='Para Aluguer').reduce((sum,v)=>{const p=parseFloat(String(v['Valor Aluguer (semanal)']||'0').replace(/[^\d.,]/g,''));return sum+(isNaN(p)?0:p*4.33)},0);
+        const alugados=allVehicles.filter(v=>v['Estado']==='Alugado'&&v['Tipo Gestão']!=='Slot');
+        const totalRenda=alugados.reduce((sum,v)=>{const p=parseFloat(String(v['Valor Aluguer (semanal)']||'0').replace(/[^\d.,]/g,''));return sum+(isNaN(p)?0:p*4.33)},0);
         document.getElementById('totalCount').textContent=s.total;
         document.getElementById('sectionContent').innerHTML='<div class="kpi-grid">'+
-          '<div class="kpi-card"><div class="val" style="color:#6ee7b7">'+s.frota+'</div><div class="label">🚗 Frota Ativa</div><div class="sub">Alugados na rua</div></div>'+
+          '<div class="kpi-card"><div class="val" style="color:#6ee7b7">'+alugados.length+'</div><div class="label">🚗 Frota Ativa</div><div class="sub">Alugados na rua</div></div>'+
           '<div class="kpi-card"><div class="val" style="color:#93c5fd">'+s.stock+'</div><div class="label">🏪 Em Stock</div><div class="sub">Para venda / aluguer</div></div>'+
           '<div class="kpi-card"><div class="val" style="color:#fbbf24">'+(s.inativos+s.manutencao)+'</div><div class="label">🔧 Parados</div><div class="sub">Inativo + Manutenção</div></div>'+
           '<div class="kpi-card"><div class="val" style="color:#9ca3af">'+s.vendidos+'</div><div class="label">💰 Vendidos</div><div class="sub">Este ano</div></div>'+
-          '<div class="kpi-card"><div class="val" style="color:#22c55e">€'+Math.round(totalRenda).toLocaleString()+'</div><div class="label">📈 Receita Aluguer/mês</div><div class="sub">Estimada (34 alugados)</div></div>'+
+          '<div class="kpi-card"><div class="val" style="color:#22c55e">€'+Math.round(totalRenda).toLocaleString()+'</div><div class="label">📈 Receita Aluguer/mês</div><div class="sub">Estimada ('+alugados.length+' alugados)</div></div>'+
           '<div class="kpi-card"><div class="val" style="color:#60a5fa">'+s.total+'</div><div class="label">Total Frota</div><div class="sub">Todas as viaturas</div></div>'+
         '</div><div class="stats-grid">'+
           '<div class="stat-card"><div class="label">Proprietário VIANTA</div><div class="value">'+allVehicles.filter(v=>v['Proprietário']==='VIANTA').length+'</div></div>'+
@@ -366,8 +367,8 @@
       function getStats(){
         return{
           total:allVehicles.length,
-          frota:allVehicles.filter(v=>v['Estado']==='Alugado').length,
-          stock:allVehicles.filter(v=>v['Estado']==='Para Venda'||v['Estado']==='Para Aluguer').length,
+          frota:allVehicles.filter(v=>v['Estado']==='Alugado'&&v['Tipo Gestão']!=='Slot').length,
+          stock:allVehicles.filter(v=>(v['Estado']==='Para Venda'||v['Estado']==='Para Aluguer')&&v['Tipo Gestão']!=='Slot').length,
           inativos:allVehicles.filter(v=>v['Estado']==='Inativo').length,
           manutencao:allVehicles.filter(v=>v['Estado']==='Manutenção').length,
           vendidos:allVehicles.filter(v=>v['Estado']==='Vendido').length,
