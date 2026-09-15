@@ -51,6 +51,8 @@
       .badge-inactive { background: #3d2e00; color: #fde68a; }
       .badge-maint { background: #3d2e00; color: #fde68a; }
       .badge-sold { background: #1f2937; color: #9ca3af; }
+      .status-badge { cursor: pointer; transition: filter 0.15s; }
+      .status-badge:hover { filter: brightness(1.2); }
       .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: none; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-decoration: none; }
       .btn-primary { background: #3b82f6; color: white; }
       .btn-primary:hover { background: #2563eb; }
@@ -159,19 +161,57 @@
     <script>
       const DB_SHEET_ID='1j5RCxSjd24QlPaquRX7C7eeiHrzPo1c6Wsb0OQWFRjQ';
       const CSV_URL='https://docs.google.com/spreadsheets/d/'+DB_SHEET_ID+'/export?format=csv';
-      let allVehicles=[],currentTab='all',searchQuery='',gestaoFilter='',fuelFilter='';
+      const API_URL='https://vianta-transfers.netlify.app/.netlify/functions/sheets?type=fleet';
+      let allVehicles=[],currentTab='all',searchQuery='',gestaoFilter='',fuelFilter='',editingRow=null;
       function parseCSVLine(l){const r=[];let c='',iq=0;for(let i=0;i<l.length;i++){const ch=l[i];if(iq){if(ch=='"'&&l[i+1]=='"'){c+='"';i++}else if(ch=='"')iq=0;else c+=ch}else{if(ch=='"')iq=1;else if(ch==','){r.push(c);c=''}else c+=ch}}r.push(c);return r}
       async function fetchData(){try{const r=await fetch(CSV_URL),csv=await r.text(),lines=csv.trim().split('\n'),headers=parseCSVLine(lines[0]);allVehicles=lines.slice(1).map((l,idx)=>{const v=parseCSVLine(l),o={_idx:idx+2};headers.forEach((h,i)=>{o[h]=(v[i]||'').trim()});return o}).filter(v=>v['Marca/Modelo']||v['Matrícula']);render()}catch(e){console.error(e)}}
       function getFiltered(){let f=[...allVehicles];if(currentTab==='frota')f=f.filter(v=>v['Estado']==='Na Frota Aluguer');else if(currentTab==='stock')f=f.filter(v=>v['Estado']==='Em Stock Stand');else if(currentTab==='inactive')f=f.filter(v=>['Inativo','Manutenção'].includes(v['Estado']));else if(currentTab==='vendas')f=f.filter(v=>v['Estado']==='Vendido');if(gestaoFilter)f=f.filter(v=>v['Tipo Gestão']===gestaoFilter);if(fuelFilter)f=f.filter(v=>v['Combustível']===fuelFilter);if(searchQuery){const q=searchQuery.toLowerCase();f=f.filter(v=>['Marca/Modelo','Matrícula','Proprietário','Tipo Gestão','Estado'].some(k=>String(v[k]||'').toLowerCase().includes(q)))}return f}
       function getStats(){return{total:allVehicles.length,frota:allVehicles.filter(v=>v['Estado']==='Na Frota Aluguer').length,stock:allVehicles.filter(v=>v['Estado']==='Em Stock Stand').length,inativos:allVehicles.filter(v=>v['Estado']==='Inativo').length,manutencao:allVehicles.filter(v=>v['Estado']==='Manutenção').length,vendidos:allVehicles.filter(v=>v['Estado']==='Vendido').length}}
       function eB(s){return{'Na Frota Aluguer':'badge badge-active','Em Stock Stand':'badge badge-stand','Inativo':'badge badge-inactive','Manutenção':'badge badge-maint','Vendido':'badge badge-sold'}[s]||'badge'}
+      const STATUSES=['Na Frota Aluguer','Em Stock Stand','Inativo','Manutenção','Vendido'];
+      async function updateCell(v,column,value){
+        try{
+          const r=await fetch(API_URL,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({row:v._idx,column,value})});
+          const d=await r.json();
+          if(d.ok){v[column]=value;render();return true}
+          else{alert('Erro: '+d.error);return false}
+        }catch(e){alert('Erro ao guardar: '+e.message);return false}
+      }
+      function editStatus(el,rowId,currentValue){
+        if(editingRow===rowId)return;
+        editingRow=rowId;
+        const origClass=el.className;
+        const sel=document.createElement('select');
+        sel.className='status-edit-select';
+        sel.style.cssText='background:#141414;border:1px solid #3b82f6;border-radius:4px;color:#e2e8f0;font-size:11px;font-weight:500;padding:2px 6px;outline:none;cursor:pointer';
+        STATUSES.forEach(s=>{
+          const opt=document.createElement('option');
+          opt.value=s;
+          opt.textContent=s;
+          if(s===currentValue)opt.selected=true;
+          sel.appendChild(opt);
+        });
+        sel.addEventListener('change',async()=>{
+          const newVal=sel.value;
+          editingRow=null;
+          if(newVal===currentValue){el.className=origClass;el.textContent=currentValue;return}
+          const v=allVehicles.find(x=>x._idx===rowId);
+          if(v)await updateCell(v,'Estado',newVal);
+        });
+        sel.addEventListener('blur',()=>{
+          if(editingRow===rowId){editingRow=null;el.className=origClass;el.textContent=currentValue}
+        });
+        el.textContent='';
+        el.appendChild(sel);
+        sel.focus();
+      }
       function render(){const s=getStats();document.getElementById('totalCount').textContent=s.total;document.getElementById('statTotal').textContent=s.total;document.getElementById('statFrota').textContent=s.frota;document.getElementById('statStock').textContent=s.stock;document.getElementById('statInativos').textContent=s.inativos+s.manutencao;document.getElementById('statVendidos').textContent=s.vendidos;
         document.getElementById('tabsContainer').innerHTML=[{k:'all',l:'Todas',c:s.total},{k:'frota',l:'Na Frota',c:s.frota},{k:'stock',l:'Em Stock',c:s.stock},{k:'inactive',l:'Inativos',c:s.inativos+s.manutencao},{k:'vendas',l:'Vendidos',c:s.vendidos}].map(t=>'<button class="tab-btn'+(currentTab===t.k?' active':'')+'" onclick="currentTab=\''+t.k+'\';render()">'+t.l+' ('+t.c+')</button>').join('');
         const g=[...new Set(allVehicles.map(v=>v['Tipo Gestão']).filter(Boolean))];document.getElementById('gestaoFilter').innerHTML='<option value="">Todas as gestões</option>'+g.map(v=>'<option'+(gestaoFilter===v?' selected':'')+' value="'+v.replace(/"/g,'&quot;')+'">'+v+'</option>').join('');
         const u=[...new Set(allVehicles.map(v=>v['Combustível']).filter(Boolean))];document.getElementById('fuelFilter').innerHTML='<option value="">Todos combustíveis</option>'+u.map(v=>'<option'+(fuelFilter===v?' selected':'')+' value="'+v.replace(/"/g,'&quot;')+'">'+v+'</option>').join('');
         const f=getFiltered();document.getElementById('filteredCount').textContent=f.length+' veículos';
         if(!f.length){document.getElementById('tableBody').innerHTML='<tr><td colspan="10" style="text-align:center;padding:40px;color:#718096">Nenhum veículo encontrado</td></tr>';return}
-        document.getElementById('tableBody').innerHTML=f.map(v=>'<tr class="'+(['Vendido','Inativo'].includes(v['Estado'])?'inactive':'')+'"><td><strong>'+(v['Matrícula']||'-')+'</strong></td><td>'+(v['Marca/Modelo']||'')+'</td><td>'+(v['Ano']||'')+'</td><td>'+(v['Combustível']||'')+'</td><td>'+(v['KMs Atuais']||'-')+'</td><td style="font-size:12px">'+(v['Proprietário']||'')+'</td><td style="font-size:12px">'+(v['Tipo Gestão']||'')+'</td><td><span class="'+eB(v['Estado'])+'">'+(v['Estado']||'')+'</span></td><td>'+(v['Preço Venda (€)']?v['Preço Venda (€)']+'€':'-')+'</td><td>'+(v['Valor Aluguer (semanal)']||'-')+'</td></tr>').join('')}
+        document.getElementById('tableBody').innerHTML=f.map(v=>'<tr class="'+(['Vendido','Inativo'].includes(v['Estado'])?'inactive':'')+'"><td><strong>'+(v['Matrícula']||'-')+'</strong></td><td>'+(v['Marca/Modelo']||'')+'</td><td>'+(v['Ano']||'')+'</td><td>'+(v['Combustível']||'')+'</td><td>'+(v['KMs Atuais']||'-')+'</td><td style="font-size:12px">'+(v['Proprietário']||'')+'</td><td style="font-size:12px">'+(v['Tipo Gestão']||'')+'</td><td><span class="'+eB(v['Estado'])+' status-badge" onclick="editStatus(this,'+v._idx+',\''+(v['Estado']||'').replace(/'/g,"\\'")+'\')" title="Clique para alterar">'+(v['Estado']||'')+'</span></td><td>'+(v['Preço Venda (€)']?v['Preço Venda (€)']+'€':'-')+'</td><td>'+(v['Valor Aluguer (semanal)']||'-')+'</td></tr>').join('')}
       function applyFilters(){searchQuery=document.getElementById('searchInput').value;gestaoFilter=document.getElementById('gestaoFilter').value;fuelFilter=document.getElementById('fuelFilter').value;render()}
       fetchData();
     </script>
