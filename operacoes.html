@@ -287,7 +287,7 @@
 
       // ── Manutenções ──
       function renderManutencao(){
-        const f=allVehicles.filter(v=>v['Estado']==='Manutenção'||v['Estado']==='Inativo');
+        const f=allVehicles.filter(v=>v['Estado']==='Manutenção');
         document.getElementById('totalCount').textContent=f.length;
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
         document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
