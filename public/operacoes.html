@@ -159,7 +159,7 @@
     <script>
       const DB_SHEET_ID='1j5RCxSjd24QlPaquRX7C7eeiHrzPo1c6Wsb0OQWFRjQ';
       const CSV_URL='https://docs.google.com/spreadsheets/d/'+DB_SHEET_ID+'/export?format=csv';
-      const API_URL='/.netlify/functions/fleet';
+      const API_URL='https://vianta-transfers.netlify.app/.netlify/functions/sheets?type=fleet';
       let allVehicles=[],currentTab='all',searchQuery='',gestaoFilter='',fuelFilter='',editingRow=null;
       function parseCSVLine(l){const r=[];let c='',iq=0;for(let i=0;i<l.length;i++){const ch=l[i];if(iq){if(ch=='"'&&l[i+1]=='"'){c+='"';i++}else if(ch=='"')iq=0;else c+=ch}else{if(ch=='"')iq=1;else if(ch==','){r.push(c);c=''}else c+=ch}}r.push(c);return r}
       async function fetchData(){try{const r=await fetch(CSV_URL),csv=await r.text(),lines=csv.trim().split('\n'),headers=parseCSVLine(lines[0]);allVehicles=lines.slice(1).map((l,idx)=>{const v=parseCSVLine(l),o={_idx:idx+2};headers.forEach((h,i)=>{o[h]=(v[i]||'').trim()});return o}).filter(v=>v['Marca/Modelo']||v['Matrícula']);render()}catch(e){console.error(e)}}
