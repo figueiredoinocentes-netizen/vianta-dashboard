@@ -1,4 +1,4 @@
-const { google } = require('googleapis');
+import { google } from 'googleapis';
 
 const SHEET_ID = '1j5RCxSjd24QlPaquRX7C7eeiHrzPo1c6Wsb0OQWFRjQ';
 const SHEET_NAME = 'CARROS';
@@ -31,7 +31,7 @@ function cors() {
   };
 }
 
-exports.handler = async (event) => {
+export const handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers: cors(), body: '' };
   }
@@ -41,11 +41,9 @@ exports.handler = async (event) => {
       const body = JSON.parse(event.body || '{}');
       const { id, column, value, row } = body;
 
-      // support both: row index (spreadsheet row number) or id (row # column)
       let targetRow = row;
 
       if (!targetRow && id) {
-        // id is the value in column A (#)
         const auth = getAuth();
         const sheets = google.sheets({ version: 'v4', auth });
         const res = await sheets.spreadsheets.values.get({
@@ -64,7 +62,6 @@ exports.handler = async (event) => {
       let finalValue = value;
       const isNumeric = VALUES_COLUMNS.includes(column);
       if (isNumeric && value !== '' && value !== null) {
-        // strip currency symbols, keep dots and commas
         finalValue = String(value).replace(/[^\d.,-]/g, '');
       }
 
