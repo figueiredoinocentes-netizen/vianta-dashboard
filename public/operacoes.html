@@ -244,15 +244,14 @@
           '<div class="kpi-card"><div class="val" style="color:#60a5fa">'+s.total+'</div><div class="label">Total Frota</div><div class="sub">Todas as viaturas</div></div>'+
         '</div><div class="stats-grid">'+
           '<div class="stat-card"><div class="label">Proprietário VIANTA</div><div class="value">'+allVehicles.filter(v=>v['Proprietário']==='VIANTA').length+'</div></div>'+
-          '<div class="stat-card"><div class="label">Proprietário EMPRESA</div><div class="value">'+allVehicles.filter(v=>v['Proprietário']==='EMPRESA').length+'</div></div>'+
-          '<div class="stat-card"><div class="label">Investidores</div><div class="value">'+allVehicles.filter(v=>v['Proprietário']&&v['Proprietário']!=='VIANTA'&&v['Proprietário']!=='EMPRESA').length+'</div></div>'+
+          '<div class="stat-card"><div class="label">Investidores</div><div class="value">'+allVehicles.filter(v=>v['Proprietário']&&v['Proprietário']!=='VIANTA'&&v['Tipo Gestão']!=='Slot').length+'</div></div>'+
           '<div class="stat-card"><div class="label">Slot</div><div class="value">'+allVehicles.filter(v=>v['Tipo Gestão']==='Slot').length+'</div></div>'+
         '</div>';
       }
 
       // ── Frota Ativa ──
       function renderFrota(){
-        const f=allVehicles.filter(v=>v['Estado']==='Alugado');
+        const f=allVehicles.filter(v=>v['Estado']==='Alugado'&&v['Tipo Gestão']!=='Slot');
         document.getElementById('totalCount').textContent=f.length;
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
         document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
@@ -334,10 +333,10 @@
           document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#718096">Sem dados de pagamento</div>';
           return;
         }
-        let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Motorista</th><th>Viatura</th><th>Matrícula</th><th>Gestão</th><th>Valor/Semana</th><th>Estado</th></tr></thead><tbody>';
+        let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Motorista</th><th>Viatura</th><th>Matrícula</th><th>Gestão</th><th>Valor/Semana</th></tr></thead><tbody>';
         f.forEach(v=>{
-          const val=v['Tipo Gestão']==='Slot'?'35€ (slot)':(v['Valor Aluguer (semanal)']||'-');
-          html+='<tr><td><strong>'+(v['Motorista Atual']||'?')+'</strong></td><td>'+(v['Marca/Modelo']||'')+'</td><td>'+(v['Matrícula']||'-')+'</td><td style="font-size:12px">'+(v['Tipo Gestão']||'')+'</td><td>'+val+'</td><td><span class="badge '+(v['Estado']==='Alugado'?'badge-alugado':(v['Estado']==='Slot'?'badge-venda':'badge-inativo'))+'">'+(v['Estado']||'')+'</span></td></tr>';
+          const valSlot=v['Tipo Gestão']==='Slot'?'35€ (slot)':(v['Valor Aluguer (semanal)']||'-');
+          html+='<tr><td><strong>'+(v['Motorista Atual']||'?')+'</strong></td><td>'+(v['Marca/Modelo']||'')+'</td><td>'+(v['Matrícula']||'-')+'</td><td style="font-size:12px">'+(v['Tipo Gestão']||'')+'</td><td>'+valSlot+'</td></tr>';
         });
         html+='</tbody></table></div></div>';
         document.getElementById('sectionContent').innerHTML=html;
