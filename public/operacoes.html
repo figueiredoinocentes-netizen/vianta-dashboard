@@ -22,6 +22,10 @@
       .sidebar-link { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: #94a3b8; text-decoration: none; font-size: 14px; transition: all 0.15s; }
       .sidebar-link:hover { background: #1a1a1a; color: #e2e8f0; }
       .sidebar-link.active { background: #1a1a1a; color: #e2e8f0; font-weight: 500; }
+      .sidebar-section-title { padding: 12px 16px 4px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #475569; font-weight: 600; }
+      .sidebar-sublink { display: flex; align-items: center; gap: 8px; padding: 7px 12px 7px 28px; border-radius: 6px; color: #718096; text-decoration: none; font-size: 13px; cursor: pointer; transition: all 0.15s; border: none; background: transparent; width: 100%; text-align: left; }
+      .sidebar-sublink:hover { background: #1a1a1a; color: #e2e8f0; }
+      .sidebar-sublink.active { background: rgba(59,130,246,0.1); color: #60a5fa; font-weight: 500; }
       .main-content { margin-left: var(--sidebar-w); flex: 1; padding: 24px 32px; max-width: 1400px; }
       .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
       .stat-card { background: #1a1a1a; border: 1px solid #1e293b; border-radius: 12px; padding: 16px; }
@@ -81,10 +85,9 @@
       @media (max-width: 768px) {
         .sidebar { width: 60px; }
         .sidebar-logo h1, .sidebar-logo p, .sidebar-link span { display: none; }
+        .sidebar-sublink span { display: none; }
         .main-content { margin-left: 60px; padding: 16px; }
         .stats-grid { grid-template-columns: 1fr 1fr; }
-        .section-tabs { gap: 2px; }
-        .section-btn { font-size: 11px; padding: 6px 8px; }
       }
     </style>
   </head>
@@ -100,7 +103,14 @@
             <a href="/" style="flex:1;text-align:center;font-size:12px;font-weight:600;padding:8px;border-radius:6px;color:#94a3b8;text-decoration:none;transition:all 0.15s">Aquisição</a>
             <div style="flex:1;text-align:center;font-size:12px;font-weight:600;padding:8px;border-radius:6px;background:rgba(59,130,246,0.12);color:#3b82f6">Operações</div>
           </div>
-          <a href="/operacoes" class="sidebar-link active"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg><span>Gestão de Frota</span></a>
+          <a href="/operacoes" class="sidebar-link"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg><span>Gestão de Frota</span></a>
+          <button class="sidebar-sublink active" data-section="visao" onclick="setSection('visao')">📊 Visão Geral</button>
+          <button class="sidebar-sublink" data-section="frota" onclick="setSection('frota')">🚗 Frota Ativa</button>
+          <button class="sidebar-sublink" data-section="stock" onclick="setSection('stock')">🏪 Stock</button>
+          <button class="sidebar-sublink" data-section="manutencao" onclick="setSection('manutencao')">🔧 Manutenções</button>
+          <button class="sidebar-sublink" data-section="checkin" onclick="setSection('checkin')">✅ Check-ins</button>
+          <button class="sidebar-sublink" data-section="pagamentos" onclick="setSection('pagamentos')">💰 Pagamentos</button>
+          <button class="sidebar-sublink" data-section="armazem" onclick="setSection('armazem')">📦 Armazém</button>
         </nav>
       </aside>
       <main class="main-content">
@@ -119,7 +129,6 @@
               </button>
             </div>
           </div>
-          <div class="section-tabs" id="sectionTabs"></div>
           <div id="sectionContent"></div>
         </div>
         <div id="vehicleModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
@@ -211,15 +220,11 @@
       function setSection(id){
         currentSection=id;
         document.getElementById('sectionLabel').textContent=SECTIONS.find(s=>s.id===id).label;
+        document.querySelectorAll('.sidebar-sublink').forEach(b=>b.classList.toggle('active',b.dataset.section===id));
         render();
       }
 
-      function renderSections(){
-        document.getElementById('sectionTabs').innerHTML=SECTIONS.map(s=>'<button class="section-btn'+(currentSection===s.id?' active':'')+'" onclick="setSection(\''+s.id+'\')">'+s.label+'</button>').join('');
-      }
-
       function render(){
-        renderSections();
         const fn={'visao':renderVisao,'frota':renderFrota,'stock':renderStock,'manutencao':renderManutencao,'checkin':renderCheckin,'pagamentos':renderPagamentos,'armazem':renderArmazem};
         const view=fn[currentSection]||renderVisao;
         view();
