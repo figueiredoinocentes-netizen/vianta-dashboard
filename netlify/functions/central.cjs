@@ -1,4 +1,4 @@
-// Central Vianta API — Netlify Function
+// Central Vianta API — Netlify Function (CommonJS)
 // Wraps Supabase REST API for motoristas, pagamentos, carros, armazem
 
 const TABLE_MAP = {
@@ -8,30 +8,24 @@ const TABLE_MAP = {
   armazem: 'armazem',
 };
 
-const ALLOWED_ORIGINS = [
-  'https://vianta-dashboard.netlify.app',
-  'http://localhost:5173',
-  'http://localhost:8888',
-];
-
-function corsHeaders(origin) {
-  const allow = ALLOWED_ORIGINS.includes(origin) ? origin : 'https://vianta-dashboard.netlify.app';
+function cors() {
   return {
-    'Access-Control-Allow-Origin': allow,
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type, apikey',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, apikey',
-    'Access-Control-Allow-Credentials': 'true',
+    'Content-Type': 'application/json',
   };
 }
 
-function errorResponse(status, message, origin) {
-  return new Response(JSON.stringify({ error: message }), {
-    status,
-    headers: { ...corsHeaders(origin), 'Content-Type': 'application/json' },
-  });
+function ok(data) {
+  return { statusCode: 200, headers: cors(), body: JSON.stringify(data) };
 }
 
-function supabaseHeaders() {
+function err(msg, code = 500) {
+  return { statusCode: code, headers: cors(), body: JSON.stringify({ error: msg }) };
+}
+
+function sbHeaders() {
   const key = process.env.SUPABASE_SERVICE_KEY;
   return {
     'apikey': key,
@@ -42,109 +36,64 @@ function supabaseHeaders() {
 }
 
 exports.handler = async (event) => {
-  const { httpMethod, queryStringParameters, body, headers } = event;
-  const origin = headers?.origin || '';
-  const cors = corsHeaders(origin);
-
-  // Handle preflight CORS
-  if (httpMethod === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: cors });
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 204, headers: cors(), body: '' };
   }
 
-  const type = queryStringParameters?.type;
+  const type = (event.queryStringParameters || {}).type;
   const table = TABLE_MAP[type];
-
   if (!table) {
-    return errorResponse(400, `Invalid or missing type. Must be one of: ${Object.keys(TABLE_MAP).join(', ')}`, origin);
+    return err(`Invalid type. Must be: ${Object.keys(TABLE_MAP).join(', ')}`, 400);
   }
 
   const supabaseUrl = process.env.SUPABASE_URL;
-  if (!supabaseUrl) {
-    return errorResponse(500, 'SUPABASE_URL not configured', origin);
-  }
-  if (!process.env.SUPABASE_SERVICE_KEY) {
-    return errorResponse(500, 'SUPABASE_SERVICE_KEY not configured', origin);
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+  if (!supabaseUrl || !supabaseKey) {
+    return err('SUPABASE_URL and SUPABASE_SERVICE_KEY must be set', 500);
   }
 
   const baseUrl = `${supabaseUrl}/rest/v1/${table}`;
-  const sbHeaders = supabaseHeaders();
+  const headers = sbHeaders();
 
   try {
-    let response;
-
-    switch (httpMethod) {
-      case 'GET': {
-        // List all records
-        const url = `${baseUrl}?select=*`;
-        response = await fetch(url, {
-          method: 'GET',
-          headers: sbHeaders,
-        });
-        break;
-      }
-
-      case 'POST': {
-        // Create new record
-        if (!body) {
-          return errorResponse(400, 'Request body is required for POST', origin);
-        }
-        const record = JSON.parse(body);
-        response = await fetch(baseUrl, {
-          method: 'POST',
-          headers: sbHeaders,
-          body: JSON.stringify(record),
-        });
-        break;
-      }
-
-      case 'PUT': {
-        // Update a record — body must have { id, field, value }
-        if (!body) {
-          return errorResponse(400, 'Request body is required for PUT', origin);
-        }
-        const { id, field, value } = JSON.parse(body);
-        if (!id || !field || value === undefined) {
-          return errorResponse(400, 'PUT body must include id, field, and value', origin);
-        }
-        const url = `${baseUrl}?id=eq.${encodeURIComponent(id)}`;
-        response = await fetch(url, {
-          method: 'PATCH',
-          headers: sbHeaders,
-          body: JSON.stringify({ [field]: value }),
-        });
-        break;
-      }
-
-      case 'DELETE': {
-        // Delete a record — query param ?id=
-        const id = queryStringParameters?.id;
-        if (!id) {
-          return errorResponse(400, 'DELETE requires ?id= query parameter', origin);
-        }
-        const url = `${baseUrl}?id=eq.${encodeURIComponent(id)}`;
-        response = await fetch(url, {
-          method: 'DELETE',
-          headers: sbHeaders,
-        });
-        break;
-      }
-
-      default:
-        return errorResponse(405, `Method ${httpMethod} not allowed`, origin);
+    if (event.httpMethod === 'GET') {
+      const url = `${baseUrl}?select=*`;
+      const res = await fetch(url, { headers });
+      if (!res.ok) return err(`Supabase: ${await res.text()}`, res.status);
+      const data = await res.json();
+      return ok(data);
     }
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      return errorResponse(response.status, `Supabase error: ${errorText}`, origin);
+    if (event.httpMethod === 'POST') {
+      if (!event.body) return err('Body required for POST', 400);
+      const record = JSON.parse(event.body);
+      const res = await fetch(baseUrl, { method: 'POST', headers, body: JSON.stringify(record) });
+      if (!res.ok) return err(`Supabase: ${await res.text()}`, res.status);
+      const data = await res.json();
+      return ok(data);
     }
 
-    const data = httpMethod === 'DELETE' ? { deleted: true } : await response.json();
+    if (event.httpMethod === 'PUT') {
+      if (!event.body) return err('Body required for PUT', 400);
+      const { id, field, value } = JSON.parse(event.body);
+      if (!id || !field) return err('PUT body must include id and field', 400);
+      const url = `${baseUrl}?id=eq.${encodeURIComponent(id)}`;
+      const res = await fetch(url, { method: 'PATCH', headers, body: JSON.stringify({ [field]: value }) });
+      if (!res.ok) return err(`Supabase: ${await res.text()}`, res.status);
+      return ok({ updated: true });
+    }
 
-    return new Response(JSON.stringify(data), {
-      status: response.status,
-      headers: { ...cors, 'Content-Type': 'application/json' },
-    });
-  } catch (err) {
-    return errorResponse(500, `Internal error: ${err.message}`, origin);
+    if (event.httpMethod === 'DELETE') {
+      const id = (event.queryStringParameters || {}).id;
+      if (!id) return err('DELETE requires ?id=', 400);
+      const url = `${baseUrl}?id=eq.${encodeURIComponent(id)}`;
+      const res = await fetch(url, { method: 'DELETE', headers });
+      if (!res.ok) return err(`Supabase: ${await res.text()}`, res.status);
+      return ok({ deleted: true });
+    }
+
+    return err('Method not allowed', 405);
+  } catch (e) {
+    return err(`Internal: ${e.message}`, 500);
   }
 };
