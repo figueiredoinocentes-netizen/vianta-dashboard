@@ -96,7 +96,7 @@
       <aside class="sidebar">
         <div class="sidebar-logo">
           <img src="https://dashboardaquisicaovianta.lovable.app/assets/vianta-logo-BV7m2ycm.jpeg" alt="Vianta" style="width:36px;height:36px;border-radius:8px;object-fit:contain" />
-          <div><h1>VIANTA</h1><p>Fleet Success Hub</p></div>
+          <div><h1>CENTRAL VIANTA</h1><p>Gestão de Frota</p></div>
         </div>
         <nav class="sidebar-nav">
           <div style="display:flex;gap:4px;padding:4px;border-radius:8px;background:rgba(255,255,255,0.04);margin-bottom:8px">
@@ -325,22 +325,28 @@
       }
 
       // ── Pagamentos ──
-      function renderPagamentos(){
-        const f=allVehicles.filter(v=>v['Estado']==='Alugado'||v['Tipo Gestão']==='Slot');
-        document.getElementById('totalCount').textContent=f.length;
+      async function renderPagamentos(){
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
         document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
-        if(!f.length){
-          document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#718096">Sem dados de pagamento</div>';
-          return;
+        try{
+          const r=await fetch('/.netlify/functions/central?type=pagamentos',{headers:{'Accept':'application/json'}});
+          if(!r.ok){throw new Error('API error');}
+          const data=await r.json();
+          document.getElementById('totalCount').textContent=data.length;
+          if(!data.length){
+            document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#718096">Sem pagamentos registados</div>';
+            return;
+          }
+          let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Motorista</th><th>Email</th><th>Tipo</th><th>Total Bruto</th><th>Aluguer</th><th>Taxa Admin</th><th>IVA</th><th>Líquido</th><th>Estado</th><th>Data Pagamento</th></tr></thead><tbody>';
+          data.forEach(p=>{
+            const estadoClass=p.estado==='Pago'?'badge-alugado':(p.estado==='Pendente'?'badge-inativo':'badge-maint');
+            html+='<tr><td><strong>'+(p.motorista_id||'?')+'</strong></td><td style="font-size:12px">'+(p.email||'')+'</td><td>'+(p.tipo||'')+'</td><td>€'+(p.total_bruto||'0')+'</td><td>€'+(p.aluguer||'0')+'</td><td>€'+(p.taxa_admin||'0')+'</td><td>€'+(p.iva||'0')+'</td><td><strong>€'+(p.liquidio||'0')+'</strong></td><td><span class="badge '+estadoClass+'">'+(p.estado||'')+'</span></td><td>'+(p.data_pagamento||'')+'</td></tr>';
+          });
+          html+='</tbody></table></div></div>';
+          document.getElementById('sectionContent').innerHTML=html;
+        }catch(e){
+          document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#ef4444">Erro ao carregar pagamentos: '+e.message+'</div>';
         }
-        let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Motorista</th><th>Viatura</th><th>Matrícula</th><th>Gestão</th><th>Valor/Semana</th></tr></thead><tbody>';
-        f.forEach(v=>{
-          const valSlot=v['Tipo Gestão']==='Slot'?'35€ (slot)':(v['Valor Aluguer (semanal)']||'-');
-          html+='<tr><td><strong>'+(v['Motorista Atual']||'?')+'</strong></td><td>'+(v['Marca/Modelo']||'')+'</td><td>'+(v['Matrícula']||'-')+'</td><td style="font-size:12px">'+(v['Tipo Gestão']||'')+'</td><td>'+valSlot+'</td></tr>';
-        });
-        html+='</tbody></table></div></div>';
-        document.getElementById('sectionContent').innerHTML=html;
       }
 
       // ── Armazém ──
