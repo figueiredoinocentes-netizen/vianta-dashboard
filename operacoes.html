@@ -134,7 +134,7 @@
         <div id="vehicleModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
           <div class="modal">
             <h2>Nova Viatura</h2>
-            <form onsubmit="event.preventDefault();alert('Viatura registada. DB atualizada.');this.closest('.modal-overlay').style.display='none'">
+            <form onsubmit="handleNovaViatura(event)">
               <div class="grid">
                 <div class="full"><label>Modelo <span style="color:#e53e3e">*</span></label><input name="modelo" required/></div>
                 <div><label>Matrícula</label><input name="matricula"/></div>
@@ -158,7 +158,7 @@
         <div id="armazemModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
           <div class="modal">
             <h2>Novo Item</h2>
-            <form onsubmit="event.preventDefault();alert('Item adicionado.');this.closest('.modal-overlay').style.display='none'">
+            <form onsubmit="handleNovoItem(event)">
               <div class="grid">
                 <div class="full"><label>Item <span style="color:#e53e3e">*</span></label><input name="item" required/></div>
                 <div><label>Categoria</label><select name="categoria"><option value="Lubrificantes">Lubrificantes</option><option value="Filtros">Filtros</option><option value="Travões">Travões</option><option value="Pneus">Pneus</option><option value="Fluidos">Fluidos</option><option value="Documentação">Documentação</option><option value="Segurança">Segurança</option><option value="Limpeza">Limpeza</option><option value="Outro">Outro</option></select></div>
@@ -177,11 +177,7 @@
       </main>
     </div>
     <script>
-      const DB_SHEET_ID='1j5RCxSjd24QlPaquRX7C7eeiHrzPo1c6Wsb0OQWFRjQ';
-      const CSV_URL='https://docs.google.com/spreadsheets/d/'+DB_SHEET_ID+'/export?format=csv';
-      const ARMAZEM_CSV_URL='https://docs.google.com/spreadsheets/d/1oEKDArSrjfpf8xvpWSJVKcCcTfyZKKz5b5AB8Mh8-u8/export?format=csv';
-      const API_URL='https://vianta-transfers.netlify.app/.netlify/functions/sheets?type=fleet';
-      let allVehicles=[],inventory=[],currentSection='visao';
+      let allVehicles=[],inventory=[],motoristasMap={},currentSection='visao';
 
       const SECTIONS=[
         {id:'visao',label:'📊 Visão Geral'},
@@ -193,26 +189,20 @@
         {id:'armazem',label:'📦 Armazém'},
       ];
 
-      const STATUS_MAP={'Na Frota Aluguer':'Alugado','Em Stock Stand':'Para Venda','Vendido':'Vendido','Inativo':'Inativo','Manutenção':'Manutenção','Em Preparação':'Em Preparação','Para Aluguer':'Para Aluguer'};
       const BADGE_MAP={'Alugado':'badge-alugado','Para Venda':'badge-venda','Inativo':'badge-inativo','Manutenção':'badge-maint','Vendido':'badge-vendido','Em Preparação':'badge-prep','Para Aluguer':'badge-aluguer'};
       const STATUSES=['Alugado','Para Venda','Para Aluguer','Em Preparação','Inativo','Manutenção','Vendido'];
 
-      function parseCSVLine(l){const r=[];let c='',iq=0;for(let i=0;i<l.length;i++){const ch=l[i];if(iq){if(ch=='"'&&l[i+1]=='"'){c+='"';i++}else if(ch=='"')iq=0;else c+=ch}else{if(ch=='"')iq=1;else if(ch==','){r.push(c);c=''}else c+=ch}}r.push(c);return r}
-
       async function fetchData(){
         try{
-          const [r1,r2]=await Promise.all([fetch(CSV_URL),fetch(ARMAZEM_CSV_URL)]);
-          const csv1=await r1.text(),csv2=await r2.text();
-          const lines1=csv1.trim().split('\n'),headers1=parseCSVLine(lines1[0]);
-          allVehicles=lines1.slice(1).map((l,idx)=>{const v=parseCSVLine(l),o={_idx:idx+2};headers1.forEach((h,i)=>{o[h]=(v[i]||'').trim()});return o}).filter(v=>v['Marca/Modelo']||v['Matrícula']);
-          // Normalize estado to new names
-          allVehicles.forEach(v=>{const e=v['Estado'];if(STATUS_MAP[e])v['Estado']=STATUS_MAP[e]});
-          // Parse inventory
-          const lines2=csv2.trim().split('\n');
-          if(lines2.length>1){
-            const h2=parseCSVLine(lines2[0]);
-            inventory=lines2.slice(1).map((l,idx)=>{const v=parseCSVLine(l),o={_idx:idx+2};h2.forEach((h,i)=>{o[h]=(v[i]||'').trim()});return o}).filter(v=>v['Item']);
-          }
+          const [carrosRes,armazemRes,motoristasRes]=await Promise.all([
+            fetch('/.netlify/functions/central?type=carros'),
+            fetch('/.netlify/functions/central?type=armazem'),
+            fetch('/.netlify/functions/central?type=motoristas'),
+          ]);
+          allVehicles=carrosRes.ok?await carrosRes.json():[];
+          inventory=armazemRes.ok?await armazemRes.json():[];
+          motoristasMap={};
+          if(motoristasRes.ok){(await motoristasRes.json()).forEach(m=>{motoristasMap[m.id]=m});}
           render();
         }catch(e){console.error(e)}
       }
@@ -233,8 +223,8 @@
       // ── Visão Geral ──
       function renderVisao(){
         const s=getStats();
-        const alugados=allVehicles.filter(v=>v['Estado']==='Alugado'&&v['Tipo Gestão']!=='Slot');
-        const totalRenda=alugados.reduce((sum,v)=>{const p=parseFloat(String(v['Valor Aluguer (semanal)']||'0').replace(/[^\d.,]/g,''));return sum+(isNaN(p)?0:p*4.33)},0);
+        const alugados=allVehicles.filter(v=>v.estado==='Alugado'&&v.tipo_gestao!=='Slot');
+        const totalRenda=alugados.reduce((sum,v)=>{const p=parseFloat(String(v.valor_aluguer_semanal||'0').replace(/[^\d.,]/g,''));return sum+(isNaN(p)?0:p*4.33)},0);
         document.getElementById('totalCount').textContent=s.total;
         document.getElementById('sectionContent').innerHTML='<div class="kpi-grid">'+
           '<div class="kpi-card"><div class="val" style="color:#6ee7b7">'+alugados.length+'</div><div class="label">🚗 Frota Ativa</div><div class="sub">Alugados na rua</div></div>'+
@@ -244,15 +234,15 @@
           '<div class="kpi-card"><div class="val" style="color:#22c55e">€'+Math.round(totalRenda).toLocaleString()+'</div><div class="label">📈 Receita Aluguer/mês</div><div class="sub">Estimada ('+alugados.length+' alugados)</div></div>'+
           '<div class="kpi-card"><div class="val" style="color:#60a5fa">'+s.total+'</div><div class="label">Total Frota</div><div class="sub">Todas as viaturas</div></div>'+
         '</div><div class="stats-grid">'+
-          '<div class="stat-card"><div class="label">Proprietário VIANTA</div><div class="value">'+allVehicles.filter(v=>v['Proprietário']==='VIANTA').length+'</div></div>'+
-          '<div class="stat-card"><div class="label">Investidores</div><div class="value">'+allVehicles.filter(v=>v['Proprietário']&&v['Proprietário']!=='VIANTA'&&v['Tipo Gestão']!=='Slot').length+'</div></div>'+
-          '<div class="stat-card"><div class="label">Slot</div><div class="value">'+allVehicles.filter(v=>v['Tipo Gestão']==='Slot').length+'</div></div>'+
+          '<div class="stat-card"><div class="label">Proprietário VIANTA</div><div class="value">'+allVehicles.filter(v=>v.proprietario==='VIANTA').length+'</div></div>'+
+          '<div class="stat-card"><div class="label">Investidores</div><div class="value">'+allVehicles.filter(v=>v.proprietario&&v.proprietario!=='VIANTA'&&v.tipo_gestao!=='Slot').length+'</div></div>'+
+          '<div class="stat-card"><div class="label">Slot</div><div class="value">'+allVehicles.filter(v=>v.tipo_gestao==='Slot').length+'</div></div>'+
         '</div>';
       }
 
       // ── Frota Ativa ──
       function renderFrota(){
-        const f=allVehicles.filter(v=>v['Estado']==='Alugado'&&v['Tipo Gestão']!=='Slot');
+        const f=allVehicles.filter(v=>v.estado==='Alugado'&&v.tipo_gestao!=='Slot');
         document.getElementById('totalCount').textContent=f.length;
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
         document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
@@ -262,7 +252,7 @@
         }
         let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Matrícula</th><th>Modelo</th><th>Motorista</th><th>Gestão</th><th>Proprietário</th><th>Aluguer/Sem</th><th>Estado</th></tr></thead><tbody>';
         f.forEach(v=>{
-          html+='<tr><td><strong>'+(v['Matrícula']||'-')+'</strong></td><td>'+(v['Marca/Modelo']||'')+'</td><td>'+(v['Motorista Atual']||'-')+'</td><td style="font-size:12px">'+(v['Tipo Gestão']||'')+'</td><td style="font-size:12px">'+(v['Proprietário']||'')+'</td><td>'+(v['Valor Aluguer (semanal)']||'-')+'</td><td><span class="badge badge-alugado status-badge" onclick="editStatus(this,'+v._idx+',\'Alugado\')" title="Clique para alterar">Alugado</span></td></tr>';
+          html+='<tr><td><strong>'+(v.matricula||'-')+'</strong></td><td>'+(v.marca_modelo||'')+'</td><td>'+(v.motorista_atual||'-')+'</td><td style="font-size:12px">'+(v.tipo_gestao||'')+'</td><td style="font-size:12px">'+(v.proprietario||'')+'</td><td>'+(v.valor_aluguer_semanal||'-')+'</td><td><span class="badge badge-alugado status-badge" onclick="editStatus(this,'+v.id+',\'Alugado\')" title="Clique para alterar">Alugado</span></td></tr>';
         });
         html+='</tbody></table></div></div>';
         document.getElementById('sectionContent').innerHTML=html;
@@ -270,7 +260,7 @@
 
       // ── Stock ──
       function renderStock(){
-        const f=allVehicles.filter(v=>v['Estado']==='Para Venda'||v['Estado']==='Para Aluguer');
+        const f=allVehicles.filter(v=>v.estado==='Para Venda'||v.estado==='Para Aluguer');
         document.getElementById('totalCount').textContent=f.length;
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
         document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
@@ -280,7 +270,7 @@
         }
         let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Matrícula</th><th>Modelo</th><th>Ano</th><th>KMs</th><th>Proprietário</th><th>Preço Venda</th><th>Aluguer/Sem</th><th>Estado</th></tr></thead><tbody>';
         f.forEach(v=>{
-          html+='<tr><td><strong>'+(v['Matrícula']||'-')+'</strong></td><td>'+(v['Marca/Modelo']||'')+'</td><td>'+(v['Ano']||'')+'</td><td>'+(v['KMs Atuais']||'-')+'</td><td style="font-size:12px">'+(v['Proprietário']||'')+'</td><td>'+(v['Preço Venda (€)']?v['Preço Venda (€)']+'€':'-')+'</td><td>'+(v['Valor Aluguer (semanal)']||'-')+'</td><td><span class="badge '+(v['Estado']==='Para Venda'?'badge-venda':'badge-aluguer')+' status-badge" onclick="editStatus(this,'+v._idx+',\''+v['Estado']+'\')" title="Clique para alterar">'+(v['Estado']||'')+'</span></td></tr>';
+          html+='<tr><td><strong>'+(v.matricula||'-')+'</strong></td><td>'+(v.marca_modelo||'')+'</td><td>'+(v.ano||'')+'</td><td>'+(v.kms_atuais||'-')+'</td><td style="font-size:12px">'+(v.proprietario||'')+'</td><td>'+(v.preco_venda?v.preco_venda+'€':'-')+'</td><td>'+(v.valor_aluguer_semanal||'-')+'</td><td><span class="badge '+(v.estado==='Para Venda'?'badge-venda':'badge-aluguer')+' status-badge" onclick="editStatus(this,'+v.id+',\''+v.estado+'\')" title="Clique para alterar">'+(v.estado||'')+'</span></td></tr>';
         });
         html+='</tbody></table></div></div>';
         document.getElementById('sectionContent').innerHTML=html;
@@ -288,7 +278,7 @@
 
       // ── Manutenções ──
       function renderManutencao(){
-        const f=allVehicles.filter(v=>v['Estado']==='Manutenção');
+        const f=allVehicles.filter(v=>v.estado==='Manutenção');
         document.getElementById('totalCount').textContent=f.length;
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
         document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
@@ -298,7 +288,7 @@
         }
         let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Matrícula</th><th>Modelo</th><th>Proprietário</th><th>Estado</th><th>Ação</th></tr></thead><tbody>';
         f.forEach(v=>{
-          html+='<tr><td><strong>'+(v['Matrícula']||'-')+'</strong></td><td>'+(v['Marca/Modelo']||'')+'</td><td style="font-size:12px">'+(v['Proprietário']||'')+'</td><td><span class="badge '+(v['Estado']==='Manutenção'?'badge-maint':'badge-inativo')+' status-badge" onclick="editStatus(this,'+v._idx+',\''+v['Estado']+'\')">'+(v['Estado']||'')+'</span></td><td><button class="btn btn-sm btn-outline" onclick="setStatus('+v._idx+',\'Para Venda\')">Marcar Disponível</button></td></tr>';
+          html+='<tr><td><strong>'+(v.matricula||'-')+'</strong></td><td>'+(v.marca_modelo||'')+'</td><td style="font-size:12px">'+(v.proprietario||'')+'</td><td><span class="badge '+(v.estado==='Manutenção'?'badge-maint':'badge-inativo')+' status-badge" onclick="editStatus(this,'+v.id+',\''+v.estado+'\')">'+(v.estado||'')+'</span></td><td><button class="btn btn-sm btn-outline" onclick="setStatus('+v.id+',\'Para Venda\')">Marcar Disponível</button></td></tr>';
         });
         html+='</tbody></table></div></div>';
         document.getElementById('sectionContent').innerHTML=html;
@@ -306,7 +296,7 @@
 
       // ── Check-ins ──
       function renderCheckin(){
-        const f=allVehicles.filter(v=>v['Estado']==='Em Preparação');
+        const f=allVehicles.filter(v=>v.estado==='Em Preparação');
         document.getElementById('totalCount').textContent=f.length;
         document.getElementById('newBtnLabel').textContent='Check-in Manual';
         document.getElementById('newBtn').setAttribute('onclick','alert("Função: registar chegada de viatura + iniciar checklist de preparação");');
@@ -316,7 +306,7 @@
         }else{
           html+='<div class="table-wrap"><table><thead><tr><th>Matrícula</th><th>Modelo</th><th>Ação</th></tr></thead><tbody>';
           f.forEach(v=>{
-            html+='<tr><td><strong>'+(v['Matrícula']||'-')+'</strong></td><td>'+(v['Marca/Modelo']||'')+'</td><td><button class="btn btn-sm btn-primary" onclick="setStatus('+v._idx+',\'Para Venda\')">Concluir Preparação</button></td></tr>';
+            html+='<tr><td><strong>'+(v.matricula||'-')+'</strong></td><td>'+(v.marca_modelo||'')+'</td><td><button class="btn btn-sm btn-primary" onclick="setStatus('+v.id+',\'Para Venda\')">Concluir Preparação</button></td></tr>';
           });
           html+='</tbody></table></div>';
         }
@@ -339,8 +329,11 @@
           }
           let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Motorista</th><th>Email</th><th>Tipo</th><th>Total Bruto</th><th>Aluguer</th><th>Taxa Admin</th><th>IVA</th><th>Líquido</th><th>Estado</th><th>Data Pagamento</th></tr></thead><tbody>';
           data.forEach(p=>{
+            const mot=motoristasMap[p.motorista_id];
+            const nome=mot?mot.nome:('#'+(p.motorista_id||'?'));
+            const email=mot?(mot.email||''):'';
             const estadoClass=p.estado==='Pago'?'badge-alugado':(p.estado==='Pendente'?'badge-inativo':'badge-maint');
-            html+='<tr><td><strong>'+(p.motorista_id||'?')+'</strong></td><td style="font-size:12px">'+(p.email||'')+'</td><td>'+(p.tipo||'')+'</td><td>€'+(p.total_bruto||'0')+'</td><td>€'+(p.aluguer||'0')+'</td><td>€'+(p.taxa_admin||'0')+'</td><td>€'+(p.iva||'0')+'</td><td><strong>€'+(p.liquidio||'0')+'</strong></td><td><span class="badge '+estadoClass+'">'+(p.estado||'')+'</span></td><td>'+(p.data_pagamento||'')+'</td></tr>';
+            html+='<tr><td><strong>'+nome+'</strong></td><td style="font-size:12px">'+email+'</td><td>'+(mot?mot.tipo||'':'')+'</td><td>€'+(p.total_bruto||'0')+'</td><td>€'+(p.aluguer||'0')+'</td><td>€'+(p.taxa_admin||'0')+'</td><td>€'+(p.iva||'0')+'</td><td><strong>€'+(p.liquidio||'0')+'</strong></td><td><span class="badge '+estadoClass+'">'+(p.estado||'')+'</span></td><td>'+(p.data_pagamento||'')+'</td></tr>';
           });
           html+='</tbody></table></div></div>';
           document.getElementById('sectionContent').innerHTML=html;
@@ -360,10 +353,10 @@
         }
         let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Item</th><th>Categoria</th><th>Stock</th><th>Mínimo</th><th>Unidade</th><th>Fornecedor</th><th>Última Compra</th></tr></thead><tbody>';
         inventory.forEach(v=>{
-          const stock=parseInt(v['Stock Atual']||'0');
-          const minimo=parseInt(v['Stock Mínimo']||'0');
+          const stock=parseInt(v.stock_atual||'0');
+          const minimo=parseInt(v.stock_minimo||'0');
           const statusClass=stock<minimo?'low-stock':(stock<=minimo?'warning-stock':'ok-stock');
-          html+='<tr><td><strong>'+(v['Item']||'')+'</strong></td><td>'+(v['Categoria']||'')+'</td><td class="'+statusClass+'"><strong>'+(v['Stock Atual']||'0')+'</strong></td><td>'+(v['Stock Mínimo']||'0')+'</td><td>'+(v['Unidade']||'')+'</td><td>'+(v['Fornecedor']||'')+'</td><td>'+(v['Última Compra']||'')+'</td></tr>';
+          html+='<tr><td><strong>'+(v.item||'')+'</strong></td><td>'+(v.categoria||'')+'</td><td class="'+statusClass+'"><strong>'+(v.stock_atual??'0')+'</strong></td><td>'+(v.stock_minimo??'0')+'</td><td>'+(v.unidade||'')+'</td><td>'+(v.fornecedor||'')+'</td><td>'+(v.ultima_compra||'')+'</td></tr>';
         });
         html+='</tbody></table></div></div>';
         document.getElementById('sectionContent').innerHTML=html;
@@ -373,27 +366,27 @@
       function getStats(){
         return{
           total:allVehicles.length,
-          frota:allVehicles.filter(v=>v['Estado']==='Alugado'&&v['Tipo Gestão']!=='Slot').length,
-          stock:allVehicles.filter(v=>(v['Estado']==='Para Venda'||v['Estado']==='Para Aluguer')&&v['Tipo Gestão']!=='Slot').length,
-          inativos:allVehicles.filter(v=>v['Estado']==='Inativo').length,
-          manutencao:allVehicles.filter(v=>v['Estado']==='Manutenção').length,
-          vendidos:allVehicles.filter(v=>v['Estado']==='Vendido').length,
-          preparacao:allVehicles.filter(v=>v['Estado']==='Em Preparação').length,
+          frota:allVehicles.filter(v=>v.estado==='Alugado'&&v.tipo_gestao!=='Slot').length,
+          stock:allVehicles.filter(v=>(v.estado==='Para Venda'||v.estado==='Para Aluguer')&&v.tipo_gestao!=='Slot').length,
+          inativos:allVehicles.filter(v=>v.estado==='Inativo').length,
+          manutencao:allVehicles.filter(v=>v.estado==='Manutenção').length,
+          vendidos:allVehicles.filter(v=>v.estado==='Vendido').length,
+          preparacao:allVehicles.filter(v=>v.estado==='Em Preparação').length,
         };
       }
 
       async function setStatus(rowId,newStatus){
-        const v=allVehicles.find(x=>x._idx===rowId);
+        const v=allVehicles.find(x=>x.id===rowId);
         if(!v)return;
-        await updateCell(v,'Estado',newStatus);
+        await updateCell(v,'estado',newStatus);
       }
 
-      async function updateCell(v,column,value){
+      async function updateCell(v,field,value){
         try{
-          const r=await fetch(API_URL,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({row:v._idx,column,value})});
-          const d=await r.json();
-          if(d.ok){v[column]=value;render();return true}
-          else{alert('Erro: '+d.error);return false}
+          const r=await fetch('/.netlify/functions/central?type=carros',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:v.id,field,value})});
+          const d=await r.json().catch(()=>({}));
+          if(r.ok){v[field]=value;render();return true}
+          else{alert('Erro: '+(d.error||'falha ao guardar'));return false}
         }catch(e){alert('Erro ao guardar: '+e.message);return false}
       }
 
@@ -412,13 +405,59 @@
           const newVal=sel.value;
           sel.remove();
           if(newVal===currentValue)return;
-          const v=allVehicles.find(x=>x._idx===rowId);
-          if(v)await updateCell(v,'Estado',newVal);
+          const v=allVehicles.find(x=>x.id===rowId);
+          if(v)await updateCell(v,'estado',newVal);
         });
         sel.addEventListener('blur',()=>sel.remove());
         el.textContent='';
         el.appendChild(sel);
         sel.focus();
+      }
+
+      async function handleNovaViatura(e){
+        e.preventDefault();
+        const f=e.target;
+        const body={
+          matricula:f.matricula.value||null,
+          marca_modelo:f.modelo.value||null,
+          ano:f.ano.value||null,
+          combustivel:f.combustivel.value||null,
+          kms_atuais:f.kms.value||null,
+          proprietario:f.proprietario.value||null,
+          tipo_gestao:f.gestao.value||null,
+          estado:f.estado.value||null,
+          preco_venda:f.precoVenda.value||null,
+          valor_aluguer_semanal:f.precoAluguer.value||null,
+        };
+        try{
+          const r=await fetch('/.netlify/functions/central?type=carros',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+          const d=await r.json().catch(()=>({}));
+          if(!r.ok){alert('Erro ao guardar: '+(d.error||r.status));return;}
+          f.reset();
+          f.closest('.modal-overlay').style.display='none';
+          await fetchData();
+        }catch(err){alert('Erro ao guardar: '+err.message);}
+      }
+
+      async function handleNovoItem(e){
+        e.preventDefault();
+        const f=e.target;
+        const body={
+          item:f.item.value||null,
+          categoria:f.categoria.value||null,
+          stock_atual:f.stock.value?Number(f.stock.value):0,
+          stock_minimo:f.minimo.value?Number(f.minimo.value):0,
+          unidade:f.unidade.value||null,
+          fornecedor:f.fornecedor.value||null,
+        };
+        try{
+          const r=await fetch('/.netlify/functions/central?type=armazem',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+          const d=await r.json().catch(()=>({}));
+          if(!r.ok){alert('Erro ao guardar: '+(d.error||r.status));return;}
+          f.reset();
+          f.closest('.modal-overlay').style.display='none';
+          await fetchData();
+        }catch(err){alert('Erro ao guardar: '+err.message);}
       }
 
       fetchData();
