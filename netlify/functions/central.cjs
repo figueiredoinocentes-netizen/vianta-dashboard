@@ -41,7 +41,7 @@ function supabaseHeaders() {
   };
 }
 
-export const handler = async (event) => {
+exports.handler = async (event) => {
   const { httpMethod, queryStringParameters, body, headers } = event;
   const origin = headers?.origin || '';
   const cors = corsHeaders(origin);
