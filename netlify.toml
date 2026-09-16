@@ -2,6 +2,13 @@
   command = "npm run build"
   publish = "dist"
 
+[build.environment]
+  SUPABASE_URL = "https://tuwcllpwvxzmrgrqviqu.supabase.co"
+  SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1d2NsbHB3dnh6bXJncnF2aXF1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4OTU1MDQwMCwiZXhwIjoyMTA1MTI2NDAwfQ.c6npnO8pa3qi_rrVwAar8ZMh4VQAeoECZXdJemenEVU"
+
+[functions]
+  directory = "netlify/functions"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
