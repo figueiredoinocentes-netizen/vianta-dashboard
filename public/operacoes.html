@@ -625,7 +625,10 @@
       }
 
       function editStatus(el,rowId,currentValue){
-        if(document.querySelector('.status-edit-select'))return;
+        // Clear out any stale edit-select left behind by a previous interaction
+        // instead of silently refusing to open a new one (that's what made
+        // status edits look "stuck" / not saving).
+        document.querySelectorAll('.status-edit-select').forEach(s=>s.remove());
         const sel=document.createElement('select');
         sel.className='status-edit-select';
         sel.style.cssText='background:#14181f;border:1px solid #f4af25;border-radius:4px;color:#e2e8f0;font-size:11px;font-weight:500;padding:2px 6px;outline:none;cursor:pointer';
@@ -635,14 +638,18 @@
           if(s===currentValue)opt.selected=true;
           sel.appendChild(opt);
         });
-        sel.addEventListener('change',async()=>{
+        let settled=false;
+        const commit=async()=>{
+          if(settled)return;
+          settled=true;
           const newVal=sel.value;
           sel.remove();
           if(newVal===currentValue)return;
           const v=allVehicles.find(x=>x.id===rowId);
           if(v)await updateCell(v,'estado',newVal);
-        });
-        sel.addEventListener('blur',()=>sel.remove());
+        };
+        sel.addEventListener('change',commit);
+        sel.addEventListener('blur',commit);
         el.textContent='';
         el.appendChild(sel);
         sel.focus();
