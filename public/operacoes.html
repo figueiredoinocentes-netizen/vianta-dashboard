@@ -145,6 +145,8 @@
       .missing-tag { background: var(--muted-bg); color: #fbbf24; border: 1px solid var(--border); border-radius: 5px; padding: 3px 8px; font-size: 11px; cursor: pointer; transition: all 0.15s; }
       .missing-tag:hover { background: #3d2e00; border-color: #fbbf24; }
       .missing-none { font-size: 12px; color: #22c55e; }
+      .previsao-badge { display: inline-block; font-size: 12px; color: #93c5fd; background: rgba(59,130,246,0.12); border-radius: 5px; padding: 3px 8px; margin-top: 4px; }
+      .previsao-badge.previsao-overdue { color: #fca5a5; background: rgba(239,68,68,0.12); }
       .vehicle-card-actions { margin-top: auto; padding-top: 8px; }
       @media (max-width: 768px) {
         .sidebar { width: 60px; }
@@ -248,6 +250,10 @@
                 <div id="vdPrecoVendaWrap" class="full"><label>Preço Venda (€)</label><input name="precoVenda"/></div>
                 <div id="vdPrecoAluguerWrap" class="full"><label>Valor Aluguer (€/sem)</label><input name="precoAluguer"/></div>
                 <div id="vdMotoristaWrap" class="full"><label>Motorista Atual</label><select name="motoristaAtual"><option value="">Nenhum</option></select></div>
+              </div>
+              <div data-vdpane="prep" class="full" id="vdPrevisaoWrap" style="display:none;margin-bottom:16px">
+                <label>Previsão de pronto</label>
+                <input type="date" name="previsaoPronto"/>
               </div>
               <div data-vdpane="prep" id="vdChecklist" style="display:none"></div>
               <div class="actions">
@@ -441,6 +447,15 @@
         }).join('');
       }
 
+      function previsaoBadgeHTML(v){
+        if(!v.data_previsao_pronto)return '';
+        const d=new Date(v.data_previsao_pronto+'T00:00:00');
+        const today=new Date();today.setHours(0,0,0,0);
+        const overdue=d<today;
+        const fmt=d.toLocaleDateString('pt-PT',{day:'2-digit',month:'2-digit',year:'numeric'});
+        return '<div class="previsao-badge'+(overdue?' previsao-overdue':'')+'">📅 Previsto: '+fmt+'</div>';
+      }
+
       function renderCheckin(){
         const f=allVehicles.filter(v=>v.estado==='Em Preparação');
         document.getElementById('totalCount').textContent=f.length;
@@ -458,6 +473,7 @@
             '<div class="vehicle-card-img">'+(v.foto_url?'<img src="'+v.foto_url+'" alt=""/>':CAR_PLACEHOLDER_SVG)+'</div>'+
             '<div class="vehicle-card-body">'+
               '<div><div class="vehicle-card-title">'+(v.marca_modelo||'Sem modelo')+'</div><div class="vehicle-card-plate">'+(v.matricula||'Sem matrícula')+' • '+(v.tipo_gestao||'-')+'</div></div>'+
+              previsaoBadgeHTML(v)+
               (missing.length
                 ? missingTagsHTML(v)
                 : (getChecklist(v).length ? '<div class="missing-none">✓ Checklist completa</div>' : '<div class="missing-none" style="color:#7b899d">Sem checklist definida para '+(v.tipo_gestao||'este tipo')+'</div>')
@@ -535,6 +551,7 @@
         if(v.motorista_atual&&!nomes.includes(v.motorista_atual))nomes.push(v.motorista_atual);
         f.motoristaAtual.innerHTML='<option value="">Nenhum</option>'+nomes.map(n=>'<option value="'+n.replace(/"/g,'&quot;')+'">'+n+'</option>').join('');
         f.motoristaAtual.value=v.motorista_atual||'';
+        f.previsaoPronto.value=v.data_previsao_pronto||'';
         onVdGestaoChange();
         onVdEstadoChange();
         vdDriveFiles=null;
@@ -674,6 +691,7 @@
           preco_venda:f.gestao.value==='Venda'?(f.precoVenda.value||null):null,
           valor_aluguer_semanal:f.gestao.value!=='Venda'?(f.precoAluguer.value||null):null,
           motorista_atual:f.estado.value==='Em Preparação'?null:(f.motoristaAtual.value||null),
+          data_previsao_pronto:f.previsaoPronto.value||null,
         };
         const submitBtn=f.querySelector('button[type=submit]');
         submitBtn.disabled=true;
