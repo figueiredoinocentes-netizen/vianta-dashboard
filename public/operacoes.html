@@ -86,12 +86,13 @@
       .checklist-editor { margin-top: 16px; }
       .checklist-editor label.title { display: block; margin-bottom: 6px; }
       .checklist-editor-list { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; }
-      .checklist-editor-list label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--fg); font-weight: 400; cursor: pointer; margin: 0; }
+      .modal .checklist-editor-list label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--fg); font-weight: 400; cursor: pointer; margin: 0; }
       .modal h2 { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 600; margin: 0 0 20px; }
       .modal .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
       .modal .full { grid-column: 1 / -1; }
       .modal label { display: block; font-size: 13px; color: var(--muted-fg); margin-bottom: 4px; }
-      .modal input, .modal select { width: 100%; background: var(--sidebar-bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; color: var(--fg); font-size: 13px; outline: none; }
+      .modal input:not([type=checkbox]), .modal select { width: 100%; background: var(--sidebar-bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; color: var(--fg); font-size: 13px; outline: none; }
+      .modal input[type=checkbox] { width: auto; flex-shrink: 0; }
       .modal input:focus, .modal select:focus { border-color: var(--primary); }
       .modal .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
       .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
