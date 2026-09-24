@@ -94,6 +94,19 @@
       .low-stock { color: #ef4444; }
       .warning-stock { color: #f59e0b; }
       .ok-stock { color: #22c55e; }
+      .vehicle-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+      .vehicle-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+      .vehicle-card-img { width: 100%; height: 140px; background: var(--sidebar-bg); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+      .vehicle-card-img img { width: 100%; height: 100%; object-fit: cover; }
+      .vehicle-card-img svg { opacity: 0.25; }
+      .vehicle-card-body { padding: 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+      .vehicle-card-title { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; }
+      .vehicle-card-plate { font-size: 12px; color: var(--muted-fg); margin-top: -4px; }
+      .missing-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+      .missing-tag { background: var(--muted-bg); color: #fbbf24; border: 1px solid var(--border); border-radius: 5px; padding: 3px 8px; font-size: 11px; cursor: pointer; transition: all 0.15s; }
+      .missing-tag:hover { background: #3d2e00; border-color: #fbbf24; }
+      .missing-none { font-size: 12px; color: #22c55e; }
+      .vehicle-card-actions { margin-top: auto; padding-top: 8px; }
       @media (max-width: 768px) {
         .sidebar { width: 60px; }
         .sidebar-logo h1, .sidebar-logo p, .sidebar-link span { display: none; }
@@ -116,11 +129,11 @@
             <div style="flex:1;text-align:center;font-size:12px;font-weight:600;padding:8px;border-radius:6px;background:rgba(244,175,37,0.12);color:#f4af25">Operações</div>
           </div>
           <a href="/operacoes" class="sidebar-link"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg><span>Gestão de Frota</span></a>
-          <button class="sidebar-sublink active" data-section="visao" onclick="setSection('visao')">📊 Visão Geral</button>
+          <button class="sidebar-sublink" data-section="visao" onclick="setSection('visao')">📊 Visão Geral</button>
           <button class="sidebar-sublink" data-section="frota" onclick="setSection('frota')">🚗 Frota Ativa</button>
           <button class="sidebar-sublink" data-section="stock" onclick="setSection('stock')">🏪 Stock</button>
           <button class="sidebar-sublink" data-section="manutencao" onclick="setSection('manutencao')">🔧 Manutenções</button>
-          <button class="sidebar-sublink" data-section="checkin" onclick="setSection('checkin')">✅ Check-ins</button>
+          <button class="sidebar-sublink active" data-section="checkin" onclick="setSection('checkin')">✅ Check-ins</button>
           <button class="sidebar-sublink" data-section="pagamentos" onclick="setSection('pagamentos')">💰 Pagamentos</button>
           <button class="sidebar-sublink" data-section="armazem" onclick="setSection('armazem')">📦 Armazém</button>
         </nav>
@@ -130,7 +143,7 @@
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
             <div>
               <h2 style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;margin:0">Gestão de Frota</h2>
-              <p style="margin:4px 0 0;color:#7b899d;font-size:13px"><span id="sectionLabel">Visão geral</span> • <span id="totalCount">0</span> registos</p>
+              <p style="margin:4px 0 0;color:#7b899d;font-size:13px"><span id="sectionLabel">Check-ins</span> • <span id="totalCount">0</span> registos</p>
             </div>
             <div style="display:flex;gap:8px">
               <button class="btn btn-outline" onclick="fetchData()">
@@ -149,6 +162,7 @@
             <form onsubmit="handleNovaViatura(event)">
               <div class="grid">
                 <div class="full"><label>Modelo <span style="color:#e53e3e">*</span></label><input name="modelo" required/></div>
+                <div class="full"><label>Foto</label><input name="foto" type="file" accept="image/*"/></div>
                 <div><label>Matrícula</label><input name="matricula"/></div>
                 <div><label>Ano</label><input name="ano" type="number" min="2010" max="2026"/></div>
                 <div><label>Combustível</label><select name="combustivel"><option value="">Selecionar</option><option value="Elétrico">Elétrico</option><option value="Gasóleo/Diesel">Gasóleo/Diesel</option><option value="Gasolina">Gasolina</option><option value="Híbrido">Híbrido</option></select></div>
@@ -156,7 +170,7 @@
                 <div><label>Cor</label><input name="cor"/></div>
                 <div><label>Proprietário</label><select name="proprietario"><option value="VIANTA">VIANTA</option><option value="Investidor">Investidor</option><option value="Miguel Brito Comércio Auto Lda">Miguel Brito</option><option value="Vinod Carsane">Vinod Carsane</option><option value="Ricardo Duarte">Ricardo Duarte</option><option value="EMPRESA">EMPRESA</option><option value="Outro">Outro</option></select></div>
                 <div><label>Tipo Gestão</label><select name="gestao"><option value="Aluguer">Aluguer</option><option value="Venda">Venda</option><option value="Slot">Slot</option></select></div>
-                <div><label>Estado</label><select name="estado"><option value="Alugado">Alugado</option><option value="Para Venda">Para Venda</option><option value="Para Aluguer">Para Aluguer</option><option value="Em Preparação">Em Preparação</option><option value="Inativo">Inativo</option><option value="Manutenção">Manutenção</option><option value="Vendido">Vendido</option></select></div>
+                <div><label>Estado</label><select name="estado"><option value="Em Preparação" selected>Em Preparação</option><option value="Alugado">Alugado</option><option value="Para Venda">Para Venda</option><option value="Para Aluguer">Para Aluguer</option><option value="Inativo">Inativo</option><option value="Manutenção">Manutenção</option><option value="Vendido">Vendido</option></select></div>
                 <div><label>Preço Venda (€)</label><input name="precoVenda" type="number"/></div>
                 <div><label>Valor Aluguer (€/sem)</label><input name="precoAluguer" type="number"/></div>
               </div>
@@ -189,7 +203,20 @@
       </main>
     </div>
     <script>
-      let allVehicles=[],inventory=[],motoristasMap={},currentSection='visao';
+      let allVehicles=[],inventory=[],motoristasMap={},currentSection='checkin';
+
+      // Checklist de preparação — Instrução de Trabalho "Preparação de Viatura STAND".
+      // Aluguer ainda não tem checklist própria definida (fica vazia por agora).
+      const CHECKLIST_VENDA=[
+        'DUA ou DAV','Declaração de Circulação','Validar Seguro com o cliente','Inspeção',
+        'Livros de Manutenção e Manual de Utilizador','Garantia','2ª chave (quando aplicável)',
+        'Pneu suplente ou kit furos','Triângulo e colete','Cabo de carregador (aplicável a BEV)',
+        'Pintura','Pneus','Mecânica (óleo, refrigerante, limpa para-brisas, bateria 12v)',
+        'Carga elétrica (aplicável a BEV)','Limpeza exterior e interior',
+      ];
+      const CHECKLIST_ALUGUER=[];
+      function getChecklist(v){return v.tipo_gestao==='Venda'?CHECKLIST_VENDA:(v.tipo_gestao==='Aluguer'?CHECKLIST_ALUGUER:[]);}
+      function getMissingItems(v){const done=v.checklist_prep||{};return getChecklist(v).filter(item=>!done[item]);}
 
       const SECTIONS=[
         {id:'visao',label:'📊 Visão Geral'},
@@ -307,23 +334,43 @@
       }
 
       // ── Check-ins ──
+      const CAR_PLACEHOLDER_SVG='<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 17h14M5 17a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm14 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM5 17l1.5-6.5A2 2 0 0 1 8.42 9h7.16a2 2 0 0 1 1.92 1.5L19 17M5 17V13m14 4V13M5 13h14"/></svg>';
+
       function renderCheckin(){
         const f=allVehicles.filter(v=>v.estado==='Em Preparação');
         document.getElementById('totalCount').textContent=f.length;
-        document.getElementById('newBtnLabel').textContent='Check-in Manual';
-        document.getElementById('newBtn').setAttribute('onclick','alert("Função: registar chegada de viatura + iniciar checklist de preparação");');
-        let html='<div class="card" style="padding:40px;text-align:center;color:#7b899d">';
+        document.getElementById('newBtnLabel').textContent='Nova Viatura';
+        document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
         if(!f.length){
-          html+='Nenhuma viatura em preparação';
-        }else{
-          html+='<div class="table-wrap"><table><thead><tr><th>Matrícula</th><th>Modelo</th><th>Ação</th></tr></thead><tbody>';
-          f.forEach(v=>{
-            html+='<tr><td><strong>'+(v.matricula||'-')+'</strong></td><td>'+(v.marca_modelo||'')+'</td><td><button class="btn btn-sm btn-primary" onclick="setStatus('+v.id+',\'Para Venda\')">Concluir Preparação</button></td></tr>';
-          });
-          html+='</tbody></table></div>';
+          document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#7b899d">Nenhuma viatura em preparação</div>';
+          return;
         }
+        let html='<div class="vehicle-cards-grid">';
+        f.forEach(v=>{
+          const missing=getMissingItems(v);
+          const destino=v.tipo_gestao==='Aluguer'?'Para Aluguer':'Para Venda';
+          html+='<div class="vehicle-card">'+
+            '<div class="vehicle-card-img">'+(v.foto_url?'<img src="'+v.foto_url+'" alt=""/>':CAR_PLACEHOLDER_SVG)+'</div>'+
+            '<div class="vehicle-card-body">'+
+              '<div><div class="vehicle-card-title">'+(v.marca_modelo||'Sem modelo')+'</div><div class="vehicle-card-plate">'+(v.matricula||'Sem matrícula')+' • '+(v.tipo_gestao||'-')+'</div></div>'+
+              (missing.length
+                ? '<div class="missing-list">'+missing.map(item=>'<span class="missing-tag" title="Clique para marcar como feito" onclick="toggleChecklistItem('+v.id+',\''+item.replace(/'/g,"\\'")+'\')">'+item+'</span>').join('')+'</div>'
+                : (getChecklist(v).length ? '<div class="missing-none">✓ Checklist completa</div>' : '<div class="missing-none" style="color:#7b899d">Sem checklist definida para '+(v.tipo_gestao||'este tipo')+'</div>')
+              )+
+              '<div class="vehicle-card-actions"><button class="btn btn-sm btn-primary" onclick="setStatus('+v.id+',\''+destino+'\')">Concluir Preparação</button></div>'+
+            '</div>'+
+          '</div>';
+        });
         html+='</div>';
         document.getElementById('sectionContent').innerHTML=html;
+      }
+
+      async function toggleChecklistItem(carId,item){
+        const v=allVehicles.find(x=>x.id===carId);
+        if(!v)return;
+        const done={...(v.checklist_prep||{})};
+        done[item]=!done[item];
+        await updateCell(v,'checklist_prep',done);
       }
 
       // ── Pagamentos ──
@@ -426,29 +473,71 @@
         sel.focus();
       }
 
+      // Redimensiona a imagem no browser antes de enviar (mantém o payload pequeno).
+      function compressImage(file,maxDim,quality){
+        return new Promise((resolve,reject)=>{
+          const img=new Image();
+          const reader=new FileReader();
+          reader.onload=()=>{img.onload=()=>{
+            let{width,height}=img;
+            if(width>height&&width>maxDim){height=Math.round(height*maxDim/width);width=maxDim;}
+            else if(height>maxDim){width=Math.round(width*maxDim/height);height=maxDim;}
+            const canvas=document.createElement('canvas');
+            canvas.width=width;canvas.height=height;
+            canvas.getContext('2d').drawImage(img,0,0,width,height);
+            resolve(canvas.toDataURL('image/jpeg',quality));
+          };img.onerror=reject;img.src=reader.result;};
+          reader.onerror=reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      async function uploadFoto(file){
+        const dataUrl=await compressImage(file,1280,0.75);
+        const dataBase64=dataUrl.split(',')[1];
+        const r=await fetch('/.netlify/functions/upload-foto',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:file.name,contentType:'image/jpeg',dataBase64})});
+        const d=await r.json().catch(()=>({}));
+        if(!r.ok)throw new Error(d.error||'Erro ao enviar imagem');
+        return d.url;
+      }
+
       async function handleNovaViatura(e){
         e.preventDefault();
         const f=e.target;
-        const body={
-          matricula:f.matricula.value||null,
-          marca_modelo:f.modelo.value||null,
-          ano:f.ano.value||null,
-          combustivel:f.combustivel.value||null,
-          kms_atuais:f.kms.value||null,
-          proprietario:f.proprietario.value||null,
-          tipo_gestao:f.gestao.value||null,
-          estado:f.estado.value||null,
-          preco_venda:f.precoVenda.value||null,
-          valor_aluguer_semanal:f.precoAluguer.value||null,
-        };
+        const submitBtn=f.querySelector('button[type=submit]');
+        submitBtn.disabled=true;
         try{
+          let fotoUrl=null;
+          const fotoFile=f.foto.files[0];
+          if(fotoFile){
+            submitBtn.textContent='A enviar foto...';
+            fotoUrl=await uploadFoto(fotoFile);
+          }
+          const body={
+            matricula:f.matricula.value||null,
+            marca_modelo:f.modelo.value||null,
+            ano:f.ano.value||null,
+            combustivel:f.combustivel.value||null,
+            kms_atuais:f.kms.value||null,
+            proprietario:f.proprietario.value||null,
+            tipo_gestao:f.gestao.value||null,
+            estado:f.estado.value||null,
+            preco_venda:f.precoVenda.value||null,
+            valor_aluguer_semanal:f.precoAluguer.value||null,
+            foto_url:fotoUrl,
+          };
           const r=await fetch('/.netlify/functions/central?type=carros',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
           const d=await r.json().catch(()=>({}));
           if(!r.ok){alert('Erro ao guardar: '+(d.error||r.status));return;}
           f.reset();
           f.closest('.modal-overlay').style.display='none';
           await fetchData();
-        }catch(err){alert('Erro ao guardar: '+err.message);}
+        }catch(err){
+          alert('Erro ao guardar: '+err.message);
+        }finally{
+          submitBtn.disabled=false;
+          submitBtn.textContent='Guardar';
+        }
       }
 
       async function handleNovoItem(e){
