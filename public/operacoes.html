@@ -102,6 +102,10 @@
       .checklist-editor-group + .checklist-editor-group { margin-top: 16px; }
       .checklist-editor-group-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--primary); margin-bottom: 8px; }
       .checklist-editor-list { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; }
+      .checklist-editor-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+      .doc-link { font-size: 11px; color: var(--primary); text-decoration: none; background: rgba(244,175,37,0.1); border-radius: 5px; padding: 3px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+      .doc-link:hover { text-decoration: underline; }
+      .doc-link-loading { color: var(--muted-fg); background: transparent; cursor: default; }
       .modal .checklist-editor-list label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--fg); font-weight: 400; cursor: pointer; margin: 0; }
       .modal h2 { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 600; margin: 0 0 20px; }
       .modal .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -529,9 +533,43 @@
         f.motoristaAtual.value=v.motorista_atual||'';
         onVdGestaoChange();
         onVdEstadoChange();
+        vdDriveFiles=null;
         renderChecklistEditor(v);
+        fetchVdDriveFiles(v);
         setVdTab('carac');
         document.getElementById('vehicleDetailModal').style.display='flex';
+      }
+
+      // ── Documentos (Google Drive) ──
+      const DOC_KEYWORDS={
+        'DUA ou DAV':['dua','dav'],
+        'Declaração de Circulação':['circulacao','declaracao'],
+        'Validar Seguro com o cliente':['seguro'],
+        'Inspeção':['inspecao','ipo'],
+        'Livros de Manutenção e Manual de Utilizador':['manual','livro'],
+        'Garantia':['garantia'],
+      };
+      function normalizeText(s){return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');}
+      function matchFileForItem(item,files){
+        const keywords=DOC_KEYWORDS[item];
+        if(!keywords||!files)return null;
+        return files.find(f=>{const n=normalizeText(f.name);return keywords.some(k=>n.includes(k));})||null;
+      }
+      let vdDriveFiles=null,vdDriveCarId=null,vdDriveLoading=false;
+      async function fetchVdDriveFiles(v){
+        vdDriveFiles=null;vdDriveLoading=true;vdDriveCarId=v.id;
+        try{
+          const params=new URLSearchParams({matricula:v.matricula||'',modelo:v.marca_modelo||''});
+          const r=await fetch('/.netlify/functions/drive?'+params.toString());
+          const data=r.ok?await r.json():{files:[]};
+          if(vdDriveCarId!==v.id)return;
+          vdDriveFiles=data.files||[];
+        }catch(e){
+          console.error('drive fetch error',e);
+          if(vdDriveCarId===v.id)vdDriveFiles=[];
+        }finally{
+          if(vdDriveCarId===v.id){vdDriveLoading=false;renderChecklistEditor(v);}
+        }
       }
 
       function renderChecklistEditor(v){
@@ -545,8 +583,19 @@
         box.innerHTML='<div class="checklist-editor"><label class="title">Checklist de preparação</label>'+
           Object.entries(groups).map(([label,items])=>{
             if(!items.length)return '';
+            const isDocs=label==='Documentos';
             return '<div class="checklist-editor-group"><div class="checklist-editor-group-label">'+label+'</div><div class="checklist-editor-list">'+
-              items.map(item=>'<label><input type="checkbox" '+(done[item]?'checked':'')+' onchange="toggleChecklistItem('+v.id+',\''+item.replace(/'/g,"\\'")+'\')"/> '+item+'</label>').join('')+
+              items.map(item=>{
+                let docLink='';
+                if(isDocs){
+                  if(vdDriveLoading)docLink='<span class="doc-link doc-link-loading">a procurar...</span>';
+                  else if(vdDriveFiles){
+                    const file=matchFileForItem(item,vdDriveFiles);
+                    if(file)docLink='<a class="doc-link" href="'+file.webViewLink+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">📄 '+file.name+'</a>';
+                  }
+                }
+                return '<div class="checklist-editor-row"><label><input type="checkbox" '+(done[item]?'checked':'')+' onchange="toggleChecklistItem('+v.id+',\''+item.replace(/'/g,"\\'")+'\')"/> '+item+'</label>'+docLink+'</div>';
+              }).join('')+
             '</div></div>';
           }).join('')+
         '</div>';
