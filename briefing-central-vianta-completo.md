@@ -28,10 +28,7 @@
 **Region:** Europe
 **GitHub integration:** ligado ao repositório vianta-dashboard
 
-**Chaves:**
-- `SUPABASE_URL` = https://tuwcllpwvxzmrgrqviqu.supabase.co
-- `SUPABASE_SERVICE_KEY` = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1d2NsbHB3dnh6bXJncnF2aXF1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4OTU1MDQwMCwiZXhwIjoyMTA1MTI2NDAwfQ.c6npnO8pa3qi_rrVwAar8ZMh4VQAeoECZXdJemenEVU
-- `anon key` = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1d2NsbHB3dnh6bXJncnF2aXF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NTA0MDAsImV4cCI6MjEwNTEyNjQwMH0.ikxfnWjjpSxUNPveQ-Uc2j589oFjUxSiT9fhi5_wI28
+**Chaves:** guardadas apenas no Supabase Dashboard (Settings → API) e nas env vars do Netlify — **nunca** colar valores aqui outra vez (foram removidos a 2026-09-24 depois de terem ficado expostos neste ficheiro, num repo público, e rodados por precaução).
 
 **Tabelas criadas (5):**
 - `motoristas` — 53 registos importados
@@ -46,17 +43,11 @@
 
 **Site name:** vianta-dashboard
 **Site ID:** 9d2906ae-f1c6-466d-9e53-662f6844bb39
-**Deploy token:** nfp_zWsJZRM95gfshMcKSDeQ2dWhqGMQWc64cd84
+**Deploy token:** guardado apenas fora do repo (removido daqui a 2026-09-24 pelo mesmo motivo acima — revogar o antigo se ainda não foi feito).
 **Build:** `npm run build` → dist/ (com postbuild.py que copia Lovable bundle + operacoes.html)
 **Functions:** `netlify/functions/` (auto-detect)
 
-**Environment variables (SET via Dashboard):**
-| Key | Value |
-|---|---|
-| SUPABASE_URL | https://tuwcllpwvxzmrgrqviqu.supabase.co |
-| SUPABASE_SERVICE_KEY | eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1d2NsbHB3dnh6bXJncnF2aXF1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4OTU1MDQwMCwiZXhwIjoyMTA1MTI2NDAwfQ.c6npnO8pa3qi_rrVwAar8ZMh4VQAeoECZXdJemenEVU |
-
-Para setar env vars via API: usar Personal Access Token do Netlify (não disponível, pedir ao Francisco).
+**Environment variables:** SUPABASE_URL e SUPABASE_SERVICE_KEY estão definidas no Netlify Dashboard (Site settings → Environment variables), não aqui.
 
 ### 2.3 Google Sheets (legado, manter por enquanto)
 
@@ -252,11 +243,10 @@ Cada motorista tem os seus próprios valores de desconto. O CSV de pagamentos mo
 - Prefere resultados a explicações
 
 ### Dados sensíveis
-- SO_token_path: /opt/data/google_token.json
-- SO_client_secret: /opt/data/google_client_secret.json
-- Git credentials: ~/.git-credentials (formato https://user:token@github.com)
-- Netlify deploy token: nfp_zWsJZRM95gfshMcKSDeQ2dWhqGMQWc64cd84
-- GitHub token (em ~/.git-credentials): nome "Hermes Vianta OS"
+Nenhum valor de credencial vive neste ficheiro (removidos a 2026-09-24 — este repo é público). Localizações apenas:
+- Google OAuth token/client secret: `/opt/data/google_token.json`, `/opt/data/google_client_secret.json`
+- Git credentials: `~/.git-credentials` (formato `https://user:token@github.com`), token nomeado "Hermes Vianta OS" no GitHub
+- Netlify deploy token: guardado fora do repo (Netlify Dashboard → User settings → Applications)
 
 ### Para deploy
 1. `git push origin master` → Netlify auto-build
