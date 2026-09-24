@@ -24,7 +24,11 @@
         --primary-fg: #211c12;
       }
       * { box-sizing: border-box; }
-      body { margin: 0; background: var(--bg); color: var(--fg); font-family: 'Inter', sans-serif; display: flex; min-height: 100vh; }
+      *::-webkit-scrollbar { width: 8px; height: 8px; }
+      *::-webkit-scrollbar-track { background: transparent; }
+      *::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px; }
+      *::-webkit-scrollbar-thumb:hover { background: var(--muted-fg); }
+      body { margin: 0; background: var(--bg); color: var(--fg); font-family: 'Inter', sans-serif; display: flex; min-height: 100vh; -webkit-font-smoothing: antialiased; }
       .app-layout { display: flex; width: 100%; min-height: 100vh; }
       .sidebar { width: var(--sidebar-w); min-height: 100vh; border-right: 1px solid var(--border); background: var(--sidebar-bg); display: flex; flex-direction: column; flex-shrink: 0; position: fixed; left: 0; top: 0; }
       .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 20px 24px; border-bottom: 1px solid var(--border); }
@@ -35,12 +39,14 @@
       .sidebar-link:hover { background: var(--muted-bg); color: var(--fg); }
       .sidebar-link.active { background: var(--muted-bg); color: var(--fg); font-weight: 500; }
       .sidebar-section-title { padding: 12px 16px 4px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #475569; font-weight: 600; }
-      .sidebar-sublink { display: flex; align-items: center; gap: 8px; padding: 7px 12px 7px 28px; border-radius: 6px; color: var(--muted-fg); text-decoration: none; font-size: 13px; cursor: pointer; transition: all 0.15s; border: none; background: transparent; width: 100%; text-align: left; }
+      .sidebar-sublink { position: relative; display: flex; align-items: center; gap: 8px; padding: 7px 12px 7px 28px; border-radius: 6px; color: var(--muted-fg); text-decoration: none; font-size: 13px; cursor: pointer; transition: all 0.15s; border: none; background: transparent; width: 100%; text-align: left; }
       .sidebar-sublink:hover { background: var(--muted-bg); color: var(--fg); }
-      .sidebar-sublink.active { background: rgba(244,175,37,0.12); color: var(--primary); font-weight: 500; }
+      .sidebar-sublink.active { background: rgba(244,175,37,0.12); color: var(--primary); font-weight: 600; }
+      .sidebar-sublink.active::before { content: ''; position: absolute; left: 0; top: 20%; bottom: 20%; width: 3px; border-radius: 0 3px 3px 0; background: var(--primary); }
       .main-content { margin-left: var(--sidebar-w); flex: 1; padding: 24px 32px; max-width: 1400px; }
       .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
-      .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+      .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); transition: border-color 0.15s, transform 0.15s; }
+      .stat-card:hover { border-color: #2d323c; transform: translateY(-1px); }
       .stat-card .label { font-size: 12px; color: var(--muted-fg); margin-bottom: 4px; }
       .stat-card .value { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; }
       .section-tabs { display: flex; gap: 4px; margin-bottom: 12px; background: var(--card-bg); border-radius: 8px; padding: 4px; overflow-x: auto; flex-wrap: nowrap; }
@@ -53,12 +59,15 @@
       .filters select { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--fg); font-size: 13px; outline: none; min-width: 140px; }
       .filters select:focus { border-color: var(--primary); }
       .filters .count { font-size: 12px; color: var(--muted-fg); white-space: nowrap; }
-      .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+      .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+      .empty-state { padding: 48px 24px; text-align: center; color: var(--muted-fg); font-size: 14px; }
+      .empty-state-icon { font-size: 32px; margin-bottom: 12px; opacity: 0.5; }
       .table-wrap { overflow-x: auto; }
       table { width: 100%; border-collapse: collapse; }
-      thead { background: var(--sidebar-bg); }
-      th { padding: 10px 14px; font-size: 11px; font-weight: 600; color: var(--muted-fg); text-transform: uppercase; letter-spacing: 0.05em; text-align: left; white-space: nowrap; }
-      td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid var(--border); }
+      thead { background: var(--sidebar-bg); position: sticky; top: 0; z-index: 1; }
+      th { padding: 12px 14px; font-size: 11px; font-weight: 600; color: var(--muted-fg); text-transform: uppercase; letter-spacing: 0.05em; text-align: left; white-space: nowrap; border-bottom: 1px solid var(--border); }
+      td { padding: 12px 14px; font-size: 13px; border-bottom: 1px solid var(--border); transition: background 0.1s; }
+      tbody tr:last-child td { border-bottom: none; }
       tr:hover td { background: var(--muted-bg); }
       .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
       .badge-alugado { background: #064e3b; color: #6ee7b7; }
@@ -70,18 +79,21 @@
       .badge-aluguer { background: #14532d; color: #86efac; }
       .status-badge { cursor: pointer; transition: filter 0.15s; }
       .status-badge:hover { filter: brightness(1.2); }
-      .status-select { cursor: pointer; transition: filter 0.15s; border: none; outline: none; appearance: none; -webkit-appearance: none; -moz-appearance: none; font-family: inherit; }
+      .status-select { cursor: pointer; transition: filter 0.15s; border: none; outline: none; appearance: none; -webkit-appearance: none; -moz-appearance: none; font-family: inherit; padding-right: 22px !important; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; }
       .status-select:hover, .status-select:focus { filter: brightness(1.15); }
       .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: none; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-decoration: none; }
-      .btn-primary { background: var(--primary); color: var(--primary-fg); }
-      .btn-primary:hover { background: var(--primary-hover); }
+      .btn-primary { background: var(--primary); color: var(--primary-fg); box-shadow: 0 1px 3px rgba(244,175,37,0.25); }
+      .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 3px 8px rgba(244,175,37,0.3); }
+      .btn-primary:active { transform: translateY(0); }
       .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--muted-fg); }
-      .btn-outline:hover { background: var(--muted-bg); color: var(--fg); }
+      .btn-outline:hover { background: var(--muted-bg); color: var(--fg); border-color: #2d323c; }
       .btn-danger { background: #dc2626; color: white; }
       .btn-danger:hover { background: #b91c1c; }
       .btn-sm { padding: 4px 10px; font-size: 11px; }
-      .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 100; }
-      .modal { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 24px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
+      .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; z-index: 100; animation: fadeIn 0.15s ease-out; }
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes modalIn { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+      .modal { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 24px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.5); animation: modalIn 0.18s ease-out; }
       .modal-lg { max-width: 640px; }
       .clickable-plate { cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
       .clickable-plate:hover { color: var(--primary); }
@@ -97,16 +109,20 @@
       .modal input[type=checkbox] { width: auto; flex-shrink: 0; }
       .modal input:focus, .modal select:focus { border-color: var(--primary); }
       .modal .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
-      .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
-      .kpi-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
-      .kpi-card .val { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700; }
+      .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px; }
+      .kpi-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; gap: 12px; align-items: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.2); transition: border-color 0.15s, transform 0.15s; }
+      .kpi-card:hover { border-color: #2d323c; transform: translateY(-1px); }
+      .kpi-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+      .kpi-body { min-width: 0; }
+      .kpi-card .val { font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700; line-height: 1.15; }
+      .kpi-card .label { font-size: 12px; color: var(--fg); font-weight: 600; margin-top: 2px; }
       .kpi-card .sub { font-size: 11px; color: var(--muted-fg); margin-top: 2px; }
       .low-stock { color: #ef4444; }
       .warning-stock { color: #f59e0b; }
       .ok-stock { color: #22c55e; }
       .vehicle-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-      .vehicle-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; cursor: pointer; transition: border-color 0.15s; }
-      .vehicle-card:hover { border-color: var(--primary); }
+      .vehicle-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.2); transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s; }
+      .vehicle-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.3); }
       .vehicle-card-img { width: 100%; height: 140px; background: var(--sidebar-bg); display: flex; align-items: center; justify-content: center; overflow: hidden; }
       .vehicle-card-img img { width: 100%; height: 100%; object-fit: cover; }
       .vehicle-card-img svg { opacity: 0.25; }
@@ -266,6 +282,10 @@
       function getChecklist(v){return v.tipo_gestao==='Venda'?CHECKLIST_VENDA:(v.tipo_gestao==='Aluguer'?CHECKLIST_ALUGUER:[]);}
       function getMissingItems(v){const done=v.checklist_prep||{};return getChecklist(v).filter(item=>!done[item]);}
 
+      function emptyStateHTML(icon,text){
+        return '<div class="card empty-state"><div class="empty-state-icon">'+icon+'</div><div>'+text+'</div></div>';
+      }
+
       const SECTIONS=[
         {id:'visao',label:'📊 Visão Geral'},
         {id:'frota',label:'🚗 Frota Ativa'},
@@ -317,18 +337,22 @@
       }
 
       // ── Visão Geral ──
+      function kpiCardHTML(icon,color,val,label,sub){
+        return '<div class="kpi-card"><div class="kpi-icon" style="background:'+color+'26;color:'+color+'">'+icon+'</div>'+
+          '<div class="kpi-body"><div class="val" style="color:'+color+'">'+val+'</div><div class="label">'+label+'</div><div class="sub">'+sub+'</div></div></div>';
+      }
       function renderVisao(){
         const s=getStats();
         const alugados=allVehicles.filter(v=>v.estado==='Alugado'&&v.tipo_gestao!=='Slot');
         const totalRenda=alugados.reduce((sum,v)=>{const p=parseFloat(String(v.valor_aluguer_semanal||'0').replace(/[^\d.,]/g,''));return sum+(isNaN(p)?0:p*4.33)},0);
         document.getElementById('totalCount').textContent=s.total;
         document.getElementById('sectionContent').innerHTML='<div class="kpi-grid">'+
-          '<div class="kpi-card"><div class="val" style="color:#6ee7b7">'+alugados.length+'</div><div class="label">🚗 Frota Ativa</div><div class="sub">Alugados na rua</div></div>'+
-          '<div class="kpi-card"><div class="val" style="color:#93c5fd">'+s.stock+'</div><div class="label">🏪 Em Stock</div><div class="sub">Para venda / aluguer</div></div>'+
-          '<div class="kpi-card"><div class="val" style="color:#fbbf24">'+(s.inativos+s.manutencao)+'</div><div class="label">🔧 Parados</div><div class="sub">Inativo + Manutenção</div></div>'+
-          '<div class="kpi-card"><div class="val" style="color:#9ca3af">'+s.vendidos+'</div><div class="label">💰 Vendidos</div><div class="sub">Este ano</div></div>'+
-          '<div class="kpi-card"><div class="val" style="color:#22c55e">€'+Math.round(totalRenda).toLocaleString()+'</div><div class="label">📈 Receita Aluguer/mês</div><div class="sub">Estimada ('+alugados.length+' alugados)</div></div>'+
-          '<div class="kpi-card"><div class="val" style="color:#60a5fa">'+s.total+'</div><div class="label">Total Frota</div><div class="sub">Todas as viaturas</div></div>'+
+          kpiCardHTML('🚗','#6ee7b7',alugados.length,'Frota Ativa','Alugados na rua')+
+          kpiCardHTML('🏪','#93c5fd',s.stock,'Em Stock','Para venda / aluguer')+
+          kpiCardHTML('🔧','#fbbf24',(s.inativos+s.manutencao),'Parados','Inativo + Manutenção')+
+          kpiCardHTML('💰','#9ca3af',s.vendidos,'Vendidos','Este ano')+
+          kpiCardHTML('📈','#22c55e','€'+Math.round(totalRenda).toLocaleString(),'Receita Aluguer/mês','Estimada ('+alugados.length+' alugados)')+
+          kpiCardHTML('🚘','#60a5fa',s.total,'Total Frota','Todas as viaturas')+
         '</div><div class="stats-grid">'+
           '<div class="stat-card"><div class="label">Proprietário VIANTA</div><div class="value">'+allVehicles.filter(v=>v.proprietario==='VIANTA').length+'</div></div>'+
           '<div class="stat-card"><div class="label">Investidores</div><div class="value">'+allVehicles.filter(v=>v.proprietario&&v.proprietario!=='VIANTA'&&v.tipo_gestao!=='Slot').length+'</div></div>'+
@@ -343,7 +367,7 @@
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
         document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
         if(!f.length){
-          document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#7b899d">Nenhum carro alugado de momento</div>';
+          document.getElementById('sectionContent').innerHTML=emptyStateHTML('🚗','Nenhum carro alugado de momento');
           return;
         }
         let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Matrícula</th><th>Modelo</th><th>Motorista</th><th>Gestão</th><th>Proprietário</th><th>Aluguer/Sem</th><th>Estado</th></tr></thead><tbody>';
@@ -361,7 +385,7 @@
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
         document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
         if(!f.length){
-          document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#7b899d">Nenhum carro em stock</div>';
+          document.getElementById('sectionContent').innerHTML=emptyStateHTML('🏪','Nenhum carro em stock');
           return;
         }
         let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Matrícula</th><th>Modelo</th><th>Ano</th><th>KMs</th><th>Proprietário</th><th>Preço Venda</th><th>Aluguer/Sem</th><th>Estado</th></tr></thead><tbody>';
@@ -379,7 +403,7 @@
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
         document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
         if(!f.length){
-          document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#7b899d">Nenhum carro em manutenção</div>';
+          document.getElementById('sectionContent').innerHTML=emptyStateHTML('🔧','Nenhum carro em manutenção');
           return;
         }
         let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Matrícula</th><th>Modelo</th><th>Proprietário</th><th>Estado</th><th>Ação</th></tr></thead><tbody>';
@@ -400,7 +424,7 @@
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
         document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
         if(!f.length){
-          document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#7b899d">Nenhuma viatura em preparação</div>';
+          document.getElementById('sectionContent').innerHTML=emptyStateHTML('✅','Nenhuma viatura em preparação');
           return;
         }
         let html='<div class="vehicle-cards-grid">';
@@ -569,7 +593,7 @@
           const data=await r.json();
           document.getElementById('totalCount').textContent=data.length;
           if(!data.length){
-            document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#7b899d">Sem pagamentos registados</div>';
+            document.getElementById('sectionContent').innerHTML=emptyStateHTML('💰','Sem pagamentos registados');
             return;
           }
           let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Motorista</th><th>Email</th><th>Tipo</th><th>Total Bruto</th><th>Aluguer</th><th>Taxa Admin</th><th>IVA</th><th>Líquido</th><th>Estado</th><th>Data Pagamento</th></tr></thead><tbody>';
@@ -593,7 +617,7 @@
         document.getElementById('newBtnLabel').textContent='Novo Item';
         document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('armazemModal').style.display='flex'");
         if(!inventory.length){
-          document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#7b899d">Nenhum item no armazém</div>';
+          document.getElementById('sectionContent').innerHTML=emptyStateHTML('📦','Nenhum item no armazém');
           return;
         }
         let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Item</th><th>Categoria</th><th>Stock</th><th>Mínimo</th><th>Unidade</th><th>Fornecedor</th><th>Última Compra</th></tr></thead><tbody>';
