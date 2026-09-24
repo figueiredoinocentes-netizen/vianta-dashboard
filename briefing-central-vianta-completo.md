@@ -23,8 +23,7 @@
 
 ### 2.1 Supabase (PostgreSQL)
 
-**Project URL:** https://tuwcllpwvxzmrgrqviqu.supabase.co
-**Project Ref:** `tuwcllpwvxzmrgrqviqu`
+**Project URL / Ref:** ver Supabase Dashboard (removido daqui por ser o valor exato da env var SUPABASE_URL, sinalizado pelo secret scanner do Netlify)
 **Region:** Europe
 **GitHub integration:** ligado ao repositório vianta-dashboard
 
