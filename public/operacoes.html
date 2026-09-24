@@ -102,7 +102,8 @@
       .warning-stock { color: #f59e0b; }
       .ok-stock { color: #22c55e; }
       .vehicle-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-      .vehicle-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+      .vehicle-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; cursor: pointer; transition: border-color 0.15s; }
+      .vehicle-card:hover { border-color: var(--primary); }
       .vehicle-card-img { width: 100%; height: 140px; background: var(--sidebar-bg); display: flex; align-items: center; justify-content: center; overflow: hidden; }
       .vehicle-card-img img { width: 100%; height: 100%; object-fit: cover; }
       .vehicle-card-img svg { opacity: 0.25; }
@@ -191,21 +192,26 @@
         <div id="vehicleDetailModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
           <div class="modal modal-lg">
             <h2 id="vdTitle">Viatura</h2>
+            <div class="section-tabs" style="margin-bottom:16px">
+              <button type="button" class="section-btn active" data-vdtab="carac" onclick="setVdTab('carac')">Características</button>
+              <button type="button" class="section-btn" data-vdtab="prep" onclick="setVdTab('prep')">Preparação</button>
+            </div>
             <form onsubmit="handleUpdateViatura(event)" id="vdForm">
-              <div class="grid">
+              <div data-vdpane="carac" class="grid">
                 <div class="full"><label>Modelo</label><input name="modelo"/></div>
                 <div><label>Matrícula</label><input name="matricula"/></div>
                 <div><label>Ano</label><input name="ano"/></div>
                 <div><label>Combustível</label><select name="combustivel"><option value="">Selecionar</option><option value="Elétrico">Elétrico</option><option value="Gasóleo/Diesel">Gasóleo/Diesel</option><option value="Gasolina">Gasolina</option><option value="Híbrido">Híbrido</option></select></div>
                 <div><label>KMs</label><input name="kms"/></div>
-                <div><label>Proprietário</label><select name="proprietario"><option value="VIANTA">VIANTA</option><option value="Investidor">Investidor</option><option value="Miguel Brito Comércio Auto Lda">Miguel Brito</option><option value="Vinod Carsane">Vinod Carsane</option><option value="Ricardo Duarte">Ricardo Duarte</option><option value="EMPRESA">EMPRESA</option><option value="Outro">Outro</option></select></div>
-                <div><label>Tipo Gestão</label><select name="gestao"><option value="Aluguer">Aluguer</option><option value="Venda">Venda</option><option value="Slot">Slot</option></select></div>
+                <div><label>Proprietário</label><select name="proprietario" onchange="onVdProprietarioChange()"><option value="VIANTA">VIANTA</option><option value="Investidor">Investidor</option></select></div>
+                <div id="vdInvestidorWrap" class="full" style="display:none"><label>Nome do Investidor</label><input name="investidorNome" list="vdInvestidoresList"/><datalist id="vdInvestidoresList"></datalist></div>
+                <div><label>Tipo Gestão</label><select name="gestao" onchange="onVdGestaoChange()"><option value="Aluguer">Aluguer</option><option value="Venda">Venda</option><option value="Slot">Slot</option></select></div>
                 <div><label>Estado</label><select name="estado"><option value="Em Preparação">Em Preparação</option><option value="Alugado">Alugado</option><option value="Para Venda">Para Venda</option><option value="Para Aluguer">Para Aluguer</option><option value="Inativo">Inativo</option><option value="Manutenção">Manutenção</option><option value="Vendido">Vendido</option></select></div>
-                <div><label>Preço Venda (€)</label><input name="precoVenda"/></div>
-                <div><label>Valor Aluguer (€/sem)</label><input name="precoAluguer"/></div>
+                <div id="vdPrecoVendaWrap" class="full"><label>Preço Venda (€)</label><input name="precoVenda"/></div>
+                <div id="vdPrecoAluguerWrap" class="full"><label>Valor Aluguer (€/sem)</label><input name="precoAluguer"/></div>
                 <div class="full"><label>Motorista Atual</label><input name="motoristaAtual"/></div>
               </div>
-              <div id="vdChecklist"></div>
+              <div data-vdpane="prep" id="vdChecklist" style="display:none"></div>
               <div class="actions">
                 <button type="button" class="btn btn-outline" onclick="this.closest('.modal-overlay').style.display='none'">Fechar</button>
                 <button type="submit" class="btn btn-primary">Guardar Alterações</button>
@@ -382,15 +388,15 @@
         f.forEach(v=>{
           const missing=getMissingItems(v);
           const destino=v.tipo_gestao==='Aluguer'?'Para Aluguer':'Para Venda';
-          html+='<div class="vehicle-card">'+
+          html+='<div class="vehicle-card" onclick="openVehicleDetail('+v.id+')">'+
             '<div class="vehicle-card-img">'+(v.foto_url?'<img src="'+v.foto_url+'" alt=""/>':CAR_PLACEHOLDER_SVG)+'</div>'+
             '<div class="vehicle-card-body">'+
               '<div><div class="vehicle-card-title">'+(v.marca_modelo||'Sem modelo')+'</div><div class="vehicle-card-plate">'+(v.matricula||'Sem matrícula')+' • '+(v.tipo_gestao||'-')+'</div></div>'+
               (missing.length
-                ? '<div class="missing-list">'+missing.map(item=>'<span class="missing-tag" title="Clique para marcar como feito" onclick="toggleChecklistItem('+v.id+',\''+item.replace(/'/g,"\\'")+'\')">'+item+'</span>').join('')+'</div>'
+                ? '<div class="missing-list">'+missing.map(item=>'<span class="missing-tag" title="Clique para marcar como feito" onclick="event.stopPropagation();toggleChecklistItem('+v.id+',\''+item.replace(/'/g,"\\'")+'\')">'+item+'</span>').join('')+'</div>'
                 : (getChecklist(v).length ? '<div class="missing-none">✓ Checklist completa</div>' : '<div class="missing-none" style="color:#7b899d">Sem checklist definida para '+(v.tipo_gestao||'este tipo')+'</div>')
               )+
-              '<div class="vehicle-card-actions" style="display:flex;gap:6px"><button class="btn btn-sm btn-outline" onclick="openVehicleDetail('+v.id+')">Ver Detalhes</button><button class="btn btn-sm btn-primary" onclick="setStatus('+v.id+',\''+destino+'\')">Concluir Preparação</button></div>'+
+              '<div class="vehicle-card-actions"><button class="btn btn-sm btn-primary" onclick="event.stopPropagation();setStatus('+v.id+',\''+destino+'\')">Concluir Preparação</button></div>'+
             '</div>'+
           '</div>';
         });
@@ -409,6 +415,23 @@
       }
 
       // ── Pop-up de detalhe/edição de viatura ──
+      function setVdTab(tab){
+        document.querySelectorAll('[data-vdtab]').forEach(b=>b.classList.toggle('active',b.dataset.vdtab===tab));
+        document.querySelectorAll('[data-vdpane]').forEach(p=>p.style.display=(p.dataset.vdpane===tab?(p.tagName==='DIV'&&p.classList.contains('grid')?'grid':'block'):'none'));
+      }
+
+      function onVdGestaoChange(){
+        const f=document.getElementById('vdForm');
+        const isVenda=f.gestao.value==='Venda';
+        document.getElementById('vdPrecoVendaWrap').style.display=isVenda?'block':'none';
+        document.getElementById('vdPrecoAluguerWrap').style.display=isVenda?'none':'block';
+      }
+
+      function onVdProprietarioChange(){
+        const f=document.getElementById('vdForm');
+        document.getElementById('vdInvestidorWrap').style.display=f.proprietario.value==='Investidor'?'block':'none';
+      }
+
       function openVehicleDetail(carId){
         const v=allVehicles.find(x=>x.id===carId);
         if(!v)return;
@@ -420,13 +443,24 @@
         f.ano.value=v.ano||'';
         f.combustivel.value=v.combustivel||'';
         f.kms.value=v.kms_atuais||'';
-        f.proprietario.value=v.proprietario||'VIANTA';
+        const investidores=[...new Set(allVehicles.map(x=>x.proprietario).filter(p=>p&&p!=='VIANTA'))].sort();
+        document.getElementById('vdInvestidoresList').innerHTML=investidores.map(n=>'<option value="'+n.replace(/"/g,'&quot;')+'">').join('');
+        if(v.proprietario&&v.proprietario!=='VIANTA'){
+          f.proprietario.value='Investidor';
+          f.investidorNome.value=v.proprietario;
+        }else{
+          f.proprietario.value='VIANTA';
+          f.investidorNome.value='';
+        }
+        onVdProprietarioChange();
         f.gestao.value=v.tipo_gestao||'Aluguer';
         f.estado.value=v.estado||'Alugado';
         f.precoVenda.value=v.preco_venda||'';
         f.precoAluguer.value=v.valor_aluguer_semanal||'';
         f.motoristaAtual.value=v.motorista_atual||'';
+        onVdGestaoChange();
         renderChecklistEditor(v);
+        setVdTab('carac');
         document.getElementById('vehicleDetailModal').style.display='flex';
       }
 
@@ -449,17 +483,18 @@
         const carId=Number(f.dataset.carId);
         const v=allVehicles.find(x=>x.id===carId);
         if(!v)return;
+        const proprietarioFinal=f.proprietario.value==='Investidor'?(f.investidorNome.value||null):'VIANTA';
         const updates={
           marca_modelo:f.modelo.value||null,
           matricula:f.matricula.value||null,
           ano:f.ano.value||null,
           combustivel:f.combustivel.value||null,
           kms_atuais:f.kms.value||null,
-          proprietario:f.proprietario.value||null,
+          proprietario:proprietarioFinal,
           tipo_gestao:f.gestao.value||null,
           estado:f.estado.value||null,
-          preco_venda:f.precoVenda.value||null,
-          valor_aluguer_semanal:f.precoAluguer.value||null,
+          preco_venda:f.gestao.value==='Venda'?(f.precoVenda.value||null):null,
+          valor_aluguer_semanal:f.gestao.value!=='Venda'?(f.precoAluguer.value||null):null,
           motorista_atual:f.motoristaAtual.value||null,
         };
         const submitBtn=f.querySelector('button[type=submit]');
