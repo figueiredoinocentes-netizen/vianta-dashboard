@@ -25,4 +25,4 @@ Lê o ficheiro `briefing-central-vianta-completo.md` na raiz deste repositório.
 - O repo tem `"type": "module"` — `.js` são ESM, usar `export const handler`
 - Para funções Netlify, retornar `{ statusCode, headers, body }` — não `new Response()`
 - Preferir Supabase REST API via fetch() a usar SDKs pesados
-- Publicar: `public/operacoes.html` → postbuild.py copia para `dist/`
+- Publicar: `npm run build` corre `scripts/postbuild.mjs`, que copia `public/` inteiro para `dist/` (site 100% estático, sem bundler — a app React em `src/` foi removida a 2026-09-24 por nunca chegar a ser servida)

@@ -43,7 +43,7 @@
 **Site name:** vianta-dashboard
 **Site ID:** 9d2906ae-f1c6-466d-9e53-662f6844bb39
 **Deploy token:** guardado apenas fora do repo (removido daqui a 2026-09-24 pelo mesmo motivo acima — revogar o antigo se ainda não foi feito).
-**Build:** `npm run build` → dist/ (com postbuild.py que copia Lovable bundle + operacoes.html)
+**Build:** `npm run build` → `scripts/postbuild.mjs` copia `public/` inteiro para `dist/` (site estático, sem bundler)
 **Functions:** `netlify/functions/` (auto-detect)
 
 **Environment variables:** SUPABASE_URL e SUPABASE_SERVICE_KEY estão definidas no Netlify Dashboard (Site settings → Environment variables), não aqui.
@@ -85,7 +85,7 @@ A função sheets.js tem types extra: `fleet` (escreve DB Carros) e `armazem` (e
 ### 3.1 Frontend
 
 **Ficheiro principal:** `public/operacoes.html` (cópia para `operacoes.html` na raiz)
-**Build:** postbuild.py copia `public/operacoes.html` para `dist/operacoes.html`
+**Build:** `scripts/postbuild.mjs` copia `public/` para `dist/` (inclui operacoes.html)
 
 **7 secções implementadas:**
 1. 📊 Visão Geral — KPIs (frota ativa, stock, parados, receita/mês)
@@ -94,7 +94,7 @@ A função sheets.js tem types extra: `fleet` (escreve DB Carros) e `armazem` (e
 4. 🔧 Manutenções — carros em Manutenção
 5. ✅ Check-ins — carros Em Preparação
 6. 💰 Pagamentos — chama `/.netlify/functions/central?type=pagamentos`, mostra split financeiro
-7. 📦 Armazém — lê CSV da DB Armazém (sheet legado)
+7. 📦 Armazém — chama `/.netlify/functions/central?type=armazem` (Supabase, já migrado — não lê CSV)
 
 **Lovable bundle (Aquisição):** `public/assets/index-Cdosnuq2.js` — bundle minificado, editar diretamente, sem source.
 
@@ -231,7 +231,7 @@ Cada motorista tem os seus próprios valores de desconto. O CSV de pagamentos mo
 ### Convenções de código
 - Frontend: HTML + CSS + JS num único ficheiro (standalone)
 - API: Netlify Functions com ESM (`export const handler`)
-- Publicar: `public/operacoes.html` é a fonte; postbuild.py copia para `dist/`
+- Publicar: `public/operacoes.html` é a fonte; `scripts/postbuild.mjs` copia para `dist/`
 - Repo tem `"type": "module"` — `.js` são ESM, `.cjs` são CommonJS
 
 ### Regras do Francisco (não quebrar)

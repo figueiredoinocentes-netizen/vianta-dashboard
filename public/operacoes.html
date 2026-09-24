@@ -10,44 +10,56 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" crossorigin href="/assets/index-DBm4vQ15.css" />
     <style>
-      :root { --sidebar-w: 256px; }
+      :root {
+        --sidebar-w: 256px;
+        --bg: #0e1115;
+        --sidebar-bg: #101318;
+        --card-bg: #14181f;
+        --border: #23272f;
+        --muted-bg: #1e2229;
+        --muted-fg: #7b899d;
+        --fg: #f1f5f9;
+        --primary: #f4af25;
+        --primary-hover: #dba01f;
+        --primary-fg: #211c12;
+      }
       * { box-sizing: border-box; }
-      body { margin: 0; background: #0f0f0f; color: #e2e8f0; font-family: 'Inter', sans-serif; display: flex; min-height: 100vh; }
+      body { margin: 0; background: var(--bg); color: var(--fg); font-family: 'Inter', sans-serif; display: flex; min-height: 100vh; }
       .app-layout { display: flex; width: 100%; min-height: 100vh; }
-      .sidebar { width: var(--sidebar-w); min-height: 100vh; border-right: 1px solid #1e293b; background: #0a0a0a; display: flex; flex-direction: column; flex-shrink: 0; position: fixed; left: 0; top: 0; }
-      .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 20px 24px; border-bottom: 1px solid #1e293b; }
-      .sidebar-logo h1 { font-size: 16px; font-weight: 700; margin: 0; }
+      .sidebar { width: var(--sidebar-w); min-height: 100vh; border-right: 1px solid var(--border); background: var(--sidebar-bg); display: flex; flex-direction: column; flex-shrink: 0; position: fixed; left: 0; top: 0; }
+      .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 20px 24px; border-bottom: 1px solid var(--border); }
+      .sidebar-logo h1 { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; margin: 0; }
       .sidebar-logo p { font-size: 10px; margin: 0; opacity: 0.6; }
       .sidebar-nav { padding: 12px; display: flex; flex-direction: column; gap: 2px; flex: 1; }
-      .sidebar-link { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: #94a3b8; text-decoration: none; font-size: 14px; transition: all 0.15s; }
-      .sidebar-link:hover { background: #1a1a1a; color: #e2e8f0; }
-      .sidebar-link.active { background: #1a1a1a; color: #e2e8f0; font-weight: 500; }
+      .sidebar-link { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: var(--muted-fg); text-decoration: none; font-size: 14px; transition: all 0.15s; }
+      .sidebar-link:hover { background: var(--muted-bg); color: var(--fg); }
+      .sidebar-link.active { background: var(--muted-bg); color: var(--fg); font-weight: 500; }
       .sidebar-section-title { padding: 12px 16px 4px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #475569; font-weight: 600; }
-      .sidebar-sublink { display: flex; align-items: center; gap: 8px; padding: 7px 12px 7px 28px; border-radius: 6px; color: #718096; text-decoration: none; font-size: 13px; cursor: pointer; transition: all 0.15s; border: none; background: transparent; width: 100%; text-align: left; }
-      .sidebar-sublink:hover { background: #1a1a1a; color: #e2e8f0; }
-      .sidebar-sublink.active { background: rgba(59,130,246,0.1); color: #60a5fa; font-weight: 500; }
+      .sidebar-sublink { display: flex; align-items: center; gap: 8px; padding: 7px 12px 7px 28px; border-radius: 6px; color: var(--muted-fg); text-decoration: none; font-size: 13px; cursor: pointer; transition: all 0.15s; border: none; background: transparent; width: 100%; text-align: left; }
+      .sidebar-sublink:hover { background: var(--muted-bg); color: var(--fg); }
+      .sidebar-sublink.active { background: rgba(244,175,37,0.12); color: var(--primary); font-weight: 500; }
       .main-content { margin-left: var(--sidebar-w); flex: 1; padding: 24px 32px; max-width: 1400px; }
       .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
-      .stat-card { background: #1a1a1a; border: 1px solid #1e293b; border-radius: 12px; padding: 16px; }
-      .stat-card .label { font-size: 12px; color: #718096; margin-bottom: 4px; }
-      .stat-card .value { font-size: 24px; font-weight: 700; }
-      .section-tabs { display: flex; gap: 4px; margin-bottom: 12px; background: #1a1a1a; border-radius: 8px; padding: 4px; overflow-x: auto; flex-wrap: nowrap; }
-      .section-btn { padding: 8px 14px; border: none; background: transparent; color: #718096; border-radius: 6px; cursor: pointer; font-size: 12px; white-space: nowrap; transition: all 0.15s; }
-      .section-btn:hover { color: #e2e8f0; background: #2a2a2a; }
-      .section-btn.active { background: #2d2d2d; color: #e2e8f0; font-weight: 600; }
+      .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+      .stat-card .label { font-size: 12px; color: var(--muted-fg); margin-bottom: 4px; }
+      .stat-card .value { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; }
+      .section-tabs { display: flex; gap: 4px; margin-bottom: 12px; background: var(--card-bg); border-radius: 8px; padding: 4px; overflow-x: auto; flex-wrap: nowrap; }
+      .section-btn { padding: 8px 14px; border: none; background: transparent; color: var(--muted-fg); border-radius: 6px; cursor: pointer; font-size: 12px; white-space: nowrap; transition: all 0.15s; }
+      .section-btn:hover { color: var(--fg); background: var(--muted-bg); }
+      .section-btn.active { background: rgba(244,175,37,0.12); color: var(--primary); font-weight: 600; }
       .filters { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; position: relative; }
-      .filters input[type="text"] { flex: 1; background: #1a1a1a; border: 1px solid #1e293b; border-radius: 8px; padding: 10px 12px; color: #e2e8f0; font-size: 13px; outline: none; }
-      .filters input[type="text"]:focus { border-color: #3b82f6; }
-      .filters select { background: #1a1a1a; border: 1px solid #1e293b; border-radius: 8px; padding: 10px 12px; color: #e2e8f0; font-size: 13px; outline: none; min-width: 140px; }
-      .filters select:focus { border-color: #3b82f6; }
-      .filters .count { font-size: 12px; color: #718096; white-space: nowrap; }
-      .card { background: #1a1a1a; border: 1px solid #1e293b; border-radius: 12px; overflow: hidden; }
+      .filters input[type="text"] { flex: 1; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--fg); font-size: 13px; outline: none; }
+      .filters input[type="text"]:focus { border-color: var(--primary); }
+      .filters select { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--fg); font-size: 13px; outline: none; min-width: 140px; }
+      .filters select:focus { border-color: var(--primary); }
+      .filters .count { font-size: 12px; color: var(--muted-fg); white-space: nowrap; }
+      .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
       .table-wrap { overflow-x: auto; }
       table { width: 100%; border-collapse: collapse; }
-      thead { background: #141414; }
-      th { padding: 10px 14px; font-size: 11px; font-weight: 600; color: #718096; text-transform: uppercase; letter-spacing: 0.05em; text-align: left; white-space: nowrap; }
-      td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid #1e293b; }
-      tr:hover td { background: #1e1e1e; }
+      thead { background: var(--sidebar-bg); }
+      th { padding: 10px 14px; font-size: 11px; font-weight: 600; color: var(--muted-fg); text-transform: uppercase; letter-spacing: 0.05em; text-align: left; white-space: nowrap; }
+      td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid var(--border); }
+      tr:hover td { background: var(--muted-bg); }
       .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
       .badge-alugado { background: #064e3b; color: #6ee7b7; }
       .badge-venda { background: #1e3a5f; color: #93c5fd; }
@@ -59,26 +71,26 @@
       .status-badge { cursor: pointer; transition: filter 0.15s; }
       .status-badge:hover { filter: brightness(1.2); }
       .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: none; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-decoration: none; }
-      .btn-primary { background: #3b82f6; color: white; }
-      .btn-primary:hover { background: #2563eb; }
-      .btn-outline { background: transparent; border: 1px solid #1e293b; color: #94a3b8; }
-      .btn-outline:hover { background: #1a1a1a; color: #e2e8f0; }
+      .btn-primary { background: var(--primary); color: var(--primary-fg); }
+      .btn-primary:hover { background: var(--primary-hover); }
+      .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--muted-fg); }
+      .btn-outline:hover { background: var(--muted-bg); color: var(--fg); }
       .btn-danger { background: #dc2626; color: white; }
       .btn-danger:hover { background: #b91c1c; }
       .btn-sm { padding: 4px 10px; font-size: 11px; }
       .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 100; }
-      .modal { background: #1a1a1a; border: 1px solid #1e293b; border-radius: 12px; padding: 24px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
-      .modal h2 { font-size: 18px; font-weight: 600; margin: 0 0 20px; }
+      .modal { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 24px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
+      .modal h2 { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 600; margin: 0 0 20px; }
       .modal .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
       .modal .full { grid-column: 1 / -1; }
-      .modal label { display: block; font-size: 13px; color: #94a3b8; margin-bottom: 4px; }
-      .modal input, .modal select { width: 100%; background: #141414; border: 1px solid #1e293b; border-radius: 6px; padding: 8px 10px; color: #e2e8f0; font-size: 13px; outline: none; }
-      .modal input:focus, .modal select:focus { border-color: #3b82f6; }
+      .modal label { display: block; font-size: 13px; color: var(--muted-fg); margin-bottom: 4px; }
+      .modal input, .modal select { width: 100%; background: var(--sidebar-bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; color: var(--fg); font-size: 13px; outline: none; }
+      .modal input:focus, .modal select:focus { border-color: var(--primary); }
       .modal .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
       .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
-      .kpi-card { background: #1a1a1a; border: 1px solid #1e293b; border-radius: 12px; padding: 16px; }
-      .kpi-card .val { font-size: 28px; font-weight: 700; }
-      .kpi-card .sub { font-size: 11px; color: #718096; margin-top: 2px; }
+      .kpi-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+      .kpi-card .val { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700; }
+      .kpi-card .sub { font-size: 11px; color: var(--muted-fg); margin-top: 2px; }
       .low-stock { color: #ef4444; }
       .warning-stock { color: #f59e0b; }
       .ok-stock { color: #22c55e; }
@@ -100,8 +112,8 @@
         </div>
         <nav class="sidebar-nav">
           <div style="display:flex;gap:4px;padding:4px;border-radius:8px;background:rgba(255,255,255,0.04);margin-bottom:8px">
-            <a href="/" style="flex:1;text-align:center;font-size:12px;font-weight:600;padding:8px;border-radius:6px;color:#94a3b8;text-decoration:none;transition:all 0.15s">Aquisição</a>
-            <div style="flex:1;text-align:center;font-size:12px;font-weight:600;padding:8px;border-radius:6px;background:rgba(59,130,246,0.12);color:#3b82f6">Operações</div>
+            <a href="/" style="flex:1;text-align:center;font-size:12px;font-weight:600;padding:8px;border-radius:6px;color:#7b899d;text-decoration:none;transition:all 0.15s">Aquisição</a>
+            <div style="flex:1;text-align:center;font-size:12px;font-weight:600;padding:8px;border-radius:6px;background:rgba(244,175,37,0.12);color:#f4af25">Operações</div>
           </div>
           <a href="/operacoes" class="sidebar-link"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg><span>Gestão de Frota</span></a>
           <button class="sidebar-sublink active" data-section="visao" onclick="setSection('visao')">📊 Visão Geral</button>
@@ -117,8 +129,8 @@
         <div id="app">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
             <div>
-              <h2 style="font-size:20px;font-weight:700;margin:0">Gestão de Frota</h2>
-              <p style="margin:4px 0 0;color:#718096;font-size:13px"><span id="sectionLabel">Visão geral</span> • <span id="totalCount">0</span> registos</p>
+              <h2 style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;margin:0">Gestão de Frota</h2>
+              <p style="margin:4px 0 0;color:#7b899d;font-size:13px"><span id="sectionLabel">Visão geral</span> • <span id="totalCount">0</span> registos</p>
             </div>
             <div style="display:flex;gap:8px">
               <button class="btn btn-outline" onclick="fetchData()">
@@ -247,7 +259,7 @@
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
         document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
         if(!f.length){
-          document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#718096">Nenhum carro alugado de momento</div>';
+          document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#7b899d">Nenhum carro alugado de momento</div>';
           return;
         }
         let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Matrícula</th><th>Modelo</th><th>Motorista</th><th>Gestão</th><th>Proprietário</th><th>Aluguer/Sem</th><th>Estado</th></tr></thead><tbody>';
@@ -265,7 +277,7 @@
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
         document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
         if(!f.length){
-          document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#718096">Nenhum carro em stock</div>';
+          document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#7b899d">Nenhum carro em stock</div>';
           return;
         }
         let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Matrícula</th><th>Modelo</th><th>Ano</th><th>KMs</th><th>Proprietário</th><th>Preço Venda</th><th>Aluguer/Sem</th><th>Estado</th></tr></thead><tbody>';
@@ -283,7 +295,7 @@
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
         document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
         if(!f.length){
-          document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#718096">Nenhum carro em manutenção</div>';
+          document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#7b899d">Nenhum carro em manutenção</div>';
           return;
         }
         let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Matrícula</th><th>Modelo</th><th>Proprietário</th><th>Estado</th><th>Ação</th></tr></thead><tbody>';
@@ -300,7 +312,7 @@
         document.getElementById('totalCount').textContent=f.length;
         document.getElementById('newBtnLabel').textContent='Check-in Manual';
         document.getElementById('newBtn').setAttribute('onclick','alert("Função: registar chegada de viatura + iniciar checklist de preparação");');
-        let html='<div class="card" style="padding:40px;text-align:center;color:#718096">';
+        let html='<div class="card" style="padding:40px;text-align:center;color:#7b899d">';
         if(!f.length){
           html+='Nenhuma viatura em preparação';
         }else{
@@ -324,7 +336,7 @@
           const data=await r.json();
           document.getElementById('totalCount').textContent=data.length;
           if(!data.length){
-            document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#718096">Sem pagamentos registados</div>';
+            document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#7b899d">Sem pagamentos registados</div>';
             return;
           }
           let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Motorista</th><th>Email</th><th>Tipo</th><th>Total Bruto</th><th>Aluguer</th><th>Taxa Admin</th><th>IVA</th><th>Líquido</th><th>Estado</th><th>Data Pagamento</th></tr></thead><tbody>';
@@ -348,7 +360,7 @@
         document.getElementById('newBtnLabel').textContent='Novo Item';
         document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('armazemModal').style.display='flex'");
         if(!inventory.length){
-          document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#718096">Nenhum item no armazém</div>';
+          document.getElementById('sectionContent').innerHTML='<div class="card" style="padding:40px;text-align:center;color:#7b899d">Nenhum item no armazém</div>';
           return;
         }
         let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Item</th><th>Categoria</th><th>Stock</th><th>Mínimo</th><th>Unidade</th><th>Fornecedor</th><th>Última Compra</th></tr></thead><tbody>';
@@ -394,7 +406,7 @@
         if(document.querySelector('.status-edit-select'))return;
         const sel=document.createElement('select');
         sel.className='status-edit-select';
-        sel.style.cssText='background:#141414;border:1px solid #3b82f6;border-radius:4px;color:#e2e8f0;font-size:11px;font-weight:500;padding:2px 6px;outline:none;cursor:pointer';
+        sel.style.cssText='background:#14181f;border:1px solid #f4af25;border-radius:4px;color:#e2e8f0;font-size:11px;font-weight:500;padding:2px 6px;outline:none;cursor:pointer';
         STATUSES.forEach(s=>{
           const opt=document.createElement('option');
           opt.value=s;opt.textContent=s;
