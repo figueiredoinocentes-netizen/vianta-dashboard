@@ -199,6 +199,13 @@
             </div>
             <form onsubmit="handleUpdateViatura(event)" id="vdForm">
               <div data-vdpane="carac" class="grid">
+                <div class="full" id="vdFotoWrap">
+                  <label>Foto</label>
+                  <div id="vdFotoPreview" style="display:none;margin-bottom:8px">
+                    <img id="vdFotoPreviewImg" src="" alt="" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;border:1px solid var(--border)"/>
+                  </div>
+                  <input name="foto" type="file" accept="image/*"/>
+                </div>
                 <div class="full"><label>Modelo</label><input name="modelo"/></div>
                 <div><label>Matrícula</label><input name="matricula"/></div>
                 <div><label>Ano</label><input name="ano"/></div>
@@ -444,6 +451,9 @@
         const f=document.getElementById('vdForm');
         f.dataset.carId=carId;
         document.getElementById('vdTitle').textContent=(v.marca_modelo||'Viatura')+(v.matricula?' — '+v.matricula:'');
+        f.foto.value='';
+        document.getElementById('vdFotoPreview').style.display=v.foto_url?'block':'none';
+        document.getElementById('vdFotoPreviewImg').src=v.foto_url||'';
         f.modelo.value=v.marca_modelo||'';
         f.matricula.value=v.matricula||'';
         f.ano.value=v.ano||'';
@@ -494,7 +504,24 @@
         const v=allVehicles.find(x=>x.id===carId);
         if(!v)return;
         const proprietarioFinal=f.proprietario.value==='Investidor'?(f.investidorNome.value||null):'VIANTA';
+        const submitBtn0=f.querySelector('button[type=submit]');
+        let fotoUrl;
+        const fotoFile=f.foto.files[0];
+        if(fotoFile){
+          submitBtn0.disabled=true;
+          submitBtn0.textContent='A enviar foto...';
+          try{
+            fotoUrl=await uploadFoto(fotoFile);
+          }catch(err){
+            alert('Erro ao enviar imagem: '+err.message);
+            submitBtn0.disabled=false;
+            submitBtn0.textContent='Guardar Alterações';
+            return;
+          }
+          submitBtn0.textContent='Guardar Alterações';
+        }
         const updates={
+          ...(fotoUrl?{foto_url:fotoUrl}:{}),
           marca_modelo:f.modelo.value||null,
           matricula:f.matricula.value||null,
           ano:f.ano.value||null,
