@@ -207,10 +207,10 @@
                 <div><label>Proprietário</label><select name="proprietario" onchange="onVdProprietarioChange()"><option value="VIANTA">VIANTA</option><option value="Investidor">Investidor</option></select></div>
                 <div id="vdInvestidorWrap" class="full" style="display:none"><label>Nome do Investidor</label><input name="investidorNome" list="vdInvestidoresList"/><datalist id="vdInvestidoresList"></datalist></div>
                 <div><label>Tipo Gestão</label><select name="gestao" onchange="onVdGestaoChange()"><option value="Aluguer">Aluguer</option><option value="Venda">Venda</option><option value="Slot">Slot</option></select></div>
-                <div><label>Estado</label><select name="estado"><option value="Em Preparação">Em Preparação</option><option value="Alugado">Alugado</option><option value="Para Venda">Para Venda</option><option value="Para Aluguer">Para Aluguer</option><option value="Inativo">Inativo</option><option value="Manutenção">Manutenção</option><option value="Vendido">Vendido</option></select></div>
+                <div><label>Estado</label><select name="estado" onchange="onVdEstadoChange()"><option value="Em Preparação">Em Preparação</option><option value="Alugado">Alugado</option><option value="Para Venda">Para Venda</option><option value="Para Aluguer">Para Aluguer</option><option value="Inativo">Inativo</option><option value="Manutenção">Manutenção</option><option value="Vendido">Vendido</option></select></div>
                 <div id="vdPrecoVendaWrap" class="full"><label>Preço Venda (€)</label><input name="precoVenda"/></div>
                 <div id="vdPrecoAluguerWrap" class="full"><label>Valor Aluguer (€/sem)</label><input name="precoAluguer"/></div>
-                <div class="full"><label>Motorista Atual</label><input name="motoristaAtual"/></div>
+                <div id="vdMotoristaWrap" class="full"><label>Motorista Atual</label><select name="motoristaAtual"><option value="">Nenhum</option></select></div>
               </div>
               <div data-vdpane="prep" id="vdChecklist" style="display:none"></div>
               <div class="actions">
@@ -433,6 +433,11 @@
         document.getElementById('vdInvestidorWrap').style.display=f.proprietario.value==='Investidor'?'block':'none';
       }
 
+      function onVdEstadoChange(){
+        const f=document.getElementById('vdForm');
+        document.getElementById('vdMotoristaWrap').style.display=f.estado.value==='Em Preparação'?'none':'block';
+      }
+
       function openVehicleDetail(carId){
         const v=allVehicles.find(x=>x.id===carId);
         if(!v)return;
@@ -458,8 +463,12 @@
         f.estado.value=v.estado||'Alugado';
         f.precoVenda.value=v.preco_venda||'';
         f.precoAluguer.value=v.valor_aluguer_semanal||'';
+        const nomes=[...new Set(Object.values(motoristasMap).map(m=>m.nome).filter(Boolean))].sort();
+        if(v.motorista_atual&&!nomes.includes(v.motorista_atual))nomes.push(v.motorista_atual);
+        f.motoristaAtual.innerHTML='<option value="">Nenhum</option>'+nomes.map(n=>'<option value="'+n.replace(/"/g,'&quot;')+'">'+n+'</option>').join('');
         f.motoristaAtual.value=v.motorista_atual||'';
         onVdGestaoChange();
+        onVdEstadoChange();
         renderChecklistEditor(v);
         setVdTab('carac');
         document.getElementById('vehicleDetailModal').style.display='flex';
@@ -496,7 +505,7 @@
           estado:f.estado.value||null,
           preco_venda:f.gestao.value==='Venda'?(f.precoVenda.value||null):null,
           valor_aluguer_semanal:f.gestao.value!=='Venda'?(f.precoAluguer.value||null):null,
-          motorista_atual:f.motoristaAtual.value||null,
+          motorista_atual:f.estado.value==='Em Preparação'?null:(f.motoristaAtual.value||null),
         };
         const submitBtn=f.querySelector('button[type=submit]');
         submitBtn.disabled=true;
