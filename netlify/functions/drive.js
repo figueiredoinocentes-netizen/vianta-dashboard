@@ -77,13 +77,21 @@ function findMatchingFolder(folders, matricula, modelo) {
     const byPlate = folders.find((f) => normalize(f.name).includes(normPlate));
     if (byPlate) return byPlate;
   }
-  const modelWords = (modelo || '').toLowerCase().split(/\s+/).filter((w) => w.length > 3);
+  // Score every folder by how many model words it contains (NOT filtered by
+  // length — dropping short words like "Y" or "3" is what previously made
+  // "Tesla Model Y" match the "Tesla Model 3" folder, since both share the
+  // generic words "tesla"/"model"). Pick the best match, and require at
+  // least half the words to agree so a single generic word can't win alone.
+  const modelWords = (modelo || '').toLowerCase().split(/\s+/).filter(Boolean);
   if (modelWords.length) {
-    const byModel = folders.find((f) => {
+    let best = null;
+    let bestScore = 0;
+    for (const f of folders) {
       const fn = f.name.toLowerCase();
-      return modelWords.some((w) => fn.includes(w));
-    });
-    if (byModel) return byModel;
+      const score = modelWords.filter((w) => fn.includes(w)).length;
+      if (score > bestScore) { bestScore = score; best = f; }
+    }
+    if (best && bestScore >= Math.ceil(modelWords.length / 2)) return best;
   }
   return null;
 }

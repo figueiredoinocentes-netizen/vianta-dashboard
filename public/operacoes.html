@@ -102,10 +102,14 @@
       .checklist-editor-group + .checklist-editor-group { margin-top: 16px; }
       .checklist-editor-group-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--primary); margin-bottom: 8px; }
       .checklist-editor-list { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; }
-      .checklist-editor-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
-      .doc-link { font-size: 11px; color: var(--primary); text-decoration: none; background: rgba(244,175,37,0.1); border-radius: 5px; padding: 3px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+      .checklist-editor-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+      .checklist-editor-row label { flex-shrink: 0; }
+      .doc-slot { display: inline-flex; align-items: center; gap: 6px; }
+      .doc-link { font-size: 11px; color: var(--primary); text-decoration: none; background: rgba(244,175,37,0.1); border-radius: 5px; padding: 3px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
       .doc-link:hover { text-decoration: underline; }
       .doc-link-loading { color: var(--muted-fg); background: transparent; cursor: default; }
+      .doc-upload-btn { font-size: 11px; color: var(--muted-fg); border: 1px dashed var(--border); border-radius: 5px; padding: 3px 8px; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+      .doc-upload-btn:hover { color: var(--primary); border-color: var(--primary); background: rgba(244,175,37,0.08); }
       .modal .checklist-editor-list label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--fg); font-weight: 400; cursor: pointer; margin: 0; }
       .modal h2 { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 600; margin: 0 0 20px; }
       .modal .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -555,20 +559,48 @@
         if(!keywords||!files)return null;
         return files.find(f=>{const n=normalizeText(f.name);return keywords.some(k=>n.includes(k));})||null;
       }
-      let vdDriveFiles=null,vdDriveCarId=null,vdDriveLoading=false;
+      let vdDriveFiles=null,vdDriveFolder=null,vdDriveCarId=null,vdDriveLoading=false;
       async function fetchVdDriveFiles(v){
-        vdDriveFiles=null;vdDriveLoading=true;vdDriveCarId=v.id;
+        vdDriveFiles=null;vdDriveFolder=null;vdDriveLoading=true;vdDriveCarId=v.id;
         try{
           const params=new URLSearchParams({matricula:v.matricula||'',modelo:v.marca_modelo||''});
           const r=await fetch('/.netlify/functions/drive?'+params.toString());
-          const data=r.ok?await r.json():{files:[]};
+          const data=r.ok?await r.json():{files:[],folder:null};
           if(vdDriveCarId!==v.id)return;
           vdDriveFiles=data.files||[];
+          vdDriveFolder=data.folder||null;
         }catch(e){
           console.error('drive fetch error',e);
-          if(vdDriveCarId===v.id)vdDriveFiles=[];
+          if(vdDriveCarId===v.id){vdDriveFiles=[];vdDriveFolder=null;}
         }finally{
           if(vdDriveCarId===v.id){vdDriveLoading=false;renderChecklistEditor(v);}
+        }
+      }
+
+      async function uploadDocForItem(carId,item,inputEl){
+        const file=inputEl.files[0];
+        if(!file||!vdDriveFolder)return;
+        const row=inputEl.closest('.checklist-editor-row');
+        const slot=row.querySelector('.doc-slot');
+        const prevHTML=slot.innerHTML;
+        slot.innerHTML='<span class="doc-link doc-link-loading">a enviar...</span>';
+        try{
+          const dataBase64=await new Promise((resolve,reject)=>{
+            const reader=new FileReader();
+            reader.onload=()=>resolve(reader.result.split(',')[1]);
+            reader.onerror=reject;
+            reader.readAsDataURL(file);
+          });
+          const ext=(file.name.match(/\.[a-z0-9]+$/i)||[''])[0];
+          const filename=item.replace(/[^\p{L}\p{N} ]/gu,'').trim()+ext;
+          const r=await fetch('/.netlify/functions/drive-upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({folderId:vdDriveFolder.id,filename,contentType:file.type,dataBase64})});
+          const d=await r.json().catch(()=>({}));
+          if(!r.ok)throw new Error(d.error||'Erro ao enviar');
+          const v=allVehicles.find(x=>x.id===carId);
+          if(v)await fetchVdDriveFiles(v);
+        }catch(e){
+          alert('Erro ao enviar documento: '+e.message);
+          slot.innerHTML=prevHTML;
         }
       }
 
@@ -586,15 +618,20 @@
             const isDocs=label==='Documentos';
             return '<div class="checklist-editor-group"><div class="checklist-editor-group-label">'+label+'</div><div class="checklist-editor-list">'+
               items.map(item=>{
-                let docLink='';
+                let docSlot='';
                 if(isDocs){
-                  if(vdDriveLoading)docLink='<span class="doc-link doc-link-loading">a procurar...</span>';
-                  else if(vdDriveFiles){
-                    const file=matchFileForItem(item,vdDriveFiles);
-                    if(file)docLink='<a class="doc-link" href="'+file.webViewLink+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">📄 '+file.name+'</a>';
+                  const itemEsc=item.replace(/'/g,"\\'");
+                  const inputId='docup-'+v.id+'-'+normalizeText(item).replace(/[^a-z0-9]/g,'');
+                  if(vdDriveLoading){
+                    docSlot='<span class="doc-slot"><span class="doc-link doc-link-loading">a procurar...</span></span>';
+                  }else{
+                    const file=vdDriveFiles?matchFileForItem(item,vdDriveFiles):null;
+                    const viewLink=file?'<a class="doc-link" href="'+file.webViewLink+'" target="_blank" rel="noopener">📄 '+file.name+'</a>':'';
+                    const uploadBtn=vdDriveFolder?'<label class="doc-upload-btn" for="'+inputId+'" title="'+(file?'Substituir ficheiro':'Enviar documento')+'">'+(file?'🔄':'📤 Adicionar')+'<input type="file" id="'+inputId+'" style="display:none" onclick="event.stopPropagation()" onchange="uploadDocForItem('+v.id+',\''+itemEsc+'\',this)"/></label>':'';
+                    docSlot='<span class="doc-slot" onclick="event.stopPropagation()">'+viewLink+uploadBtn+'</span>';
                   }
                 }
-                return '<div class="checklist-editor-row"><label><input type="checkbox" '+(done[item]?'checked':'')+' onchange="toggleChecklistItem('+v.id+',\''+item.replace(/'/g,"\\'")+'\')"/> '+item+'</label>'+docLink+'</div>';
+                return '<div class="checklist-editor-row"><label><input type="checkbox" '+(done[item]?'checked':'')+' onchange="toggleChecklistItem('+v.id+',\''+item.replace(/'/g,"\\'")+'\')"/> '+item+'</label>'+docSlot+'</div>';
               }).join('')+
             '</div></div>';
           }).join('')+
