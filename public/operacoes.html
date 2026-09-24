@@ -70,6 +70,8 @@
       .badge-aluguer { background: #14532d; color: #86efac; }
       .status-badge { cursor: pointer; transition: filter 0.15s; }
       .status-badge:hover { filter: brightness(1.2); }
+      .status-select { cursor: pointer; transition: filter 0.15s; border: none; outline: none; appearance: none; -webkit-appearance: none; -moz-appearance: none; font-family: inherit; }
+      .status-select:hover, .status-select:focus { filter: brightness(1.15); }
       .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: none; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-decoration: none; }
       .btn-primary { background: var(--primary); color: var(--primary-fg); }
       .btn-primary:hover { background: var(--primary-hover); }
@@ -277,6 +279,15 @@
       const BADGE_MAP={'Alugado':'badge-alugado','Para Venda':'badge-venda','Inativo':'badge-inativo','Manutenção':'badge-maint','Vendido':'badge-vendido','Em Preparação':'badge-prep','Para Aluguer':'badge-aluguer'};
       const STATUSES=['Alugado','Para Venda','Para Aluguer','Em Preparação','Inativo','Manutenção','Vendido'];
 
+      // Sempre um <select> real, nunca um span que se troca por um select a meio
+      // da interação — era essa troca que ficava presa e bloqueava novas edições.
+      function statusSelectHTML(v){
+        const cls=BADGE_MAP[v.estado]||'';
+        return '<select class="badge status-select '+cls+'" onchange="setStatus('+v.id+',this.value)" title="Alterar estado">'+
+          STATUSES.map(s=>'<option value="'+s+'"'+(s===v.estado?' selected':'')+'>'+s+'</option>').join('')+
+        '</select>';
+      }
+
       async function fetchData(){
         try{
           const [carrosRes,armazemRes,motoristasRes]=await Promise.all([
@@ -337,7 +348,7 @@
         }
         let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Matrícula</th><th>Modelo</th><th>Motorista</th><th>Gestão</th><th>Proprietário</th><th>Aluguer/Sem</th><th>Estado</th></tr></thead><tbody>';
         f.forEach(v=>{
-          html+='<tr><td><strong class="clickable-plate" onclick="openVehicleDetail('+v.id+')" title="Ver detalhes">'+(v.matricula||'-')+'</strong></td><td>'+(v.marca_modelo||'')+'</td><td>'+(v.motorista_atual||'-')+'</td><td style="font-size:12px">'+(v.tipo_gestao||'')+'</td><td style="font-size:12px">'+(v.proprietario||'')+'</td><td>'+(v.valor_aluguer_semanal||'-')+'</td><td><span class="badge badge-alugado status-badge" onclick="editStatus(this,'+v.id+',\'Alugado\')" title="Clique para alterar">Alugado</span></td></tr>';
+          html+='<tr><td><strong class="clickable-plate" onclick="openVehicleDetail('+v.id+')" title="Ver detalhes">'+(v.matricula||'-')+'</strong></td><td>'+(v.marca_modelo||'')+'</td><td>'+(v.motorista_atual||'-')+'</td><td style="font-size:12px">'+(v.tipo_gestao||'')+'</td><td style="font-size:12px">'+(v.proprietario||'')+'</td><td>'+(v.valor_aluguer_semanal||'-')+'</td><td>'+statusSelectHTML(v)+'</td></tr>';
         });
         html+='</tbody></table></div></div>';
         document.getElementById('sectionContent').innerHTML=html;
@@ -355,7 +366,7 @@
         }
         let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Matrícula</th><th>Modelo</th><th>Ano</th><th>KMs</th><th>Proprietário</th><th>Preço Venda</th><th>Aluguer/Sem</th><th>Estado</th></tr></thead><tbody>';
         f.forEach(v=>{
-          html+='<tr><td><strong class="clickable-plate" onclick="openVehicleDetail('+v.id+')" title="Ver detalhes">'+(v.matricula||'-')+'</strong></td><td>'+(v.marca_modelo||'')+'</td><td>'+(v.ano||'')+'</td><td>'+(v.kms_atuais||'-')+'</td><td style="font-size:12px">'+(v.proprietario||'')+'</td><td>'+(v.preco_venda?v.preco_venda+'€':'-')+'</td><td>'+(v.valor_aluguer_semanal||'-')+'</td><td><span class="badge '+(v.estado==='Para Venda'?'badge-venda':'badge-aluguer')+' status-badge" onclick="editStatus(this,'+v.id+',\''+v.estado+'\')" title="Clique para alterar">'+(v.estado||'')+'</span></td></tr>';
+          html+='<tr><td><strong class="clickable-plate" onclick="openVehicleDetail('+v.id+')" title="Ver detalhes">'+(v.matricula||'-')+'</strong></td><td>'+(v.marca_modelo||'')+'</td><td>'+(v.ano||'')+'</td><td>'+(v.kms_atuais||'-')+'</td><td style="font-size:12px">'+(v.proprietario||'')+'</td><td>'+(v.preco_venda?v.preco_venda+'€':'-')+'</td><td>'+(v.valor_aluguer_semanal||'-')+'</td><td>'+statusSelectHTML(v)+'</td></tr>';
         });
         html+='</tbody></table></div></div>';
         document.getElementById('sectionContent').innerHTML=html;
@@ -374,7 +385,7 @@
         let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Matrícula</th><th>Modelo</th><th>Proprietário</th><th>Estado</th><th>Ação</th></tr></thead><tbody>';
         f.forEach(v=>{
           const destino=v.tipo_gestao==='Aluguer'?'Para Aluguer':'Para Venda';
-          html+='<tr><td><strong class="clickable-plate" onclick="openVehicleDetail('+v.id+')" title="Ver detalhes">'+(v.matricula||'-')+'</strong></td><td>'+(v.marca_modelo||'')+'</td><td style="font-size:12px">'+(v.proprietario||'')+'</td><td><span class="badge '+(v.estado==='Manutenção'?'badge-maint':'badge-inativo')+' status-badge" onclick="editStatus(this,'+v.id+',\''+v.estado+'\')">'+(v.estado||'')+'</span></td><td><button class="btn btn-sm btn-outline" onclick="setStatus('+v.id+',\''+destino+'\')">Marcar Disponível</button></td></tr>';
+          html+='<tr><td><strong class="clickable-plate" onclick="openVehicleDetail('+v.id+')" title="Ver detalhes">'+(v.matricula||'-')+'</strong></td><td>'+(v.marca_modelo||'')+'</td><td style="font-size:12px">'+(v.proprietario||'')+'</td><td>'+statusSelectHTML(v)+'</td><td><button class="btn btn-sm btn-outline" onclick="setStatus('+v.id+',\''+destino+'\')">Marcar Disponível</button></td></tr>';
         });
         html+='</tbody></table></div></div>';
         document.getElementById('sectionContent').innerHTML=html;
@@ -622,37 +633,6 @@
           if(r.ok){v[field]=value;render();return true}
           else{alert('Erro: '+(d.error||'falha ao guardar'));return false}
         }catch(e){alert('Erro ao guardar: '+e.message);return false}
-      }
-
-      function editStatus(el,rowId,currentValue){
-        // Clear out any stale edit-select left behind by a previous interaction
-        // instead of silently refusing to open a new one (that's what made
-        // status edits look "stuck" / not saving).
-        document.querySelectorAll('.status-edit-select').forEach(s=>s.remove());
-        const sel=document.createElement('select');
-        sel.className='status-edit-select';
-        sel.style.cssText='background:#14181f;border:1px solid #f4af25;border-radius:4px;color:#e2e8f0;font-size:11px;font-weight:500;padding:2px 6px;outline:none;cursor:pointer';
-        STATUSES.forEach(s=>{
-          const opt=document.createElement('option');
-          opt.value=s;opt.textContent=s;
-          if(s===currentValue)opt.selected=true;
-          sel.appendChild(opt);
-        });
-        let settled=false;
-        const commit=async()=>{
-          if(settled)return;
-          settled=true;
-          const newVal=sel.value;
-          sel.remove();
-          if(newVal===currentValue)return;
-          const v=allVehicles.find(x=>x.id===rowId);
-          if(v)await updateCell(v,'estado',newVal);
-        };
-        sel.addEventListener('change',commit);
-        sel.addEventListener('blur',commit);
-        el.textContent='';
-        el.appendChild(sel);
-        sel.focus();
       }
 
       // Redimensiona a imagem no browser antes de enviar (mantém o payload pequeno).
