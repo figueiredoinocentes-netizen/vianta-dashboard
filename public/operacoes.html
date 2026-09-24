@@ -98,7 +98,9 @@
       .clickable-plate { cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
       .clickable-plate:hover { color: var(--primary); }
       .checklist-editor { margin-top: 16px; }
-      .checklist-editor label.title { display: block; margin-bottom: 6px; }
+      .checklist-editor label.title { display: block; margin-bottom: 10px; }
+      .checklist-editor-group + .checklist-editor-group { margin-top: 16px; }
+      .checklist-editor-group-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--primary); margin-bottom: 8px; }
       .checklist-editor-list { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; }
       .modal .checklist-editor-list label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--fg); font-weight: 400; cursor: pointer; margin: 0; }
       .modal h2 { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 600; margin: 0 0 20px; }
@@ -129,6 +131,8 @@
       .vehicle-card-body { padding: 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
       .vehicle-card-title { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; }
       .vehicle-card-plate { font-size: 14px; color: var(--muted-fg); margin-top: -2px; }
+      .missing-group + .missing-group { margin-top: 8px; }
+      .missing-group-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted-fg); margin-bottom: 4px; }
       .missing-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
       .missing-tag { background: var(--muted-bg); color: #fbbf24; border: 1px solid var(--border); border-radius: 5px; padding: 3px 8px; font-size: 11px; cursor: pointer; transition: all 0.15s; }
       .missing-tag:hover { background: #3d2e00; border-color: #fbbf24; }
@@ -271,15 +275,15 @@
 
       // Checklist de preparação — Instrução de Trabalho "Preparação de Viatura STAND".
       // Aluguer ainda não tem checklist própria definida (fica vazia por agora).
-      const CHECKLIST_VENDA=[
-        'DUA ou DAV','Declaração de Circulação','Validar Seguro com o cliente','Inspeção',
-        'Livros de Manutenção e Manual de Utilizador','Garantia','2ª chave (quando aplicável)',
-        'Pneu suplente ou kit furos','Triângulo e colete','Cabo de carregador (aplicável a BEV)',
-        'Pintura','Pneus','Mecânica (óleo, refrigerante, limpa para-brisas, bateria 12v)',
-        'Carga elétrica (aplicável a BEV)','Limpeza exterior e interior','Tapetes',
-      ];
-      const CHECKLIST_ALUGUER=[];
-      function getChecklist(v){return v.tipo_gestao==='Venda'?CHECKLIST_VENDA:(v.tipo_gestao==='Aluguer'?CHECKLIST_ALUGUER:[]);}
+      // Segue a divisão da própria Instrução de Trabalho "Preparação de Viatura
+      // STAND": Documentação vs Estado da viatura (aqui "A Fazer").
+      const CHECKLIST_GROUPS_VENDA={
+        'Documentos':['DUA ou DAV','Declaração de Circulação','Validar Seguro com o cliente','Inspeção','Livros de Manutenção e Manual de Utilizador','Garantia'],
+        'A Fazer':['2ª chave (quando aplicável)','Pneu suplente ou kit furos','Triângulo e colete','Cabo de carregador (aplicável a BEV)','Pintura','Pneus','Mecânica (óleo, refrigerante, limpa para-brisas, bateria 12v)','Carga elétrica (aplicável a BEV)','Limpeza exterior e interior','Tapetes'],
+      };
+      const CHECKLIST_GROUPS_ALUGUER={'Documentos':[],'A Fazer':[]};
+      function getChecklistGroups(v){return v.tipo_gestao==='Venda'?CHECKLIST_GROUPS_VENDA:(v.tipo_gestao==='Aluguer'?CHECKLIST_GROUPS_ALUGUER:{});}
+      function getChecklist(v){return Object.values(getChecklistGroups(v)).flat();}
       function getMissingItems(v){const done=v.checklist_prep||{};return getChecklist(v).filter(item=>!done[item]);}
 
       function emptyStateHTML(icon,text){
@@ -418,6 +422,17 @@
       // ── Check-ins ──
       const CAR_PLACEHOLDER_SVG='<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 17h14M5 17a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm14 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM5 17l1.5-6.5A2 2 0 0 1 8.42 9h7.16a2 2 0 0 1 1.92 1.5L19 17M5 17V13m14 4V13M5 13h14"/></svg>';
 
+      function missingTagsHTML(v){
+        const done=v.checklist_prep||{};
+        return Object.entries(getChecklistGroups(v)).map(([label,items])=>{
+          const missing=items.filter(item=>!done[item]);
+          if(!missing.length)return '';
+          return '<div class="missing-group"><div class="missing-group-label">'+label+'</div><div class="missing-list">'+
+            missing.map(item=>'<span class="missing-tag" title="Clique para marcar como feito" onclick="event.stopPropagation();toggleChecklistItem('+v.id+',\''+item.replace(/'/g,"\\'")+'\')">'+item+'</span>').join('')+
+          '</div></div>';
+        }).join('');
+      }
+
       function renderCheckin(){
         const f=allVehicles.filter(v=>v.estado==='Em Preparação');
         document.getElementById('totalCount').textContent=f.length;
@@ -436,7 +451,7 @@
             '<div class="vehicle-card-body">'+
               '<div><div class="vehicle-card-title">'+(v.marca_modelo||'Sem modelo')+'</div><div class="vehicle-card-plate">'+(v.matricula||'Sem matrícula')+' • '+(v.tipo_gestao||'-')+'</div></div>'+
               (missing.length
-                ? '<div class="missing-list">'+missing.map(item=>'<span class="missing-tag" title="Clique para marcar como feito" onclick="event.stopPropagation();toggleChecklistItem('+v.id+',\''+item.replace(/'/g,"\\'")+'\')">'+item+'</span>').join('')+'</div>'
+                ? missingTagsHTML(v)
                 : (getChecklist(v).length ? '<div class="missing-none">✓ Checklist completa</div>' : '<div class="missing-none" style="color:#7b899d">Sem checklist definida para '+(v.tipo_gestao||'este tipo')+'</div>')
               )+
               '<div class="vehicle-card-actions"><button class="btn btn-sm btn-primary" onclick="event.stopPropagation();setStatus('+v.id+',\''+destino+'\')">Concluir Preparação</button></div>'+
@@ -520,16 +535,21 @@
       }
 
       function renderChecklistEditor(v){
-        const list=getChecklist(v);
+        const groups=getChecklistGroups(v);
         const done=v.checklist_prep||{};
         const box=document.getElementById('vdChecklist');
-        if(!list.length){
+        if(!getChecklist(v).length){
           box.innerHTML='<div class="checklist-editor"><label class="title">Checklist de preparação</label><p style="color:var(--muted-fg);font-size:13px;margin:0">Sem checklist definida para '+(v.tipo_gestao||'este tipo')+'.</p></div>';
           return;
         }
-        box.innerHTML='<div class="checklist-editor"><label class="title">Checklist de preparação</label><div class="checklist-editor-list">'+
-          list.map(item=>'<label><input type="checkbox" '+(done[item]?'checked':'')+' onchange="toggleChecklistItem('+v.id+',\''+item.replace(/'/g,"\\'")+'\')"/> '+item+'</label>').join('')+
-        '</div></div>';
+        box.innerHTML='<div class="checklist-editor"><label class="title">Checklist de preparação</label>'+
+          Object.entries(groups).map(([label,items])=>{
+            if(!items.length)return '';
+            return '<div class="checklist-editor-group"><div class="checklist-editor-group-label">'+label+'</div><div class="checklist-editor-list">'+
+              items.map(item=>'<label><input type="checkbox" '+(done[item]?'checked':'')+' onchange="toggleChecklistItem('+v.id+',\''+item.replace(/'/g,"\\'")+'\')"/> '+item+'</label>').join('')+
+            '</div></div>';
+          }).join('')+
+        '</div>';
       }
 
       async function handleUpdateViatura(e){
