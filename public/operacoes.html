@@ -207,7 +207,7 @@
                 <div class="full"><label>Foto</label><input name="foto" type="file" accept="image/*"/></div>
                 <div><label>Matrícula</label><input name="matricula"/></div>
                 <div><label>Ano</label><input name="ano" type="number" min="2010" max="2026"/></div>
-                <div><label>Combustível</label><select name="combustivel"><option value="">Selecionar</option><option value="Elétrico">Elétrico</option><option value="Gasóleo/Diesel">Gasóleo/Diesel</option><option value="Gasolina">Gasolina</option><option value="Híbrido">Híbrido</option></select></div>
+                <div><label>Combustível</label><select name="combustivel"><option value="">Selecionar</option><option value="Elétrico">Elétrico</option><option value="Gasóleo/Diesel">Gasóleo/Diesel</option><option value="Gasolina">Gasolina</option><option value="GPL">GPL</option><option value="Híbrido">Híbrido</option></select></div>
                 <div><label>KMs</label><input name="kms" type="number"/></div>
                 <div><label>Cor</label><input name="cor"/></div>
                 <div><label>Proprietário</label><select name="proprietario"><option value="VIANTA">VIANTA</option><option value="Investidor">Investidor</option><option value="Miguel Brito Comércio Auto Lda">Miguel Brito</option><option value="Vinod Carsane">Vinod Carsane</option><option value="Ricardo Duarte">Ricardo Duarte</option><option value="EMPRESA">EMPRESA</option><option value="Outro">Outro</option></select></div>
@@ -242,7 +242,7 @@
                 <div class="full"><label>Modelo</label><input name="modelo"/></div>
                 <div><label>Matrícula</label><input name="matricula"/></div>
                 <div><label>Ano</label><input name="ano"/></div>
-                <div><label>Combustível</label><select name="combustivel"><option value="">Selecionar</option><option value="Elétrico">Elétrico</option><option value="Gasóleo/Diesel">Gasóleo/Diesel</option><option value="Gasolina">Gasolina</option><option value="Híbrido">Híbrido</option></select></div>
+                <div><label>Combustível</label><select name="combustivel"><option value="">Selecionar</option><option value="Elétrico">Elétrico</option><option value="Gasóleo/Diesel">Gasóleo/Diesel</option><option value="Gasolina">Gasolina</option><option value="GPL">GPL</option><option value="Híbrido">Híbrido</option></select></div>
                 <div><label>KMs</label><input name="kms"/></div>
                 <div><label>Proprietário</label><select name="proprietario" onchange="onVdProprietarioChange()"><option value="VIANTA">VIANTA</option><option value="Investidor">Investidor</option></select></div>
                 <div id="vdInvestidorWrap" class="full" style="display:none"><label>Nome do Investidor</label><input name="investidorNome" list="vdInvestidoresList"/><datalist id="vdInvestidoresList"></datalist></div>
@@ -296,7 +296,14 @@
         'Documentos':['DUA ou DAV','Declaração de Circulação','Validar Seguro com o cliente','Inspeção','Livros de Manutenção e Manual de Utilizador','Garantia'],
         'A Fazer':['2ª chave (quando aplicável)','Pneu suplente ou kit furos','Triângulo e colete','Cabo de carregador (aplicável a BEV)','Pintura','Pneus','Mecânica (óleo, refrigerante, limpa para-brisas, bateria 12v)','Carga elétrica (aplicável a BEV)','Limpeza exterior e interior','Tapetes'],
       };
-      const CHECKLIST_GROUPS_ALUGUER={'Documentos':[],'A Fazer':[]};
+      // Da Instrução de Trabalho "Preparação de Viatura TVDE" — os itens físicos
+      // que o documento lista sob "Documentação" (2ª chave, extintor, placas...)
+      // ficam em "A Fazer" aqui, como no de Venda, para bater certo com a
+      // integração da Drive (só documentos de papel fazem sentido lá).
+      const CHECKLIST_GROUPS_ALUGUER={
+        'Documentos':['DUA ou DAV','Declaração de Circulação','Validar Seguro','Inspeção TVDE','Livros de Manutenção e Manual de Utilizador','Inscrição nas plataformas'],
+        'A Fazer':['2ª chave (juntar no arquivo da viatura)','Pneu suplente ou kit furos','Triângulo e colete','Extintor','Cabo de carregador (aplicável a BEV)','Placas TVDE','Placa não fumador','Placa RNAT (quando aplicável)','Pintura','Pneus','Mecânica (óleo, refrigerante, limpa para-brisas, bateria 12v)','Carga elétrica (aplicável a BEV)','Limpeza exterior e interior'],
+      };
       function getChecklistGroups(v){return v.tipo_gestao==='Venda'?CHECKLIST_GROUPS_VENDA:(v.tipo_gestao==='Aluguer'?CHECKLIST_GROUPS_ALUGUER:{});}
       function getChecklist(v){return Object.values(getChecklistGroups(v)).flat();}
       function getMissingItems(v){const done=v.checklist_prep||{};return getChecklist(v).filter(item=>!done[item]);}
@@ -570,6 +577,9 @@
         'Inspeção':['inspecao','ipo'],
         'Livros de Manutenção e Manual de Utilizador':['manual','livro'],
         'Garantia':['garantia'],
+        'Validar Seguro':['seguro'],
+        'Inspeção TVDE':['inspecao','ipo','tvde'],
+        'Inscrição nas plataformas':['inscricao','plataforma','uber','bolt'],
       };
       function normalizeText(s){return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');}
       function matchFileForItem(item,files){
