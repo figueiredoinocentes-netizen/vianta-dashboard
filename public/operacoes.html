@@ -186,6 +186,7 @@
           <button class="sidebar-sublink" data-section="pagamentos" onclick="setSection('pagamentos')">💰 Pagamentos</button>
           <button class="sidebar-sublink" data-section="armazem" onclick="setSection('armazem')">📦 Armazém</button>
           <button class="sidebar-sublink" data-section="investidores" onclick="setSection('investidores')">🤝 Investidores</button>
+          <button class="sidebar-sublink" data-section="clientes" onclick="setSection('clientes')">🧑‍💼 Clientes</button>
         </nav>
       </aside>
       <main class="main-content">
@@ -260,6 +261,7 @@
                 <div id="vdPrecoVendaWrap" class="full"><label>Preço Venda (€)</label><input name="precoVenda"/></div>
                 <div id="vdPrecoAluguerWrap" class="full"><label>Valor Aluguer (€/sem)</label><input name="precoAluguer"/></div>
                 <div id="vdMotoristaWrap" class="full"><label>Motorista Atual</label><select name="motoristaAtual"><option value="">Nenhum</option></select></div>
+                <div id="vdClienteWrap" class="full" style="display:none"><label>Cliente (comprador)</label><select name="clienteId"><option value="">Selecionar</option></select></div>
               </div>
               <div data-vdpane="prep" class="full" id="vdPrevisaoWrap" style="display:none;margin-bottom:16px">
                 <label>Previsão de pronto</label>
@@ -330,10 +332,36 @@
             </form>
           </div>
         </div>
+        <div id="clienteModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+          <div class="modal">
+            <h2 id="clienteModalTitle">Novo Cliente</h2>
+            <form id="clienteForm" onsubmit="handleSaveCliente(event)">
+              <div class="grid">
+                <div class="full"><label>Nome <span style="color:#e53e3e">*</span></label><input name="nome" required/></div>
+                <div><label>Email</label><input name="email" type="email"/></div>
+                <div><label>Telefone</label><input name="telefone"/></div>
+              </div>
+              <div class="actions" style="justify-content:space-between">
+                <button type="button" class="btn btn-outline btn-danger-outline" id="clienteDeleteToggle" style="display:none" onclick="toggleDeleteConfirm('cliente')">Eliminar</button>
+                <div style="display:flex;gap:8px">
+                  <button type="button" class="btn btn-outline" onclick="this.closest('.modal-overlay').style.display='none'">Cancelar</button>
+                  <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+              </div>
+              <div id="clienteDeleteConfirm" class="delete-confirm" style="display:none">
+                <p>Esta ação não pode ser desfeita. Escreve <strong>DELETE</strong> para confirmar.</p>
+                <div style="display:flex;gap:8px">
+                  <input type="text" id="clienteDeleteInput" oninput="onDeleteConfirmInput('cliente')" placeholder="DELETE"/>
+                  <button type="button" class="btn btn-danger" id="clienteDeleteBtn" disabled onclick="handleDeleteCliente()">Eliminar definitivamente</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
       </main>
     </div>
     <script>
-      let allVehicles=[],inventory=[],motoristasMap={},investidoresList=[],currentSection='checkin';
+      let allVehicles=[],inventory=[],motoristasMap={},investidoresList=[],clientesList=[],currentSection='checkin';
 
       // Checklist de preparação — Instrução de Trabalho "Preparação de Viatura STAND".
       // Aluguer ainda não tem checklist própria definida (fica vazia por agora).
@@ -368,6 +396,7 @@
         {id:'pagamentos',label:'💰 Pagamentos'},
         {id:'armazem',label:'📦 Armazém'},
         {id:'investidores',label:'🤝 Investidores'},
+        {id:'clientes',label:'🧑‍💼 Clientes'},
       ];
 
       const BADGE_MAP={'Alugado':'badge-alugado','Para Venda':'badge-venda','Inativo':'badge-inativo','Manutenção':'badge-maint','Vendido':'badge-vendido','Em Preparação':'badge-prep','Para Aluguer':'badge-aluguer'};
@@ -384,17 +413,19 @@
 
       async function fetchData(){
         try{
-          const [carrosRes,armazemRes,motoristasRes,investidoresRes]=await Promise.all([
+          const [carrosRes,armazemRes,motoristasRes,investidoresRes,clientesRes]=await Promise.all([
             fetch('/.netlify/functions/central?type=carros'),
             fetch('/.netlify/functions/central?type=armazem'),
             fetch('/.netlify/functions/central?type=motoristas'),
             fetch('/.netlify/functions/central?type=investidores'),
+            fetch('/.netlify/functions/central?type=clientes'),
           ]);
           allVehicles=carrosRes.ok?await carrosRes.json():[];
           inventory=armazemRes.ok?await armazemRes.json():[];
           motoristasMap={};
           if(motoristasRes.ok){(await motoristasRes.json()).forEach(m=>{motoristasMap[m.id]=m});}
           investidoresList=investidoresRes.ok?await investidoresRes.json():[];
+          clientesList=clientesRes.ok?await clientesRes.json():[];
           render();
         }catch(e){console.error(e)}
       }
@@ -407,7 +438,7 @@
       }
 
       function render(){
-        const fn={'visao':renderVisao,'frota':renderFrota,'stock':renderStock,'manutencao':renderManutencao,'checkin':renderCheckin,'pagamentos':renderPagamentos,'armazem':renderArmazem,'investidores':renderInvestidores};
+        const fn={'visao':renderVisao,'frota':renderFrota,'stock':renderStock,'manutencao':renderManutencao,'checkin':renderCheckin,'pagamentos':renderPagamentos,'armazem':renderArmazem,'investidores':renderInvestidores,'clientes':renderClientes};
         const view=fn[currentSection]||renderVisao;
         view();
       }
@@ -588,6 +619,7 @@
       function onVdEstadoChange(){
         const f=document.getElementById('vdForm');
         document.getElementById('vdMotoristaWrap').style.display=f.estado.value==='Em Preparação'?'none':'block';
+        document.getElementById('vdClienteWrap').style.display=f.estado.value==='Vendido'?'block':'none';
       }
 
       function openVehicleDetail(carId){
@@ -623,6 +655,9 @@
         if(v.motorista_atual&&!nomes.includes(v.motorista_atual))nomes.push(v.motorista_atual);
         f.motoristaAtual.innerHTML='<option value="">Nenhum</option>'+nomes.map(n=>'<option value="'+n.replace(/"/g,'&quot;')+'">'+n+'</option>').join('');
         f.motoristaAtual.value=v.motorista_atual||'';
+        const sortedClientes=[...clientesList].sort((a,b)=>a.nome.localeCompare(b.nome));
+        f.clienteId.innerHTML='<option value="">Selecionar</option>'+sortedClientes.map(c=>'<option value="'+c.id+'">'+c.nome+'</option>').join('');
+        f.clienteId.value=v.cliente_id||'';
         f.previsaoPronto.value=v.data_previsao_pronto||'';
         onVdGestaoChange();
         onVdEstadoChange();
@@ -769,6 +804,7 @@
           preco_venda:f.gestao.value==='Venda'?(f.precoVenda.value||null):null,
           valor_aluguer_semanal:f.gestao.value!=='Venda'?(f.precoAluguer.value||null):null,
           motorista_atual:f.estado.value==='Em Preparação'?null:(f.motoristaAtual.value||null),
+          cliente_id:f.estado.value==='Vendido'&&f.clienteId.value?Number(f.clienteId.value):null,
           data_previsao_pronto:f.previsaoPronto.value||null,
         };
         const submitBtn=f.querySelector('button[type=submit]');
@@ -935,6 +971,93 @@
           const d=await r.json().catch(()=>({}));
           if(!r.ok){alert('Erro ao eliminar: '+(d.error||r.status));return;}
           document.getElementById('investidorModal').style.display='none';
+          await fetchData();
+        }catch(e){
+          alert('Erro ao eliminar: '+e.message);
+        }finally{
+          btn.disabled=false;btn.textContent='Eliminar definitivamente';
+        }
+      }
+
+      // ── Clientes ──
+      function renderClientes(){
+        document.getElementById('totalCount').textContent=clientesList.length;
+        document.getElementById('newBtnLabel').textContent='Novo Cliente';
+        document.getElementById('newBtn').setAttribute('onclick','openClienteModal()');
+        if(!clientesList.length){
+          document.getElementById('sectionContent').innerHTML=emptyStateHTML('🧑‍💼','Nenhum cliente registado');
+          return;
+        }
+        let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th>Viaturas Compradas</th></tr></thead><tbody>';
+        clientesList.forEach(c=>{
+          const numCarros=allVehicles.filter(v=>v.cliente_id===c.id).length;
+          html+='<tr><td><strong class="clickable-plate" onclick="openClienteModal('+c.id+')" title="Editar">'+(c.nome||'')+'</strong></td><td style="font-size:12px">'+(c.email||'-')+'</td><td style="font-size:12px">'+(c.telefone||'-')+'</td><td>'+numCarros+'</td></tr>';
+        });
+        html+='</tbody></table></div></div>';
+        document.getElementById('sectionContent').innerHTML=html;
+      }
+
+      function openClienteModal(id){
+        const f=document.getElementById('clienteForm');
+        f.reset();
+        f.dataset.clienteId=id||'';
+        document.getElementById('clienteModalTitle').textContent=id?'Editar Cliente':'Novo Cliente';
+        document.getElementById('clienteDeleteToggle').style.display=id?'inline-flex':'none';
+        document.getElementById('clienteDeleteConfirm').style.display='none';
+        if(id){
+          const c=clientesList.find(x=>x.id===id);
+          if(c){
+            f.nome.value=c.nome||'';
+            f.email.value=c.email||'';
+            f.telefone.value=c.telefone||'';
+          }
+        }
+        document.getElementById('clienteModal').style.display='flex';
+      }
+
+      async function handleSaveCliente(e){
+        e.preventDefault();
+        const f=e.target;
+        const id=f.dataset.clienteId;
+        const body={nome:f.nome.value||null,email:f.email.value||null,telefone:f.telefone.value||null};
+        const submitBtn=f.querySelector('button[type=submit]');
+        submitBtn.disabled=true;
+        try{
+          let r;
+          if(id){
+            r=await fetch('/.netlify/functions/central?type=clientes',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:Number(id),field:'nome',value:body.nome})});
+            if(r.ok)for(const field of['email','telefone']){
+              await fetch('/.netlify/functions/central?type=clientes',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:Number(id),field,value:body[field]})});
+            }
+          }else{
+            r=await fetch('/.netlify/functions/central?type=clientes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+          }
+          const d=await r.json().catch(()=>({}));
+          if(!r.ok){alert('Erro ao guardar: '+(d.error||r.status));return;}
+          document.getElementById('clienteModal').style.display='none';
+          await fetchData();
+        }catch(err){
+          alert('Erro ao guardar: '+err.message);
+        }finally{
+          submitBtn.disabled=false;
+        }
+      }
+
+      async function handleDeleteCliente(){
+        const id=document.getElementById('clienteForm').dataset.clienteId;
+        if(!id)return;
+        const numCarros=allVehicles.filter(v=>v.cliente_id===Number(id)).length;
+        if(numCarros>0){
+          alert('Não é possível eliminar: há '+numCarros+' viatura(s) associada(s) a este cliente.');
+          return;
+        }
+        const btn=document.getElementById('clienteDeleteBtn');
+        btn.disabled=true;btn.textContent='A eliminar...';
+        try{
+          const r=await fetch('/.netlify/functions/central?type=clientes&id='+id,{method:'DELETE'});
+          const d=await r.json().catch(()=>({}));
+          if(!r.ok){alert('Erro ao eliminar: '+(d.error||r.status));return;}
+          document.getElementById('clienteModal').style.display='none';
           await fetchData();
         }catch(e){
           alert('Erro ao eliminar: '+e.message);
