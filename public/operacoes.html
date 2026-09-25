@@ -186,7 +186,6 @@
           <button class="sidebar-sublink" data-section="pagamentos" onclick="setSection('pagamentos')">💰 Pagamentos</button>
           <button class="sidebar-sublink" data-section="armazem" onclick="setSection('armazem')">📦 Armazém</button>
           <button class="sidebar-sublink" data-section="investidores" onclick="setSection('investidores')">🤝 Investidores</button>
-          <button class="sidebar-sublink" data-section="clientes" onclick="setSection('clientes')">🧑‍💼 Clientes</button>
         </nav>
       </aside>
       <main class="main-content">
@@ -261,7 +260,7 @@
                 <div id="vdPrecoVendaWrap" class="full"><label>Preço Venda (€)</label><input name="precoVenda"/></div>
                 <div id="vdPrecoAluguerWrap" class="full"><label>Valor Aluguer (€/sem)</label><input name="precoAluguer"/></div>
                 <div id="vdMotoristaWrap" class="full"><label>Motorista Atual</label><select name="motoristaAtual"><option value="">Nenhum</option></select></div>
-                <div id="vdClienteWrap" class="full" style="display:none"><label>Cliente (comprador)</label><select name="clienteId"><option value="">Selecionar</option></select></div>
+                <div id="vdClienteWrap" class="full" style="display:none"><label>Cliente (comprador)</label><div style="display:flex;gap:8px"><select name="clienteId" style="flex:1"><option value="">Selecionar</option></select><button type="button" class="btn btn-outline btn-sm" onclick="openClienteModal()" title="Novo cliente">+ Novo</button></div></div>
               </div>
               <div data-vdpane="prep" class="full" id="vdPrevisaoWrap" style="display:none;margin-bottom:16px">
                 <label>Previsão de pronto</label>
@@ -396,7 +395,6 @@
         {id:'pagamentos',label:'💰 Pagamentos'},
         {id:'armazem',label:'📦 Armazém'},
         {id:'investidores',label:'🤝 Investidores'},
-        {id:'clientes',label:'🧑‍💼 Clientes'},
       ];
 
       const BADGE_MAP={'Alugado':'badge-alugado','Para Venda':'badge-venda','Inativo':'badge-inativo','Manutenção':'badge-maint','Vendido':'badge-vendido','Em Preparação':'badge-prep','Para Aluguer':'badge-aluguer'};
@@ -438,7 +436,7 @@
       }
 
       function render(){
-        const fn={'visao':renderVisao,'frota':renderFrota,'stock':renderStock,'manutencao':renderManutencao,'checkin':renderCheckin,'pagamentos':renderPagamentos,'armazem':renderArmazem,'investidores':renderInvestidores,'clientes':renderClientes};
+        const fn={'visao':renderVisao,'frota':renderFrota,'stock':renderStock,'manutencao':renderManutencao,'checkin':renderCheckin,'pagamentos':renderPagamentos,'armazem':renderArmazem,'investidores':renderInvestidores};
         const view=fn[currentSection]||renderVisao;
         view();
       }
@@ -980,23 +978,6 @@
       }
 
       // ── Clientes ──
-      function renderClientes(){
-        document.getElementById('totalCount').textContent=clientesList.length;
-        document.getElementById('newBtnLabel').textContent='Novo Cliente';
-        document.getElementById('newBtn').setAttribute('onclick','openClienteModal()');
-        if(!clientesList.length){
-          document.getElementById('sectionContent').innerHTML=emptyStateHTML('🧑‍💼','Nenhum cliente registado');
-          return;
-        }
-        let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th>Viaturas Compradas</th></tr></thead><tbody>';
-        clientesList.forEach(c=>{
-          const numCarros=allVehicles.filter(v=>v.cliente_id===c.id).length;
-          html+='<tr><td><strong class="clickable-plate" onclick="openClienteModal('+c.id+')" title="Editar">'+(c.nome||'')+'</strong></td><td style="font-size:12px">'+(c.email||'-')+'</td><td style="font-size:12px">'+(c.telefone||'-')+'</td><td>'+numCarros+'</td></tr>';
-        });
-        html+='</tbody></table></div></div>';
-        document.getElementById('sectionContent').innerHTML=html;
-      }
-
       function openClienteModal(id){
         const f=document.getElementById('clienteForm');
         f.reset();
@@ -1034,8 +1015,15 @@
           }
           const d=await r.json().catch(()=>({}));
           if(!r.ok){alert('Erro ao guardar: '+(d.error||r.status));return;}
+          const newId=!id&&Array.isArray(d)&&d[0]?d[0].id:null;
           document.getElementById('clienteModal').style.display='none';
           await fetchData();
+          if(newId&&document.getElementById('vehicleDetailModal').style.display==='flex'){
+            const vdForm=document.getElementById('vdForm');
+            const sorted=[...clientesList].sort((a,b)=>a.nome.localeCompare(b.nome));
+            vdForm.clienteId.innerHTML='<option value="">Selecionar</option>'+sorted.map(c=>'<option value="'+c.id+'">'+c.nome+'</option>').join('');
+            vdForm.clienteId.value=newId;
+          }
         }catch(err){
           alert('Erro ao guardar: '+err.message);
         }finally{
