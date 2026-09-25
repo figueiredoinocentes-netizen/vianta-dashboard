@@ -90,7 +90,14 @@
       .btn-outline:hover { background: var(--muted-bg); color: var(--fg); border-color: #2d323c; }
       .btn-danger { background: #dc2626; color: white; }
       .btn-danger:hover { background: #b91c1c; }
+      .btn-danger:disabled { background: #4b2020; color: #8a5a5a; cursor: not-allowed; }
+      .btn-danger-outline { color: #f87171; border-color: #7f1d1d; }
+      .btn-danger-outline:hover { background: rgba(239,68,68,0.1); border-color: #f87171; color: #fca5a5; }
       .btn-sm { padding: 4px 10px; font-size: 11px; }
+      .delete-confirm { margin-top: 12px; padding: 12px; background: rgba(239,68,68,0.08); border: 1px solid #7f1d1d; border-radius: 8px; }
+      .delete-confirm p { margin: 0 0 8px; font-size: 12px; color: #fca5a5; }
+      .delete-confirm input { flex: 1; background: var(--sidebar-bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; color: var(--fg); font-size: 13px; outline: none; }
+      .delete-confirm input:focus { border-color: #f87171; }
       .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; z-index: 100; animation: fadeIn 0.15s ease-out; }
       @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
       @keyframes modalIn { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
@@ -259,9 +266,19 @@
                 <input type="date" name="previsaoPronto"/>
               </div>
               <div data-vdpane="prep" id="vdChecklist" style="display:none"></div>
-              <div class="actions">
-                <button type="button" class="btn btn-outline" onclick="this.closest('.modal-overlay').style.display='none'">Fechar</button>
-                <button type="submit" class="btn btn-primary">Guardar Alterações</button>
+              <div class="actions" style="justify-content:space-between">
+                <button type="button" class="btn btn-outline btn-danger-outline" onclick="toggleDeleteConfirm('vd')">Eliminar Viatura</button>
+                <div style="display:flex;gap:8px">
+                  <button type="button" class="btn btn-outline" onclick="this.closest('.modal-overlay').style.display='none'">Fechar</button>
+                  <button type="submit" class="btn btn-primary">Guardar Alterações</button>
+                </div>
+              </div>
+              <div id="vdDeleteConfirm" class="delete-confirm" style="display:none">
+                <p>Esta ação não pode ser desfeita. Escreve <strong>DELETE</strong> para confirmar.</p>
+                <div style="display:flex;gap:8px">
+                  <input type="text" id="vdDeleteInput" oninput="onDeleteConfirmInput('vd')" placeholder="DELETE"/>
+                  <button type="button" class="btn btn-danger" id="vdDeleteBtn" disabled onclick="handleDeleteViatura()">Eliminar definitivamente</button>
+                </div>
               </div>
             </form>
           </div>
@@ -296,9 +313,19 @@
                 <div><label>IBAN</label><input name="iban"/></div>
                 <div><label>NIF</label><input name="nif"/></div>
               </div>
-              <div class="actions">
-                <button type="button" class="btn btn-outline" onclick="this.closest('.modal-overlay').style.display='none'">Cancelar</button>
-                <button type="submit" class="btn btn-primary">Guardar</button>
+              <div class="actions" style="justify-content:space-between">
+                <button type="button" class="btn btn-outline btn-danger-outline" id="investidorDeleteToggle" style="display:none" onclick="toggleDeleteConfirm('investidor')">Eliminar</button>
+                <div style="display:flex;gap:8px">
+                  <button type="button" class="btn btn-outline" onclick="this.closest('.modal-overlay').style.display='none'">Cancelar</button>
+                  <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+              </div>
+              <div id="investidorDeleteConfirm" class="delete-confirm" style="display:none">
+                <p>Esta ação não pode ser desfeita. Escreve <strong>DELETE</strong> para confirmar.</p>
+                <div style="display:flex;gap:8px">
+                  <input type="text" id="investidorDeleteInput" oninput="onDeleteConfirmInput('investidor')" placeholder="DELETE"/>
+                  <button type="button" class="btn btn-danger" id="investidorDeleteBtn" disabled onclick="handleDeleteInvestidor()">Eliminar definitivamente</button>
+                </div>
               </div>
             </form>
           </div>
@@ -569,6 +596,7 @@
         const f=document.getElementById('vdForm');
         f.dataset.carId=carId;
         document.getElementById('vdTitle').textContent=(v.marca_modelo||'Viatura')+(v.matricula?' — '+v.matricula:'');
+        document.getElementById('vdDeleteConfirm').style.display='none';
         f.foto.value='';
         document.getElementById('vdFotoPreview').style.display=v.foto_url?'block':'none';
         document.getElementById('vdFotoPreviewImg').src=v.foto_url||'';
@@ -828,6 +856,8 @@
         f.reset();
         f.dataset.investidorId=id||'';
         document.getElementById('investidorModalTitle').textContent=id?'Editar Investidor':'Novo Investidor';
+        document.getElementById('investidorDeleteToggle').style.display=id?'inline-flex':'none';
+        document.getElementById('investidorDeleteConfirm').style.display='none';
         if(id){
           const inv=investidoresList.find(i=>i.id===id);
           if(inv){
@@ -872,6 +902,62 @@
           alert('Erro ao guardar: '+err.message);
         }finally{
           submitBtn.disabled=false;
+        }
+      }
+
+      // ── Eliminar (investidor / viatura), com confirmação por palavra ──
+      function toggleDeleteConfirm(kind){
+        const box=document.getElementById(kind+'DeleteConfirm');
+        const opening=box.style.display==='none';
+        box.style.display=opening?'block':'none';
+        const input=document.getElementById(kind+'DeleteInput');
+        input.value='';
+        onDeleteConfirmInput(kind);
+        if(opening)input.focus();
+      }
+
+      function onDeleteConfirmInput(kind){
+        document.getElementById(kind+'DeleteBtn').disabled=document.getElementById(kind+'DeleteInput').value.trim()!=='DELETE';
+      }
+
+      async function handleDeleteInvestidor(){
+        const id=document.getElementById('investidorForm').dataset.investidorId;
+        if(!id)return;
+        const numCarros=allVehicles.filter(v=>v.investidor_id===Number(id)).length;
+        if(numCarros>0){
+          alert('Não é possível eliminar: há '+numCarros+' viatura(s) associada(s) a este investidor. Muda o proprietário dessas viaturas primeiro.');
+          return;
+        }
+        const btn=document.getElementById('investidorDeleteBtn');
+        btn.disabled=true;btn.textContent='A eliminar...';
+        try{
+          const r=await fetch('/.netlify/functions/central?type=investidores&id='+id,{method:'DELETE'});
+          const d=await r.json().catch(()=>({}));
+          if(!r.ok){alert('Erro ao eliminar: '+(d.error||r.status));return;}
+          document.getElementById('investidorModal').style.display='none';
+          await fetchData();
+        }catch(e){
+          alert('Erro ao eliminar: '+e.message);
+        }finally{
+          btn.disabled=false;btn.textContent='Eliminar definitivamente';
+        }
+      }
+
+      async function handleDeleteViatura(){
+        const id=document.getElementById('vdForm').dataset.carId;
+        if(!id)return;
+        const btn=document.getElementById('vdDeleteBtn');
+        btn.disabled=true;btn.textContent='A eliminar...';
+        try{
+          const r=await fetch('/.netlify/functions/central?type=carros&id='+id,{method:'DELETE'});
+          const d=await r.json().catch(()=>({}));
+          if(!r.ok){alert('Erro ao eliminar: '+(d.error||r.status));return;}
+          document.getElementById('vehicleDetailModal').style.display='none';
+          await fetchData();
+        }catch(e){
+          alert('Erro ao eliminar: '+e.message);
+        }finally{
+          btn.disabled=false;btn.textContent='Eliminar definitivamente';
         }
       }
 
