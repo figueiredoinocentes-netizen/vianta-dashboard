@@ -178,6 +178,7 @@
           <button class="sidebar-sublink active" data-section="checkin" onclick="setSection('checkin')">✅ Check-ins</button>
           <button class="sidebar-sublink" data-section="pagamentos" onclick="setSection('pagamentos')">💰 Pagamentos</button>
           <button class="sidebar-sublink" data-section="armazem" onclick="setSection('armazem')">📦 Armazém</button>
+          <button class="sidebar-sublink" data-section="investidores" onclick="setSection('investidores')">🤝 Investidores</button>
         </nav>
       </aside>
       <main class="main-content">
@@ -211,7 +212,7 @@
                 <div><label>KMs</label><input name="kms" type="number"/></div>
                 <div><label>Cor</label><input name="cor"/></div>
                 <div><label>Proprietário</label><select name="proprietario" onchange="onNvProprietarioChange()"><option value="VIANTA">VIANTA</option><option value="Investidor">Investidor</option></select></div>
-                <div id="nvInvestidorWrap" class="full" style="display:none"><label>Nome do Investidor</label><input name="investidorNome" list="nvInvestidoresList"/><datalist id="nvInvestidoresList"></datalist></div>
+                <div id="nvInvestidorWrap" class="full" style="display:none"><label>Investidor</label><select name="investidorId"><option value="">Selecionar</option></select></div>
                 <div><label>Tipo Gestão</label><select name="gestao"><option value="Aluguer">Aluguer</option><option value="Venda">Venda</option><option value="Slot">Slot</option></select></div>
                 <div><label>Estado</label><select name="estado"><option value="Em Preparação" selected>Em Preparação</option><option value="Alugado">Alugado</option><option value="Para Venda">Para Venda</option><option value="Para Aluguer">Para Aluguer</option><option value="Inativo">Inativo</option><option value="Manutenção">Manutenção</option><option value="Vendido">Vendido</option></select></div>
                 <div><label>Preço Venda (€)</label><input name="precoVenda" type="number"/></div>
@@ -246,7 +247,7 @@
                 <div><label>Combustível</label><select name="combustivel"><option value="">Selecionar</option><option value="Elétrico">Elétrico</option><option value="Gasóleo/Diesel">Gasóleo/Diesel</option><option value="Gasolina">Gasolina</option><option value="GPL">GPL</option><option value="Híbrido">Híbrido</option></select></div>
                 <div><label>KMs</label><input name="kms"/></div>
                 <div><label>Proprietário</label><select name="proprietario" onchange="onVdProprietarioChange()"><option value="VIANTA">VIANTA</option><option value="Investidor">Investidor</option></select></div>
-                <div id="vdInvestidorWrap" class="full" style="display:none"><label>Nome do Investidor</label><input name="investidorNome" list="vdInvestidoresList"/><datalist id="vdInvestidoresList"></datalist></div>
+                <div id="vdInvestidorWrap" class="full" style="display:none"><label>Investidor</label><select name="investidorId"><option value="">Selecionar</option></select></div>
                 <div><label>Tipo Gestão</label><select name="gestao" onchange="onVdGestaoChange()"><option value="Aluguer">Aluguer</option><option value="Venda">Venda</option><option value="Slot">Slot</option></select></div>
                 <div><label>Estado</label><select name="estado" onchange="onVdEstadoChange()"><option value="Em Preparação">Em Preparação</option><option value="Alugado">Alugado</option><option value="Para Venda">Para Venda</option><option value="Para Aluguer">Para Aluguer</option><option value="Inativo">Inativo</option><option value="Manutenção">Manutenção</option><option value="Vendido">Vendido</option></select></div>
                 <div id="vdPrecoVendaWrap" class="full"><label>Preço Venda (€)</label><input name="precoVenda"/></div>
@@ -284,10 +285,28 @@
             </form>
           </div>
         </div>
+        <div id="investidorModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+          <div class="modal">
+            <h2 id="investidorModalTitle">Novo Investidor</h2>
+            <form id="investidorForm" onsubmit="handleSaveInvestidor(event)">
+              <div class="grid">
+                <div class="full"><label>Nome <span style="color:#e53e3e">*</span></label><input name="nome" required/></div>
+                <div><label>Email</label><input name="email" type="email"/></div>
+                <div><label>Telefone</label><input name="telefone"/></div>
+                <div><label>IBAN</label><input name="iban"/></div>
+                <div><label>NIF</label><input name="nif"/></div>
+              </div>
+              <div class="actions">
+                <button type="button" class="btn btn-outline" onclick="this.closest('.modal-overlay').style.display='none'">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+              </div>
+            </form>
+          </div>
+        </div>
       </main>
     </div>
     <script>
-      let allVehicles=[],inventory=[],motoristasMap={},currentSection='checkin';
+      let allVehicles=[],inventory=[],motoristasMap={},investidoresList=[],currentSection='checkin';
 
       // Checklist de preparação — Instrução de Trabalho "Preparação de Viatura STAND".
       // Aluguer ainda não tem checklist própria definida (fica vazia por agora).
@@ -321,6 +340,7 @@
         {id:'checkin',label:'✅ Check-ins'},
         {id:'pagamentos',label:'💰 Pagamentos'},
         {id:'armazem',label:'📦 Armazém'},
+        {id:'investidores',label:'🤝 Investidores'},
       ];
 
       const BADGE_MAP={'Alugado':'badge-alugado','Para Venda':'badge-venda','Inativo':'badge-inativo','Manutenção':'badge-maint','Vendido':'badge-vendido','Em Preparação':'badge-prep','Para Aluguer':'badge-aluguer'};
@@ -337,15 +357,17 @@
 
       async function fetchData(){
         try{
-          const [carrosRes,armazemRes,motoristasRes]=await Promise.all([
+          const [carrosRes,armazemRes,motoristasRes,investidoresRes]=await Promise.all([
             fetch('/.netlify/functions/central?type=carros'),
             fetch('/.netlify/functions/central?type=armazem'),
             fetch('/.netlify/functions/central?type=motoristas'),
+            fetch('/.netlify/functions/central?type=investidores'),
           ]);
           allVehicles=carrosRes.ok?await carrosRes.json():[];
           inventory=armazemRes.ok?await armazemRes.json():[];
           motoristasMap={};
           if(motoristasRes.ok){(await motoristasRes.json()).forEach(m=>{motoristasMap[m.id]=m});}
+          investidoresList=investidoresRes.ok?await investidoresRes.json():[];
           render();
         }catch(e){console.error(e)}
       }
@@ -358,7 +380,7 @@
       }
 
       function render(){
-        const fn={'visao':renderVisao,'frota':renderFrota,'stock':renderStock,'manutencao':renderManutencao,'checkin':renderCheckin,'pagamentos':renderPagamentos,'armazem':renderArmazem};
+        const fn={'visao':renderVisao,'frota':renderFrota,'stock':renderStock,'manutencao':renderManutencao,'checkin':renderCheckin,'pagamentos':renderPagamentos,'armazem':renderArmazem,'investidores':renderInvestidores};
         const view=fn[currentSection]||renderVisao;
         view();
       }
@@ -529,8 +551,9 @@
       }
 
       function openNovaViaturaModal(){
-        const investidores=[...new Set(allVehicles.map(x=>x.proprietario).filter(p=>p&&p!=='VIANTA'))].sort();
-        document.getElementById('nvInvestidoresList').innerHTML=investidores.map(n=>'<option value="'+n.replace(/"/g,'&quot;')+'">').join('');
+        const f=document.getElementById('vehicleModal').querySelector('form');
+        const sorted=[...investidoresList].sort((a,b)=>a.nome.localeCompare(b.nome));
+        f.investidorId.innerHTML='<option value="">Selecionar</option>'+sorted.map(i=>'<option value="'+i.id+'">'+i.nome+'</option>').join('');
         onNvProprietarioChange();
         document.getElementById('vehicleModal').style.display='flex';
       }
@@ -554,14 +577,14 @@
         f.ano.value=v.ano||'';
         f.combustivel.value=v.combustivel||'';
         f.kms.value=v.kms_atuais||'';
-        const investidores=[...new Set(allVehicles.map(x=>x.proprietario).filter(p=>p&&p!=='VIANTA'))].sort();
-        document.getElementById('vdInvestidoresList').innerHTML=investidores.map(n=>'<option value="'+n.replace(/"/g,'&quot;')+'">').join('');
-        if(v.proprietario&&v.proprietario!=='VIANTA'){
+        const sortedInvestidores=[...investidoresList].sort((a,b)=>a.nome.localeCompare(b.nome));
+        f.investidorId.innerHTML='<option value="">Selecionar</option>'+sortedInvestidores.map(i=>'<option value="'+i.id+'">'+i.nome+'</option>').join('');
+        if(v.investidor_id){
           f.proprietario.value='Investidor';
-          f.investidorNome.value=v.proprietario;
+          f.investidorId.value=v.investidor_id;
         }else{
           f.proprietario.value='VIANTA';
-          f.investidorNome.value='';
+          f.investidorId.value='';
         }
         onVdProprietarioChange();
         f.gestao.value=v.tipo_gestao||'Aluguer';
@@ -685,7 +708,9 @@
         const carId=Number(f.dataset.carId);
         const v=allVehicles.find(x=>x.id===carId);
         if(!v)return;
-        const proprietarioFinal=f.proprietario.value==='Investidor'?(f.investidorNome.value||null):'VIANTA';
+        const isInvestidor=f.proprietario.value==='Investidor';
+        const selectedInvestidor=isInvestidor?investidoresList.find(i=>String(i.id)===f.investidorId.value):null;
+        const proprietarioFinal=isInvestidor?(selectedInvestidor?selectedInvestidor.nome:null):'VIANTA';
         const submitBtn0=f.querySelector('button[type=submit]');
         let fotoUrl;
         const fotoFile=f.foto.files[0];
@@ -710,6 +735,7 @@
           combustivel:f.combustivel.value||null,
           kms_atuais:f.kms.value||null,
           proprietario:proprietarioFinal,
+          investidor_id:selectedInvestidor?selectedInvestidor.id:null,
           tipo_gestao:f.gestao.value||null,
           estado:f.estado.value||null,
           preco_venda:f.gestao.value==='Venda'?(f.precoVenda.value||null):null,
@@ -777,6 +803,76 @@
         });
         html+='</tbody></table></div></div>';
         document.getElementById('sectionContent').innerHTML=html;
+      }
+
+      // ── Investidores ──
+      function renderInvestidores(){
+        document.getElementById('totalCount').textContent=investidoresList.length;
+        document.getElementById('newBtnLabel').textContent='Novo Investidor';
+        document.getElementById('newBtn').setAttribute('onclick','openInvestidorModal()');
+        if(!investidoresList.length){
+          document.getElementById('sectionContent').innerHTML=emptyStateHTML('🤝','Nenhum investidor registado');
+          return;
+        }
+        let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th>IBAN</th><th>NIF</th><th>Viaturas</th></tr></thead><tbody>';
+        investidoresList.forEach(i=>{
+          const numCarros=allVehicles.filter(v=>v.investidor_id===i.id).length;
+          html+='<tr><td><strong class="clickable-plate" onclick="openInvestidorModal('+i.id+')" title="Editar">'+(i.nome||'')+'</strong></td><td style="font-size:12px">'+(i.email||'-')+'</td><td style="font-size:12px">'+(i.telefone||'-')+'</td><td style="font-size:12px">'+(i.iban||'-')+'</td><td style="font-size:12px">'+(i.nif||'-')+'</td><td>'+numCarros+'</td></tr>';
+        });
+        html+='</tbody></table></div></div>';
+        document.getElementById('sectionContent').innerHTML=html;
+      }
+
+      function openInvestidorModal(id){
+        const f=document.getElementById('investidorForm');
+        f.reset();
+        f.dataset.investidorId=id||'';
+        document.getElementById('investidorModalTitle').textContent=id?'Editar Investidor':'Novo Investidor';
+        if(id){
+          const inv=investidoresList.find(i=>i.id===id);
+          if(inv){
+            f.nome.value=inv.nome||'';
+            f.email.value=inv.email||'';
+            f.telefone.value=inv.telefone||'';
+            f.iban.value=inv.iban||'';
+            f.nif.value=inv.nif||'';
+          }
+        }
+        document.getElementById('investidorModal').style.display='flex';
+      }
+
+      async function handleSaveInvestidor(e){
+        e.preventDefault();
+        const f=e.target;
+        const id=f.dataset.investidorId;
+        const body={
+          nome:f.nome.value||null,
+          email:f.email.value||null,
+          telefone:f.telefone.value||null,
+          iban:f.iban.value||null,
+          nif:f.nif.value||null,
+        };
+        const submitBtn=f.querySelector('button[type=submit]');
+        submitBtn.disabled=true;
+        try{
+          let r;
+          if(id){
+            r=await fetch('/.netlify/functions/central?type=investidores',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:Number(id),field:'nome',value:body.nome})});
+            if(r.ok)for(const field of['email','telefone','iban','nif']){
+              await fetch('/.netlify/functions/central?type=investidores',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:Number(id),field,value:body[field]})});
+            }
+          }else{
+            r=await fetch('/.netlify/functions/central?type=investidores',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+          }
+          const d=await r.json().catch(()=>({}));
+          if(!r.ok){alert('Erro ao guardar: '+(d.error||r.status));return;}
+          document.getElementById('investidorModal').style.display='none';
+          await fetchData();
+        }catch(err){
+          alert('Erro ao guardar: '+err.message);
+        }finally{
+          submitBtn.disabled=false;
+        }
       }
 
       // ── Helpers ──
@@ -847,13 +943,16 @@
             submitBtn.textContent='A enviar foto...';
             fotoUrl=await uploadFoto(fotoFile);
           }
+          const isInvestidor=f.proprietario.value==='Investidor';
+          const selectedInvestidor=isInvestidor?investidoresList.find(i=>String(i.id)===f.investidorId.value):null;
           const body={
             matricula:f.matricula.value||null,
             marca_modelo:f.modelo.value||null,
             ano:f.ano.value||null,
             combustivel:f.combustivel.value||null,
             kms_atuais:f.kms.value||null,
-            proprietario:f.proprietario.value==='Investidor'?(f.investidorNome.value||null):'VIANTA',
+            proprietario:isInvestidor?(selectedInvestidor?selectedInvestidor.nome:null):'VIANTA',
+            investidor_id:selectedInvestidor?selectedInvestidor.id:null,
             tipo_gestao:f.gestao.value||null,
             estado:f.estado.value||null,
             preco_venda:f.precoVenda.value||null,

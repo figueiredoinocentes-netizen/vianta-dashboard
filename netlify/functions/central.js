@@ -6,6 +6,7 @@ const TABLE_MAP = {
   pagamentos: 'pagamentos',
   carros: 'carros',
   armazem: 'armazem',
+  investidores: 'investidores',
 };
 
 const PROD_ORIGIN = 'https://vianta-dashboard.netlify.app';
