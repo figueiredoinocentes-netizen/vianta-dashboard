@@ -191,7 +191,7 @@
               <button class="btn btn-outline" onclick="fetchData()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg> Atualizar
               </button>
-              <button class="btn btn-primary" id="newBtn" onclick="document.getElementById('vehicleModal').style.display='flex'">
+              <button class="btn btn-primary" id="newBtn" onclick="openNovaViaturaModal()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg> <span id="newBtnLabel">Nova Viatura</span>
               </button>
             </div>
@@ -210,7 +210,8 @@
                 <div><label>Combustível</label><select name="combustivel"><option value="">Selecionar</option><option value="Elétrico">Elétrico</option><option value="Gasóleo/Diesel">Gasóleo/Diesel</option><option value="Gasolina">Gasolina</option><option value="GPL">GPL</option><option value="Híbrido">Híbrido</option></select></div>
                 <div><label>KMs</label><input name="kms" type="number"/></div>
                 <div><label>Cor</label><input name="cor"/></div>
-                <div><label>Proprietário</label><select name="proprietario"><option value="VIANTA">VIANTA</option><option value="Investidor">Investidor</option><option value="Miguel Brito Comércio Auto Lda">Miguel Brito</option><option value="Vinod Carsane">Vinod Carsane</option><option value="Ricardo Duarte">Ricardo Duarte</option><option value="EMPRESA">EMPRESA</option><option value="Outro">Outro</option></select></div>
+                <div><label>Proprietário</label><select name="proprietario" onchange="onNvProprietarioChange()"><option value="VIANTA">VIANTA</option><option value="Investidor">Investidor</option></select></div>
+                <div id="nvInvestidorWrap" class="full" style="display:none"><label>Nome do Investidor</label><input name="investidorNome" list="nvInvestidoresList"/><datalist id="nvInvestidoresList"></datalist></div>
                 <div><label>Tipo Gestão</label><select name="gestao"><option value="Aluguer">Aluguer</option><option value="Venda">Venda</option><option value="Slot">Slot</option></select></div>
                 <div><label>Estado</label><select name="estado"><option value="Em Preparação" selected>Em Preparação</option><option value="Alugado">Alugado</option><option value="Para Venda">Para Venda</option><option value="Para Aluguer">Para Aluguer</option><option value="Inativo">Inativo</option><option value="Manutenção">Manutenção</option><option value="Vendido">Vendido</option></select></div>
                 <div><label>Preço Venda (€)</label><input name="precoVenda" type="number"/></div>
@@ -391,7 +392,7 @@
         const f=allVehicles.filter(v=>v.estado==='Alugado'&&v.tipo_gestao!=='Slot');
         document.getElementById('totalCount').textContent=f.length;
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
-        document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
+        document.getElementById('newBtn').setAttribute('onclick',"openNovaViaturaModal()");
         if(!f.length){
           document.getElementById('sectionContent').innerHTML=emptyStateHTML('🚗','Nenhum carro alugado de momento');
           return;
@@ -409,7 +410,7 @@
         const f=allVehicles.filter(v=>v.estado==='Para Venda'||v.estado==='Para Aluguer');
         document.getElementById('totalCount').textContent=f.length;
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
-        document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
+        document.getElementById('newBtn').setAttribute('onclick',"openNovaViaturaModal()");
         if(!f.length){
           document.getElementById('sectionContent').innerHTML=emptyStateHTML('🏪','Nenhum carro em stock');
           return;
@@ -427,7 +428,7 @@
         const f=allVehicles.filter(v=>v.estado==='Manutenção');
         document.getElementById('totalCount').textContent=f.length;
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
-        document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
+        document.getElementById('newBtn').setAttribute('onclick',"openNovaViaturaModal()");
         if(!f.length){
           document.getElementById('sectionContent').innerHTML=emptyStateHTML('🔧','Nenhum carro em manutenção');
           return;
@@ -468,7 +469,7 @@
         const f=allVehicles.filter(v=>v.estado==='Em Preparação');
         document.getElementById('totalCount').textContent=f.length;
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
-        document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
+        document.getElementById('newBtn').setAttribute('onclick',"openNovaViaturaModal()");
         if(!f.length){
           document.getElementById('sectionContent').innerHTML=emptyStateHTML('✅','Nenhuma viatura em preparação');
           return;
@@ -520,6 +521,18 @@
       function onVdProprietarioChange(){
         const f=document.getElementById('vdForm');
         document.getElementById('vdInvestidorWrap').style.display=f.proprietario.value==='Investidor'?'block':'none';
+      }
+
+      function onNvProprietarioChange(){
+        const f=document.getElementById('vehicleModal').querySelector('form');
+        document.getElementById('nvInvestidorWrap').style.display=f.proprietario.value==='Investidor'?'block':'none';
+      }
+
+      function openNovaViaturaModal(){
+        const investidores=[...new Set(allVehicles.map(x=>x.proprietario).filter(p=>p&&p!=='VIANTA'))].sort();
+        document.getElementById('nvInvestidoresList').innerHTML=investidores.map(n=>'<option value="'+n.replace(/"/g,'&quot;')+'">').join('');
+        onNvProprietarioChange();
+        document.getElementById('vehicleModal').style.display='flex';
       }
 
       function onVdEstadoChange(){
@@ -721,7 +734,7 @@
       // ── Pagamentos ──
       async function renderPagamentos(){
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
-        document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('vehicleModal').style.display='flex'");
+        document.getElementById('newBtn').setAttribute('onclick',"openNovaViaturaModal()");
         try{
           const r=await fetch('/.netlify/functions/central?type=pagamentos',{headers:{'Accept':'application/json'}});
           if(!r.ok){throw new Error('API error');}
@@ -840,7 +853,7 @@
             ano:f.ano.value||null,
             combustivel:f.combustivel.value||null,
             kms_atuais:f.kms.value||null,
-            proprietario:f.proprietario.value||null,
+            proprietario:f.proprietario.value==='Investidor'?(f.investidorNome.value||null):'VIANTA',
             tipo_gestao:f.gestao.value||null,
             estado:f.estado.value||null,
             preco_venda:f.precoVenda.value||null,
