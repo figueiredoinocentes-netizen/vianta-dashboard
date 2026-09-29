@@ -13,7 +13,8 @@ shutil.copy2(os.path.join(PUBLIC, 'assets', 'index-DBm4vQ15.css'), ASSETS)
 # 2. Copy old Lovable index.html (overwrites Vite's generated one)
 shutil.copy2(os.path.join(PUBLIC, 'lovable-index.html'), os.path.join(DIST, 'index.html'))
 
-# 3. Copy operacoes.html
-shutil.copy2(os.path.join(PUBLIC, 'operacoes.html'), os.path.join(DIST, 'operacoes.html'))
+# 3. Copy standalone pages
+for page in ['operacoes.html', 'winner-adds.html']:
+    shutil.copy2(os.path.join(PUBLIC, page), os.path.join(DIST, page))
 
-print("Post-build: old Lovable assets + operacoes.html copied to dist/")
+print("Post-build: old Lovable assets + standalone pages copied to dist/")
