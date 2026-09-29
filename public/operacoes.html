@@ -113,14 +113,11 @@
         <nav class="sidebar-nav">
           <div style="display:flex;gap:4px;padding:4px;border-radius:8px;background:rgba(255,255,255,0.04);margin-bottom:8px">
             <a href="/" style="flex:1;text-align:center;font-size:12px;font-weight:600;padding:8px;border-radius:6px;color:#94a3b8;text-decoration:none;transition:all 0.15s">Aquisição</a>
+            <a href="/stock" style="flex:1;text-align:center;font-size:12px;font-weight:600;padding:8px;border-radius:6px;color:#94a3b8;text-decoration:none;transition:all 0.15s">Stock</a>
             <div style="flex:1;text-align:center;font-size:12px;font-weight:600;padding:8px;border-radius:6px;background:rgba(59,130,246,0.12);color:#3b82f6">Operações</div>
           </div>
           <button class="sidebar-sublink active" data-section="visao" onclick="setSection('visao')">📊 Visão Geral</button>
-          <button class="sidebar-sublink" data-section="frota" onclick="setSection('frota')">🚗 Frota Ativa</button>
-          <div style="font-size:10px;color:#475569;padding:8px 16px 4px 28px;text-transform:uppercase;letter-spacing:0.05em;font-weight:600">Stock</div>
-          <button class="sidebar-sublink" data-section="stockvenda" onclick="setSection('stockvenda')">🏷️ Venda</button>
-          <button class="sidebar-sublink" data-section="stockaluguer" onclick="setSection('stockaluguer')">🔑 Aluguer</button>
-          <button class="sidebar-sublink" data-section="stock" onclick="setSection('stock')">🏪 Todos</button>
+          <button class="sidebar-sublink" data-section="stock" onclick="setSection('stock')">🏪 Stock</button>
           <button class="sidebar-sublink" data-section="manutencao" onclick="setSection('manutencao')">🔧 Manutenções</button>
           <button class="sidebar-sublink" data-section="checkin" onclick="setSection('checkin')">✅ Check-ins</button>
           <button class="sidebar-sublink" data-section="pagamentos" onclick="setSection('pagamentos')">💰 Pagamentos</button>
@@ -204,9 +201,7 @@
       const SECTIONS=[
         {id:'visao',label:'📊 Visão Geral'},
         {id:'frota',label:'🚗 Frota Ativa'},
-        {id:'stock',label:'🏪 Stock (Todos)'},
-        {id:'stockvenda',label:'🏷️ Stock Venda'},
-        {id:'stockaluguer',label:'🔑 Stock Aluguer'},
+        {id:'stock',label:'🏪 Stock'},
         {id:'manutencao',label:'🔧 Manutenções'},
         {id:'checkin',label:'✅ Check-ins'},
         {id:'pagamentos',label:'💰 Pagamentos'},
@@ -282,7 +277,7 @@
       }
 
       function render(){
-        const fn={'visao':renderVisao,'frota':renderFrota,'stock':renderStock,'stockvenda':renderStockVenda,'stockaluguer':renderStockAluguer,'manutencao':renderManutencao,'checkin':renderCheckin,'pagamentos':renderPagamentos,'armazem':renderArmazem};
+        const fn={'visao':renderVisao,'frota':renderFrota,'stock':renderStock,'manutencao':renderManutencao,'checkin':renderCheckin,'pagamentos':renderPagamentos,'armazem':renderArmazem};
         const view=fn[currentSection]||renderVisao;
         view();
       }
