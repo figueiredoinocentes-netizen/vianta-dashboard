@@ -2,6 +2,11 @@
   command = "npm run build"
   publish = "dist"
 
+[build.environment]
+  # O URL e a chave publishable do Supabase vão no bundle do browser por desenho (são públicos);
+  # sem isto o scanner de segredos do Netlify falha o build com "Exposed secrets detected".
+  SECRETS_SCAN_OMIT_KEYS = "SUPABASE_URL,VITE_SUPABASE_URL,VITE_SUPABASE_PUBLISHABLE_KEY,VITE_SUPABASE_PROJECT_ID"
+
 [functions]
   directory = "netlify/functions"
 
