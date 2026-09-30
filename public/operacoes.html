@@ -211,7 +211,7 @@
               </button>
             </div>
           </div>
-          <div class="search-bar">
+          <div class="search-bar" id="searchBar">
             <input id="searchInput" type="text" placeholder="🔍 Pesquisar por matrícula, modelo, motorista, investidor, armazém…" oninput="applySearch()" />
             <button class="search-clear" id="clearSearch" onclick="clearSearch()" style="display:none">✕</button>
           </div>
@@ -464,6 +464,7 @@
         currentSection=id;
         document.getElementById('sectionLabel').textContent=SECTIONS.find(s=>s.id===id).label;
         document.querySelectorAll('.sidebar-sublink').forEach(b=>b.classList.toggle('active',b.dataset.section===id));
+        document.getElementById('searchBar').style.display=id==='visao'?'none':'flex';
         render();
       }
 
