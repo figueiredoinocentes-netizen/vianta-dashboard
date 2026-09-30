@@ -1,0 +1,1 @@
+DELETE FROM public.pipeline_stage_configs WHERE pipeline_name = 'Venda';

@@ -1,0 +1,25 @@
+project_id = "mowptkpnjlttbqgjtena"
+
+[functions.fetch-sheets-data]
+verify_jwt = false
+
+[functions.fetch-ghl-data]
+verify_jwt = false
+
+[functions.fetch-ghl-notes]
+verify_jwt = false
+
+[functions.fetch-lead-movements]
+verify_jwt = false
+
+[functions.chat]
+verify_jwt = false
+
+[functions.sync-sales-playbook]
+verify_jwt = false
+
+[functions.fetch-meta-creative-names]
+verify_jwt = false
+
+[functions.fetch-meta-insights]
+verify_jwt = false

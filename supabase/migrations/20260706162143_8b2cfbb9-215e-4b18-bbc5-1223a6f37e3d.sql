@@ -1,0 +1,1 @@
+ALTER TABLE public.meta_creative_cache ADD COLUMN IF NOT EXISTS spend_last_30d numeric;

@@ -1,264 +1,262 @@
-import { useState, useEffect } from 'react'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, PieChart, Pie, Cell } from 'recharts'
-import { DollarSign, Users, Clock, TrendingUp, ShoppingCart, RefreshCw } from 'lucide-react'
+import { useState, useMemo, useCallback } from 'react';
+import MonthlyProgressTab from '@/components/dashboard/MonthlyProgressTab';
+import CACBreakdownDialog from '@/components/dashboard/CACBreakdownDialog';
+import ChurnBreakdownDialog from '@/components/dashboard/ChurnBreakdownDialog';
+import LTVBreakdownDialog from '@/components/dashboard/LTVBreakdownDialog';
+import InvestmentBreakdownDialog from '@/components/dashboard/InvestmentBreakdownDialog';
+import { motion } from 'framer-motion';
+import { DollarSign, Users, TrendingDown, TrendingUp, Clock, Percent, BarChart3 } from 'lucide-react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import KPICard from '@/components/dashboard/KPICard';
+import GlobalFilters from '@/components/dashboard/GlobalFilters';
+import AcquisitionSourceChart from '@/components/dashboard/AcquisitionSourceChart';
+import ClosingsEvolutionChart from '@/components/dashboard/ClosingsEvolutionChart';
+import RevenueEvolutionChart from '@/components/dashboard/RevenueEvolutionChart';
+import MonthlyClosingsDetail from '@/components/dashboard/MonthlyClosingsDetail';
+import { useSheetData } from '@/hooks/useSheetData';
+import { usePersistedFilters } from '@/hooks/usePersistedFilters';
+import { useMonthlyObjectives } from '@/hooks/useMonthlyObjectives';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import type { FilterState } from '@/types/dashboard';
 
-// DB Leads Log
-const LEADS_SHEET_ID = '1s9ByVhHXQppWAQsZrgudw4d4GMdzR-qaK0ObPLdRejg'
-const LEADS_CSV = `https://docs.google.com/spreadsheets/d/${LEADS_SHEET_ID}/export?format=csv`
-
-/* CSV parser */
-function parseCSVLine(line: string): string[] {
-  const result = []
-  let cur = '', inQ = false
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i]
-    if (inQ) { if (c === '"' && line[i+1] === '"') { cur += '"'; i++ } else if (c === '"') inQ = false; else cur += c }
-    else { if (c === '"') inQ = true; else if (c === ',') { result.push(cur); cur = '' } else cur += c }
-  }
-  result.push(cur)
-  return result
+function getCurrentQuarterMonths(): string[] {
+  const now = new Date();
+  const year = now.getFullYear();
+  const q = Math.floor(now.getMonth() / 3);
+  return [0, 1, 2].map(i => {
+    const m = q * 3 + i + 1;
+    return `${year}-${String(m).padStart(2, '0')}-01`;
+  });
 }
 
-interface Filters {
-  period: string;
-  offerType: string;
-  source: string;
+function getYearMonths(): string[] {
+  const year = new Date().getFullYear();
+  return Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, '0')}-01`);
 }
 
-function Dashboard() {
-  const [data, setData] = useState<any>(null)
-  const [leads, setLeads] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [filters, setFilters] = useState<Filters>({ period: 'all', offerType: '', source: '' })
+const Dashboard = () => {
+  const DASHBOARD_DEFAULTS = useMemo(() => ({ period: 'all', offerTypes: '', source: 'todos', selectedMonth: undefined as string | undefined, customDateFrom: undefined as string | undefined, customDateTo: undefined as string | undefined }), []);
+  const [persistedFilters, setPersistedFilters] = usePersistedFilters('dashboard-filters', DASHBOARD_DEFAULTS);
 
-  useEffect(() => { loadData() }, [filters])
+  const filters: FilterState = useMemo(() => ({
+    period: persistedFilters.period as FilterState['period'],
+    offerTypes: persistedFilters.offerTypes ? persistedFilters.offerTypes.split(',').filter(Boolean) as any : [],
+    source: persistedFilters.source || 'todos',
+    selectedMonth: persistedFilters.selectedMonth,
+    customDateFrom: persistedFilters.customDateFrom,
+    customDateTo: persistedFilters.customDateTo,
+  }), [persistedFilters]);
 
-  async function loadData() {
-    setLoading(true)
-    try {
-      // Load leads data
-      const resp = await fetch(LEADS_CSV)
-      const csv = await resp.text()
-      const lines = csv.trim().split('\n')
-      const headers = parseCSVLine(lines[0])
-      const rawLeads = lines.slice(1).map(line => {
-        const vals = parseCSVLine(line)
-        const obj: any = {}
-        headers.forEach((h, i) => { obj[h.trim()] = (vals[i] || '').trim() })
-        return obj
-      }).filter(l => l['nome'] || l['telefone'])
+  const setFilters = useCallback((f: FilterState) => {
+    setPersistedFilters({
+      period: f.period,
+      offerTypes: f.offerTypes.length > 0 ? f.offerTypes.join(',') : '',
+      source: f.source,
+      selectedMonth: f.selectedMonth,
+      customDateFrom: f.customDateFrom,
+      customDateTo: f.customDateTo,
+    });
+  }, [setPersistedFilters]);
+  const [showCACBreakdown, setShowCACBreakdown] = useState(false);
+  const [showChurnBreakdown, setShowChurnBreakdown] = useState(false);
+  const [showLTVBreakdown, setShowLTVBreakdown] = useState(false);
+  const [showInvestmentBreakdown, setShowInvestmentBreakdown] = useState(false);
 
-      setLeads(rawLeads)
+  const { data, isLoading, isError, error } = useSheetData(filters);
+  const { getObjectivesForMonth } = useMonthlyObjectives();
 
-      // Calculate KPIs
-      const now = new Date()
-      const thisMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`
+  const quarterMonths = useMemo(() => getCurrentQuarterMonths(), []);
 
-      let filtered = [...rawLeads]
-      
-      // Apply period filter
-      if (filters.period === 'month') {
-        filtered = filtered.filter(l => (l['data_registo'] || '').startsWith(thisMonth))
-      } else if (filters.period === 'quarter') {
-        const qStart = new Date(now.getFullYear(), Math.floor(now.getMonth()/3)*3, 1)
-        filtered = filtered.filter(l => {
-          const d = new Date(l['data_registo'])
-          return d >= qStart && d <= now
-        })
+  const quarterlyObjectives = useMemo(() => {
+    let revenue = 0, fechos = 0, budget = 0;
+    let hasAny = false;
+    for (const m of quarterMonths) {
+      const objs = getObjectivesForMonth(m);
+      for (const o of objs) {
+        if (o.oferta === 'aluguer' || o.oferta === 'compra') {
+          revenue += o.revenueAlvo;
+          fechos += o.fechosAlvo;
+          budget += o.budgetAlvo;
+          hasAny = true;
+        }
       }
-
-      // Apply offer filter
-      if (filters.offerType) {
-        filtered = filtered.filter(l => l['oferta']?.toLowerCase() === filters.offerType.toLowerCase())
-      }
-
-      const totalLeads = filtered.length
-      const qualificadas = filtered.filter(l => l['estado'] === 'Nova Lead Qualificada' || l['estado'] === 'Crédito Aprovado' || l['estado'] === 'Fechado').length
-      const fechados = filtered.filter(l => l['estado'] === 'Fechado').length
-      const creditosAprovados = filtered.filter(l => l['estado'] === 'Crédito Aprovado' || l['estado'] === 'Fechado').length
-
-      // Monthly breakdown
-      const monthlyMap: Record<string, any> = {}
-      filtered.forEach(l => {
-        const month = (l['data_registo'] || '').slice(0, 7)
-        if (!month) return
-        if (!monthlyMap[month]) monthlyMap[month] = { month, leads: 0, qualificadas: 0, fechados: 0 }
-        monthlyMap[month].leads++
-        if (l['estado'] === 'Nova Lead Qualificada' || l['estado'] === 'Crédito Aprovado' || l['estado'] === 'Fechado') monthlyMap[month].qualificadas++
-        if (l['estado'] === 'Fechado') monthlyMap[month].fechados++
-      })
-
-      const monthlyData = Object.values(monthlyMap).sort((a: any, b: any) => a.month.localeCompare(b.month))
-
-      // Source distribution
-      const sourceMap: Record<string, number> = {}
-      filtered.forEach(l => {
-        const src = l['fonte'] || 'Desconhecido'
-        sourceMap[src] = (sourceMap[src] || 0) + 1
-      })
-      const sourceData = Object.entries(sourceMap).map(([name, value]) => ({ name, value }))
-
-      const investimentoTotal = 1250 + (fechados * 0) // placeholder - need ads data
-      const cacMedio = fechados > 0 ? investimentoTotal / fechados : 0
-
-      setData({
-        totalLeads,
-        qualificadas,
-        fechados,
-        creditosAprovados,
-        txConversao: totalLeads > 0 ? (fechados / totalLeads * 100) : 0,
-        investimentoTotal,
-        cacMedio,
-        monthlyData,
-        sourceData,
-      })
-    } catch(e) {
-      console.error(e)
     }
-    setLoading(false)
-  }
+    return hasAny ? { revenue, fechos, budget } : null;
+  }, [quarterMonths, getObjectivesForMonth]);
 
-  const metrics = [
-    { title: 'Leads', value: data?.totalLeads || 0, icon: Users, color: '#3b82f6' },
-    { title: 'Lead Qualificada', value: data?.qualificadas || 0, icon: Users, color: '#8b5cf6' },
-    { title: 'Créditos Aprovados', value: data?.creditosAprovados || 0, icon: Clock, color: '#f59e0b' },
-    { title: 'Fechos', value: data?.fechados || 0, icon: ShoppingCart, color: '#10b981' },
-    { title: 'Taxa Conversão', value: `${(data?.txConversao || 0).toFixed(1)}%`, icon: TrendingUp, color: '#10b981' },
-    { title: 'CAC Médio', value: `€${Math.round(data?.cacMedio || 0)}`, icon: DollarSign, color: '#ef4444' },
-    { title: 'Investimento', value: `€${(data?.investimentoTotal || 0).toLocaleString()}`, icon: DollarSign, color: '#f59e0b' },
-  ]
+  const revenueObjectives = useMemo(() => {
+    const yearMonths = getYearMonths();
+    const result: { month: string; target: number }[] = [];
+    let hasAny = false;
+    for (const m of yearMonths) {
+      const objs = getObjectivesForMonth(m);
+      let total = 0;
+      for (const o of objs) {
+        if (o.oferta === 'aluguer' || o.oferta === 'compra') {
+          total += o.revenueAlvo;
+          hasAny = true;
+        }
+      }
+      const monthKey = m.slice(0, 7); // "2026-05"
+      result.push({ month: monthKey, target: total });
+    }
+    return hasAny ? result : [];
+  }, [getObjectivesForMonth]);
 
   return (
-    <div style={{ padding: 24 }}>
+    <DashboardLayout>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>
-            Dashboard <span style={{ background: 'linear-gradient(135deg, #1a202c, #d0c1ac)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Marketing & Comercial</span>
+      <div className="flex flex-col gap-6 mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <h1 className="text-2xl font-display font-bold text-foreground">
+            Dashboard <span className="text-gradient-primary">Marketing & Comercial</span>
           </h1>
-          <p style={{ color: '#718096', fontSize: 13, marginTop: 4 }}>Visão geral do desempenho — Vianta</p>
-        </div>
-        <button className="btn btn-outline" onClick={loadData}>
-          <RefreshCw size={14} /> Atualizar
-        </button>
+          <p className="text-sm text-muted-foreground mt-1">
+            Visão geral do desempenho — Vianta
+          </p>
+        </motion.div>
+
+        <GlobalFilters
+          filters={filters}
+          onFiltersChange={setFilters}
+          fontes={data?.fontes || []}
+        />
       </div>
 
-      {/* Filters */}
-      <div className="filters" style={{ marginBottom: 20 }}>
-        <select value={filters.period} onChange={e => setFilters({...filters, period: e.target.value})}>
-          <option value="all">Todo o período</option>
-          <option value="month">Este mês</option>
-          <option value="quarter">Este trimestre</option>
-        </select>
-        <select value={filters.offerType} onChange={e => setFilters({...filters, offerType: e.target.value})}>
-          <option value="">Todas as ofertas</option>
-          <option value="Aluguer">Aluguer</option>
-          <option value="Compra">Compra</option>
-          <option value="Slot">Slot</option>
-        </select>
-        <span className="count">{data?.totalLeads || 0} leads</span>
-      </div>
+      <Tabs defaultValue="visao-geral" className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="visao-geral">Visão Geral</TabsTrigger>
+          <TabsTrigger value="progresso-mensal">Progresso Mensal</TabsTrigger>
+        </TabsList>
 
-      {/* KPI Cards */}
-      {loading ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
-          {[1,2,3,4,5,6,7].map(i => (
-            <div key={i} className="stat-card" style={{ height: 100 }}>
-              <div style={{ background: '#e2e8f0', height: 10, width: '60%', borderRadius: 4, marginBottom: 8 }}>&nbsp;</div>
-              <div style={{ background: '#e2e8f0', height: 24, width: '40%', borderRadius: 4 }}>&nbsp;</div>
+        <TabsContent value="visao-geral">
+          {/* Loading State */}
+          {isLoading && (
+            <div className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="h-[120px] rounded-xl" />
+                ))}
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-[340px] rounded-xl" />
+                ))}
+              </div>
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="stats-grid">
-          {metrics.map((m, i) => (
-            <div key={i} className="stat-card">
-              <div className="label">{m.title}</div>
-              <div className="value" style={{ color: m.color }}>{m.value}</div>
+          )}
+
+          {/* Error State */}
+          {isError && (
+            <div className="glass-card rounded-xl p-8 text-center">
+              <p className="text-destructive font-medium text-lg">Erro ao carregar dados</p>
+              <p className="text-sm text-muted-foreground mt-2">{error?.message}</p>
+              <p className="text-xs text-muted-foreground mt-4">
+                Verifica se a Google Sheet está acessível e a API key está correta.
+              </p>
             </div>
-          ))}
-        </div>
-      )}
+          )}
 
-      {/* Charts Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
-        {/* Monthly Evolution */}
-        <div className="card">
-          <div className="card-header"><h3>Evolução Mensal</h3></div>
-          <div className="card-body" style={{ height: 300 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data?.monthlyData || []}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="month" fontSize={11} />
-                <YAxis fontSize={11} />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="leads" name="Leads" fill="#3b82f6" radius={[4,4,0,0]} />
-                <Bar dataKey="qualificadas" name="Qualificadas" fill="#8b5cf6" radius={[4,4,0,0]} />
-                <Bar dataKey="fechados" name="Fechos" fill="#10b981" radius={[4,4,0,0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+          {/* Data loaded */}
+          {data && (
+            <>
+              {/* KPI Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4 mb-8">
+                <KPICard
+                  title="Vendas"
+                  value={String(data.kpis.totalDrivers)}
+                  icon={<Users className="h-4 w-4" />}
+                  delay={0}
+                  tooltip="Número total de drivers que fecharam contrato no período selecionado."
+                  numericValue={data.kpis.totalDrivers}
+                  objective={quarterlyObjectives?.fechos}
+                  objectiveLabel={quarterlyObjectives ? String(quarterlyObjectives.fechos) : undefined}
+                />
+                <KPICard
+                  title="Investimento"
+                  value={`€${data.kpis.investimentoTotal.toLocaleString()}`}
+                  icon={<DollarSign className="h-4 w-4" />}
+                  delay={0.05}
+                  tooltip="Soma total do investimento em tráfego pago, equipa comercial e referências. Clica para ver o detalhe."
+                  onClick={() => setShowInvestmentBreakdown(true)}
+                  numericValue={data.kpis.investimentoTotal}
+                  objective={quarterlyObjectives?.budget}
+                  objectiveLabel={quarterlyObjectives ? `€${Math.round(quarterlyObjectives.budget).toLocaleString()}` : undefined}
+                />
+                <KPICard
+                  title="CAC Médio"
+                  value={`€${Math.round(data.kpis.cacMedio)}`}
+                  icon={<TrendingDown className="h-4 w-4" />}
+                  delay={0.1}
+                  tooltip="Custo de Aquisição por Cliente. Clica para ver o detalhe do cálculo."
+                  onClick={() => setShowCACBreakdown(true)}
+                />
+                <KPICard
+                  title="Ciclo Venda"
+                  value={`${Math.round(data.kpis.cicloVendaMedio)} dias`}
+                  icon={<Clock className="h-4 w-4" />}
+                  delay={0.15}
+                  tooltip="Média de dias entre a data de entrada do lead e a data de fecho do contrato."
+                />
+                <KPICard
+                  title="Churn"
+                  value={`${data.kpis.taxaChurn.toFixed(1)}%`}
+                  icon={<Percent className="h-4 w-4" />}
+                  delay={0.2}
+                  tooltip="Percentagem de drivers que saíram (cancelaram) em relação ao total de drivers fechados. Clica para ver o detalhe."
+                  onClick={() => setShowChurnBreakdown(true)}
+                />
+                <KPICard
+                  title="Ticket Médio"
+                  value={`€${Math.round(data.kpis.ticketMedio).toLocaleString()}`}
+                  icon={<BarChart3 className="h-4 w-4" />}
+                  delay={0.25}
+                  tooltip="Valor médio dos contratos dos drivers fechados no período selecionado."
+                />
+                <KPICard
+                  title="LTV Médio"
+                  value={`€${Math.round(data.kpis.ltv).toLocaleString()}`}
+                  icon={<TrendingUp className="h-4 w-4" />}
+                  delay={0.3}
+                  tooltip="Lifetime Value médio — receita real gerada por driver, calculada como Ticket mensal × Meses ativos. Clica para ver o detalhe."
+                  onClick={() => setShowLTVBreakdown(true)}
+                />
+              </div>
 
-        {/* Source Distribution */}
-        <div className="card">
-          <div className="card-header"><h3>Distribuição por Fonte</h3></div>
-          <div className="card-body" style={{ height: 300 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={data?.sourceData || []}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  label={({ name, percent }: any) => `${name} ${((percent || 0)*100).toFixed(0)}%`}
-                >
-                  {(data?.sourceData || []).map((_: any, i: number) => (
-                    <Cell key={i} fill={['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444','#d0c1ac'][i]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
+              {/* Revenue Chart - Full Width */}
+              <div className="mb-6">
+                <RevenueEvolutionChart data={data.monthlyRevenue} objectives={revenueObjectives} />
+              </div>
 
-      {/* Recent Activity */}
-      <div className="card">
-        <div className="card-header"><h3>Últimas Leads</h3></div>
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Telefone</th>
-                <th>Oferta</th>
-                <th>Estado</th>
-                <th>Data</th>
-                <th>Fonte</th>
-              </tr>
-            </thead>
-            <tbody>
-              {leads.slice(0, 10).map((l: any, i: number) => (
-                <tr key={i}>
-                  <td>{l['nome'] || '-'}</td>
-                  <td>{l['telefone'] || '-'}</td>
-                  <td>{l['oferta'] || '-'}</td>
-                  <td><span className="badge badge-stand">{l['estado'] || '-'}</span></td>
-                  <td>{l['data_registo'] || '-'}</td>
-                  <td>{l['fonte'] || '-'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  )
-}
+              {/* Charts Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <ClosingsEvolutionChart data={data.monthlyClosings} />
+                <AcquisitionSourceChart data={data.sourceDistribution} />
+              </div>
 
-export default Dashboard
+              {/* Monthly Detail */}
+              <MonthlyClosingsDetail data={data.monthlyClosingDetails} />
+
+              {/* Dialogs */}
+              <CACBreakdownDialog open={showCACBreakdown} onOpenChange={setShowCACBreakdown} breakdown={data.cacBreakdown} />
+              <ChurnBreakdownDialog open={showChurnBreakdown} onOpenChange={setShowChurnBreakdown} breakdown={data.churnBreakdown} />
+              <LTVBreakdownDialog open={showLTVBreakdown} onOpenChange={setShowLTVBreakdown} breakdown={data.ltvBreakdown} />
+              <InvestmentBreakdownDialog open={showInvestmentBreakdown} onOpenChange={setShowInvestmentBreakdown} breakdown={data.investmentBreakdown} />
+            </>
+          )}
+        </TabsContent>
+
+        <TabsContent value="progresso-mensal">
+          <MonthlyProgressTab />
+        </TabsContent>
+      </Tabs>
+    </DashboardLayout>
+  );
+};
+
+export default Dashboard;

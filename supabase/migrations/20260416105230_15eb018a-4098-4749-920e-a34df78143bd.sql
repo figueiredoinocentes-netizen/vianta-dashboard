@@ -1,0 +1,1 @@
+DELETE FROM public.ghl_notes_cache;

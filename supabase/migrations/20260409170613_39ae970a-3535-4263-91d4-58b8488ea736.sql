@@ -1,0 +1,1 @@
+ALTER TABLE funnel_visual_config ADD COLUMN aliases text[] NOT NULL DEFAULT '{}';

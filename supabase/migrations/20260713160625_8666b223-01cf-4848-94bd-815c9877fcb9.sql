@@ -1,0 +1,1 @@
+ALTER TABLE public.monthly_objectives ADD COLUMN IF NOT EXISTS pre_aprovacao_alvo numeric DEFAULT 0;
