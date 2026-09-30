@@ -486,6 +486,8 @@
       // ── Stock ──
       function renderStock(){
         const f=allVehicles.filter(v=>v.estado==='Para Venda'||v.estado==='Para Aluguer'||v.estado==='Em Preparação');
+        // Em Preparação aparece sempre em último
+        f.sort((a,b)=>(a.estado==='Em Preparação'?1:0)-(b.estado==='Em Preparação'?1:0));
         document.getElementById('totalCount').textContent=f.length;
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
         document.getElementById('newBtn').setAttribute('onclick',"openNovaViaturaModal()");
@@ -495,7 +497,11 @@
         }
         let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Matrícula</th><th>Modelo</th><th>Ano</th><th>KMs</th><th>Proprietário</th><th>Preço Venda</th><th>Aluguer/Sem</th><th>Estado</th></tr></thead><tbody>';
         f.forEach(v=>{
-          html+='<tr><td><strong class="clickable-plate" onclick="openVehicleDetail('+v.id+')" title="Ver detalhes">'+(v.matricula||'-')+'</strong></td><td>'+(v.marca_modelo||'')+'</td><td>'+(v.ano||'')+'</td><td>'+(v.kms_atuais||'-')+'</td><td style="font-size:12px">'+(v.proprietario||'')+'</td><td>'+(v.preco_venda?v.preco_venda+'€':'-')+'</td><td>'+(v.valor_aluguer_semanal||'-')+'</td><td>'+statusSelectHTML(v)+'</td></tr>';
+          const emPrep=v.estado==='Em Preparação';
+          // 🔧 à frente do modelo + tom mais suave na linha toda
+          const rowStyle=emPrep?'style="opacity:0.75"':'';
+          const iconPrep=emPrep?' <span class="prep-tag">🔧</span> ':'';
+          html+='<tr '+rowStyle+'><td><strong class="clickable-plate" onclick="openVehicleDetail('+v.id+')" title="Ver detalhes">'+(v.matricula||'-')+'</strong></td><td>'+iconPrep+(v.marca_modelo||'')+'</td><td>'+(v.ano||'')+'</td><td>'+(v.kms_atuais||'-')+'</td><td style="font-size:12px">'+(v.proprietario||'')+'</td><td>'+(v.preco_venda?v.preco_venda+'€':'-')+'</td><td>'+(v.valor_aluguer_semanal||'-')+'</td><td>'+statusSelectHTML(v)+'</td></tr>';
         });
         html+='</tbody></table></div></div>';
         document.getElementById('sectionContent').innerHTML=html;
