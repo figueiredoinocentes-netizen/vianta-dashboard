@@ -485,7 +485,7 @@
 
       // ── Stock ──
       function renderStock(){
-        const f=allVehicles.filter(v=>v.estado==='Para Venda'||v.estado==='Para Aluguer');
+        const f=allVehicles.filter(v=>v.estado==='Para Venda'||v.estado==='Para Aluguer'||v.estado==='Em Preparação');
         document.getElementById('totalCount').textContent=f.length;
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
         document.getElementById('newBtn').setAttribute('onclick',"openNovaViaturaModal()");
