@@ -82,6 +82,13 @@
       .status-badge:hover { filter: brightness(1.2); }
       .status-select { cursor: pointer; transition: filter 0.15s; border: none; outline: none; appearance: none; -webkit-appearance: none; -moz-appearance: none; font-family: inherit; padding-right: 22px !important; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; }
       .status-select:hover, .status-select:focus { filter: brightness(1.15); }
+      .search-bar { display: flex; gap: 8px; margin-bottom: 16px; position: relative; }
+      .search-bar input { flex: 1; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 36px 10px 12px; color: var(--fg); font-size: 13px; outline: none; }
+      .search-bar input:focus { border-color: var(--primary); }
+      .search-bar input::placeholder { color: var(--muted-fg); opacity: 0.7; }
+      .search-clear { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--muted-fg); cursor: pointer; font-size: 16px; padding: 4px; line-height: 1; }
+      .search-clear:hover { color: var(--fg); }
+      .badge-primary { background: var(--primary); color: var(--primary-fg); }
       .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: none; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-decoration: none; }
       .btn-primary { background: var(--primary); color: var(--primary-fg); box-shadow: 0 1px 3px rgba(244,175,37,0.25); }
       .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 3px 8px rgba(244,175,37,0.3); }
@@ -203,6 +210,10 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg> <span id="newBtnLabel">Nova Viatura</span>
               </button>
             </div>
+          </div>
+          <div class="search-bar">
+            <input id="searchInput" type="text" placeholder="🔍 Pesquisar por matrícula, modelo, motorista, investidor, armazém…" oninput="applySearch()" />
+            <button class="search-clear" id="clearSearch" onclick="clearSearch()" style="display:none">✕</button>
           </div>
           <div id="sectionContent"></div>
         </div>
@@ -360,7 +371,7 @@
       </main>
     </div>
     <script>
-      let allVehicles=[],inventory=[],motoristasMap={},investidoresList=[],clientesList=[],currentSection='checkin';
+      let allVehicles=[],inventory=[],motoristasMap={},investidoresList=[],clientesList=[],currentSection='checkin',searchQuery='';
 
       // Checklist de preparação — Instrução de Trabalho "Preparação de Viatura STAND".
       // Aluguer ainda não tem checklist própria definida (fica vazia por agora).
@@ -407,6 +418,27 @@
         return '<select class="badge status-select '+cls+'" onchange="setStatus('+v.id+',this.value)" title="Alterar estado">'+
           STATUSES.map(s=>'<option value="'+s+'"'+(s===v.estado?' selected':'')+'>'+s+'</option>').join('')+
         '</select>';
+      }
+
+      // ── Barra de pesquisa global ──
+      function matchesSearch(q,item){
+        if(!q)return true;
+        q=q.toLowerCase();
+        const fields=[item.matricula,item.marca_modelo,item.proprietario,item.motorista_atual,
+          item.Item,item.item,item.nome,item.Categoria,item.categoria,item.email,item.telefone,item.marca_modelo];
+        return fields.some(f=>f&&String(f).toLowerCase().includes(q));
+      }
+      function applySearch(){
+        const inp=document.getElementById('searchInput');
+        searchQuery=inp.value.trim().toLowerCase();
+        document.getElementById('clearSearch').style.display=searchQuery?'block':'none';
+        render();
+      }
+      function clearSearch(){
+        document.getElementById('searchInput').value='';
+        searchQuery='';
+        document.getElementById('clearSearch').style.display='none';
+        render();
       }
 
       async function fetchData(){
@@ -467,7 +499,7 @@
 
       // ── Frota Ativa ──
       function renderFrota(){
-        const f=allVehicles.filter(v=>v.estado==='Alugado'&&v.tipo_gestao!=='Slot');
+        const f=allVehicles.filter(v=>v.estado==='Alugado'&&v.tipo_gestao!=='Slot').filter(v=>matchesSearch(searchQuery,v));
         document.getElementById('totalCount').textContent=f.length;
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
         document.getElementById('newBtn').setAttribute('onclick',"openNovaViaturaModal()");
@@ -485,7 +517,7 @@
 
       // ── Stock ──
       function renderStock(){
-        const f=allVehicles.filter(v=>v.estado==='Para Venda'||v.estado==='Para Aluguer'||v.estado==='Em Preparação');
+        const f=allVehicles.filter(v=>v.estado==='Para Venda'||v.estado==='Para Aluguer'||v.estado==='Em Preparação').filter(v=>matchesSearch(searchQuery,v));
         // Em Preparação aparece sempre em último
         f.sort((a,b)=>(a.estado==='Em Preparação'?1:0)-(b.estado==='Em Preparação'?1:0));
         document.getElementById('totalCount').textContent=f.length;
@@ -509,7 +541,7 @@
 
       // ── Manutenções ──
       function renderManutencao(){
-        const f=allVehicles.filter(v=>v.estado==='Manutenção');
+        const f=allVehicles.filter(v=>v.estado==='Manutenção').filter(v=>matchesSearch(searchQuery,v));
         document.getElementById('totalCount').textContent=f.length;
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
         document.getElementById('newBtn').setAttribute('onclick',"openNovaViaturaModal()");
@@ -550,7 +582,7 @@
       }
 
       function renderCheckin(){
-        const f=allVehicles.filter(v=>v.estado==='Em Preparação');
+        const f=allVehicles.filter(v=>v.estado==='Em Preparação').filter(v=>matchesSearch(searchQuery,v));
         document.getElementById('totalCount').textContent=f.length;
         document.getElementById('newBtnLabel').textContent='Nova Viatura';
         document.getElementById('newBtn').setAttribute('onclick',"openNovaViaturaModal()");
@@ -855,15 +887,16 @@
 
       // ── Armazém ──
       function renderArmazem(){
-        document.getElementById('totalCount').textContent=inventory.length;
+        const f=inventory.filter(v=>matchesSearch(searchQuery,v));
+        document.getElementById('totalCount').textContent=f.length;
         document.getElementById('newBtnLabel').textContent='Novo Item';
         document.getElementById('newBtn').setAttribute('onclick',"document.getElementById('armazemModal').style.display='flex'");
-        if(!inventory.length){
+        if(!f.length){
           document.getElementById('sectionContent').innerHTML=emptyStateHTML('📦','Nenhum item no armazém');
           return;
         }
         let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Item</th><th>Categoria</th><th>Stock</th><th>Mínimo</th><th>Unidade</th><th>Fornecedor</th><th>Última Compra</th></tr></thead><tbody>';
-        inventory.forEach(v=>{
+        f.forEach(v=>{
           const stock=parseInt(v.stock_atual||'0');
           const minimo=parseInt(v.stock_minimo||'0');
           const statusClass=stock<minimo?'low-stock':(stock<=minimo?'warning-stock':'ok-stock');
@@ -875,15 +908,16 @@
 
       // ── Investidores ──
       function renderInvestidores(){
-        document.getElementById('totalCount').textContent=investidoresList.length;
+        const f=investidoresList.filter(i=>matchesSearch(searchQuery,i));
+        document.getElementById('totalCount').textContent=f.length;
         document.getElementById('newBtnLabel').textContent='Novo Investidor';
         document.getElementById('newBtn').setAttribute('onclick','openInvestidorModal()');
-        if(!investidoresList.length){
+        if(!f.length){
           document.getElementById('sectionContent').innerHTML=emptyStateHTML('🤝','Nenhum investidor registado');
           return;
         }
         let html='<div class="card"><div class="table-wrap"><table><thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th>IBAN</th><th>NIF</th><th>Viaturas</th></tr></thead><tbody>';
-        investidoresList.forEach(i=>{
+        f.forEach(i=>{
           const numCarros=allVehicles.filter(v=>v.investidor_id===i.id).length;
           html+='<tr><td><strong class="clickable-plate" onclick="openInvestidorModal('+i.id+')" title="Editar">'+(i.nome||'')+'</strong></td><td style="font-size:12px">'+(i.email||'-')+'</td><td style="font-size:12px">'+(i.telefone||'-')+'</td><td style="font-size:12px">'+(i.iban||'-')+'</td><td style="font-size:12px">'+(i.nif||'-')+'</td><td>'+numCarros+'</td></tr>';
         });
