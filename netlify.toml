@@ -6,6 +6,10 @@
   # O URL e a chave publishable do Supabase vão no bundle do browser por desenho (são públicos);
   # sem isto o scanner de segredos do Netlify falha o build com "Exposed secrets detected".
   SECRETS_SCAN_OMIT_KEYS = "SUPABASE_URL,VITE_SUPABASE_URL,VITE_SUPABASE_PUBLISHABLE_KEY,VITE_SUPABASE_PROJECT_ID"
+  # Valores públicos por desenho (URL e chave publishable do projeto Supabase da Aquisição).
+  VITE_SUPABASE_URL = "https://mowptkpnjlttbqgjtena.supabase.co"
+  VITE_SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vd3B0a3Buamx0dGJxZ2p0ZW5hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzNzYzNzQsImV4cCI6MjA4NTk1MjM3NH0.mvikzwjrapWyf9sbNyUUdKa04CDWtAFU0uwlkUSW5FE"
+  VITE_SUPABASE_PROJECT_ID = "mowptkpnjlttbqgjtena"
 
 [functions]
   directory = "netlify/functions"
