@@ -21,7 +21,7 @@ exports.handler = async (event) => {
     const binary = Buffer.from(dataBase64, 'base64');
     const res = await fetch(SUPABASE_URL + '/storage/v1/object/' + bucket + '/' + name, {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + SUPABASE_SERVICE_KEY, 'Content-Type': 'image/jpeg' },
+      headers: { 'Authorization': 'Bearer ' + SUPABASE_SERVICE_KEY, 'apikey': SUPABASE_SERVICE_KEY, 'Content-Type': 'image/jpeg' },
       body: binary,
     });
 
