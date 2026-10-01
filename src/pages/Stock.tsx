@@ -354,6 +354,61 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
   );
 }
 
+/** Valor numérico usado no filtro de preço: preço de venda (Venda) ou aluguer semanal (Aluguer). */
+function valorNumerico(v: Carro, gestao: Gestao): number | null {
+  const bruto = gestao === 'Aluguer' ? v.valor_aluguer_semanal : v.preco_venda;
+  if (vazio(bruto)) return null;
+  let s = String(bruto).replace(/[^\d.,]/g, '');
+  if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, ''); // 17.900 → 17900
+  else s = s.replace(',', '.');
+  const n = parseFloat(s);
+  return isNaN(n) ? null : n;
+}
+
+// Categorias TVDE escritas de várias formas na sheet → um nome único.
+const CATEGORIA_CANONICA: Record<string, string> = {
+  courier: 'Courier',
+  womendrivers: 'Women Drivers',
+  storepickup: 'Store Pickup',
+  prioridade: 'Prioridade',
+  priority: 'Prioridade',
+  uberx: 'UberX',
+  uberxl: 'UberXL',
+  comfort: 'Comfort',
+  confort: 'Comfort',
+  electric: 'Electric',
+  eletric: 'Electric',
+  black: 'Black',
+  green: 'Green',
+};
+
+function categoriasDe(v: Carro): string[] {
+  const out = new Set<string>();
+  for (const parte of String(v.categorias_tvde || '').split(/[,;+]/)) {
+    const chave = normalizeText(parte).replace(/[^a-z]/g, '');
+    if (!chave) continue;
+    out.add(CATEGORIA_CANONICA[chave] || parte.trim());
+  }
+  return [...out];
+}
+
+function Chip({ ativo, onClick, children }: { ativo: boolean; onClick: () => void; children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'rounded-full border px-2.5 py-1 text-xs transition-colors',
+        ativo
+          ? 'border-primary bg-primary/15 text-primary'
+          : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground',
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
 /** true a partir de 1024 px (largura em que a ficha cabe ao lado da lista). */
 function useDesktop() {
   const query = '(min-width: 1024px)';
@@ -385,21 +440,61 @@ const Stock = () => {
     [stock],
   );
 
+  const [valorMin, setValorMin] = useState('');
+  const [valorMax, setValorMax] = useState('');
+  const [combs, setCombs] = useState<string[]>([]);
+  const [cats, setCats] = useState<string[]>([]);
+
+  const doTipo = useMemo(() => stock.filter((v) => v.tipo_gestao === gestao), [stock, gestao]);
+
+  // Opções dos filtros: só o que existe nas viaturas do separador atual.
+  const combustiveis = useMemo(
+    () => [...new Set(doTipo.map((v) => (v.combustivel || '').trim()).filter(Boolean))].sort(),
+    [doTipo],
+  );
+  const categorias = useMemo(
+    () => [...new Set(doTipo.flatMap(categoriasDe))].sort((a, b) => a.localeCompare(b)),
+    [doTipo],
+  );
+
+  const filtrosAtivos = !!(valorMin || valorMax || combs.length || cats.length);
+  const limparFiltros = () => {
+    setValorMin('');
+    setValorMax('');
+    setCombs([]);
+    setCats([]);
+  };
+  const alternar = (lista: string[], valor: string, set: (l: string[]) => void) =>
+    set(lista.includes(valor) ? lista.filter((x) => x !== valor) : [...lista, valor]);
+
   const visiveis = useMemo(() => {
     const q = normalizeText(search.trim());
-    return stock
-      .filter((v) => v.tipo_gestao === gestao)
+    const min = valorMin ? Number(valorMin) : null;
+    const max = valorMax ? Number(valorMax) : null;
+    return doTipo
       .filter(
         (v) =>
           !q ||
           [v.marca_modelo, v.matricula, v.cor, v.versao].some((c) => normalizeText(c).includes(q)),
       )
+      .filter((v) => {
+        if (min == null && max == null) return true;
+        const n = valorNumerico(v, gestao);
+        if (n == null) return false; // sem valor definido não cabe numa gama de preço
+        return (min == null || n >= min) && (max == null || n <= max);
+      })
+      .filter((v) => !combs.length || combs.includes((v.combustivel || '').trim()))
+      .filter((v) => {
+        if (!cats.length) return true;
+        const tem = categoriasDe(v);
+        return cats.every((c) => tem.includes(c)); // tem de ter TODAS as categorias escolhidas
+      })
       .sort(
         (a, b) =>
           ORDEM[disponibilidade(a)] - ORDEM[disponibilidade(b)] ||
           (a.marca_modelo || '').localeCompare(b.marca_modelo || ''),
       );
-  }, [stock, gestao, search]);
+  }, [doTipo, gestao, search, valorMin, valorMax, combs, cats]);
 
   const selecionado = visiveis.find((v) => v.id === selecionadoId) || visiveis[0] || null;
   const prontos = visiveis.filter((v) => disponibilidade(v) === 'pronto').length;
@@ -420,7 +515,10 @@ const Stock = () => {
               <button
                 key={g}
                 type="button"
-                onClick={() => setGestao(g)}
+                onClick={() => {
+                  setGestao(g);
+                  limparFiltros();
+                }}
                 className={cn(
                   'rounded-md px-4 py-1.5 text-sm font-medium transition-colors',
                   gestao === g ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground',
@@ -441,6 +539,66 @@ const Stock = () => {
           </div>
         </div>
 
+        {/* Filtros: valor, combustível e categorias TVDE */}
+        <div className="space-y-2 rounded-xl border border-border bg-card/50 p-3">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">
+                {gestao === 'Aluguer' ? 'Aluguer (€/sem)' : 'Valor (€)'}
+              </span>
+              <Input
+                type="number"
+                inputMode="numeric"
+                min={0}
+                value={valorMin}
+                onChange={(e) => setValorMin(e.target.value)}
+                placeholder="Mín."
+                className="h-8 w-24 text-xs"
+              />
+              <span className="text-xs text-muted-foreground">–</span>
+              <Input
+                type="number"
+                inputMode="numeric"
+                min={0}
+                value={valorMax}
+                onChange={(e) => setValorMax(e.target.value)}
+                placeholder="Máx."
+                className="h-8 w-24 text-xs"
+              />
+            </div>
+            {combustiveis.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="mr-1 text-xs text-muted-foreground">Combustível</span>
+                {combustiveis.map((c) => (
+                  <Chip key={c} ativo={combs.includes(c)} onClick={() => alternar(combs, c, setCombs)}>
+                    {c}
+                  </Chip>
+                ))}
+              </div>
+            )}
+          </div>
+          {categorias.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-xs text-muted-foreground">Categorias TVDE</span>
+              {categorias.map((c) => (
+                <Chip key={c} ativo={cats.includes(c)} onClick={() => alternar(cats, c, setCats)}>
+                  {c}
+                </Chip>
+              ))}
+            </div>
+          )}
+          {filtrosAtivos && (
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              <span>
+                {visiveis.length} de {doTipo.length} viaturas
+              </span>
+              <button type="button" onClick={limparFiltros} className="text-primary hover:underline">
+                Limpar filtros
+              </button>
+            </div>
+          )}
+        </div>
+
         {isError ? (
           <div className="rounded-xl border border-border p-8 text-center text-sm text-destructive">
             Erro ao carregar o stock.
@@ -449,7 +607,11 @@ const Stock = () => {
           <Skeleton className="h-[400px] rounded-xl" />
         ) : !visiveis.length ? (
           <div className="rounded-xl border border-border p-10 text-center text-sm text-muted-foreground">
-            {search ? `Nenhum resultado para "${search}"` : `Sem viaturas em ${gestao.toLowerCase()}`}
+            {search
+              ? `Nenhum resultado para "${search}"`
+              : filtrosAtivos
+                ? 'Nenhuma viatura com estes filtros.'
+                : `Sem viaturas em ${gestao.toLowerCase()}`}
           </div>
         ) : (
           <div className="grid items-start gap-4 lg:grid-cols-[minmax(300px,380px)_minmax(0,1fr)]">
