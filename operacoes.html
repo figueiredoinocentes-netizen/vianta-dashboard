@@ -270,6 +270,10 @@
                 <div><label>Estado</label><select name="estado" onchange="onVdEstadoChange()"><option value="Em Preparação">Em Preparação</option><option value="Alugado">Alugado</option><option value="Para Venda">Para Venda</option><option value="Para Aluguer">Para Aluguer</option><option value="Inativo">Inativo</option><option value="Manutenção">Manutenção</option><option value="Vendido">Vendido</option></select></div>
                 <div id="vdPrecoVendaWrap" class="full"><label>Preço Venda (€)</label><input name="precoVenda"/></div>
                 <div id="vdPrecoAluguerWrap" class="full"><label>Valor Aluguer (€/sem)</label><input name="precoAluguer"/></div>
+                <div id="vdCaucaoWrap" class="full" style="display:none">
+                  <label>Caução</label>
+                  <div id="vdCaucaoContent"></div>
+                </div>
                 <div id="vdMotoristaWrap" class="full"><label>Motorista Atual</label><select name="motoristaAtual"><option value="">Nenhum</option></select></div>
                 <div id="vdClienteWrap" class="full" style="display:none"><label>Cliente (comprador)</label><div style="display:flex;gap:8px"><select name="clienteId" style="flex:1"><option value="">Selecionar</option></select><button type="button" class="btn btn-outline btn-sm" onclick="openClienteModal()" title="Novo cliente">+ Novo</button></div></div>
               </div>
@@ -634,8 +638,43 @@
       function onVdGestaoChange(){
         const f=document.getElementById('vdForm');
         const isVenda=f.gestao.value==='Venda';
+        const isAluguer=f.gestao.value==='Aluguer';
         document.getElementById('vdPrecoVendaWrap').style.display=isVenda?'block':'none';
         document.getElementById('vdPrecoAluguerWrap').style.display=isVenda?'none':'block';
+        document.getElementById('vdCaucaoWrap').style.display=isAluguer?'block':'none';
+        if(isAluguer){
+          const precoVenda=parseFloat(f.precoVenda.value||'0');
+          const total=precoVenda>25000?600:400;
+          const meta=total===600?'300€':'200€';
+          const p1=total===600?'100€':'100€';
+          const p2=total===600?'100€':'100€';
+          const p3=total===600?'100€':'—';
+          document.getElementById('vdCaucaoContent').innerHTML=
+            '<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:16px">'+
+            '<div style="font-size:16px;font-weight:600;margin-bottom:12px">💳 Caução: <strong style="color:var(--primary)">'+total+'€</strong></div>'+
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:13px">'+
+            '<div style="background:var(--muted-bg);border-radius:8px;padding:12px">'+
+            '<div style="font-weight:600;color:var(--fg);margin-bottom:6px">📋 Prestações Vianta</div>'+
+            '<div style="font-size:12px;color:var(--muted-fg);margin-bottom:8px">Sem juros, gerido internamente</div>'+
+            '<div style="font-size:22px;font-weight:700;color:var(--primary)">'+meta+'</div>'+
+            '<div style="font-size:12px;color:var(--muted-fg)">1.ª prestação (entrega)</div>'+
+            '<div style="margin-top:8px;font-size:12px;color:var(--muted-fg)">Depois: <strong>'+p1+'</strong> + <strong>'+p2+'</strong>'+(total===600?' + <strong>'+p3+'</strong>':'')+' (mensal)</div>'+
+            '</div>'+
+            '<div style="background:var(--muted-bg);border-radius:8px;padding:12px">'+
+            '<div style="font-weight:600;color:var(--fg);margin-bottom:6px">🏦 Parcela Já</div>'+
+            '<div style="font-size:12px;color:var(--muted-fg);margin-bottom:8px">Crédito no terminal, débito automático</div>'+
+            '<div style="margin-top:4px;font-size:12px;color:var(--muted-fg)">'+
+            '<div style="margin-top:4px;color:#6ee7b7">✅ CC português</div>'+
+            '<div style="color:#6ee7b7">✅ Cartão multibanco (mesma pessoa)</div>'+
+            '<div style="margin-top:4px;color:#fde68a">Atenção: para verificar BdP</div>'+
+            '</div>'+
+            '<div style="margin-top:8px;padding:6px 10px;background:#312e81;border-radius:6px;font-size:11px;color:#a5b4fc">'+
+            '⚠️ Se faltar CC português ou cartão multibanco da mesma pessoa → <strong style="color:var(--primary)">Opção 1</strong>'+
+            '</div>'+
+            '</div>'+
+            '</div>'+
+            '</div>';
+        }
       }
 
       function onVdProprietarioChange(){
