@@ -88,17 +88,17 @@ function resumoWhatsApp(v: Carro, gestao: Gestao) {
 
 function Linha({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="flex items-baseline justify-between gap-4 border-b border-border py-1.5 last:border-b-0">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="min-w-0 break-words text-right text-sm text-foreground">{children}</span>
+    <div className="flex items-baseline gap-3 border-b border-border/60 py-1 last:border-b-0">
+      <span className="w-[42%] shrink-0 text-xs text-muted-foreground">{label}</span>
+      <span className="min-w-0 break-words text-sm text-foreground">{children}</span>
     </div>
   );
 }
 
 function Bloco({ titulo, children }: { titulo: string; children: ReactNode }) {
   return (
-    <section className="mt-5">
-      <h3 className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+    <section className="mb-4 break-inside-avoid">
+      <h3 className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-primary/80">
         {titulo}
       </h3>
       <div>{children}</div>
@@ -133,6 +133,7 @@ function BadgeEstado({ v }: { v: Carro }) {
   );
 }
 
+/** Cartão compacto: miniatura pequena + dados essenciais (o foco é a informação, não a imagem). */
 function CartaoViatura({
   v,
   gestao,
@@ -151,32 +152,32 @@ function CartaoViatura({
       type="button"
       onClick={onSelect}
       className={cn(
-        'overflow-hidden rounded-xl border bg-card text-left transition',
+        'flex w-full items-stretch gap-3 overflow-hidden rounded-xl border bg-card p-2 text-left transition',
         selecionado ? 'border-2 border-primary' : 'border-border hover:border-primary/50',
       )}
     >
       <div
         className={cn(
-          'flex aspect-[4/3] w-full items-center justify-center overflow-hidden bg-muted/40',
+          'flex h-[72px] w-24 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted/40',
           disp !== 'pronto' && 'opacity-60 grayscale',
         )}
       >
         {foto ? (
           <img src={foto} alt="" loading="lazy" className="h-full w-full object-contain" />
         ) : (
-          <Car className="h-9 w-9 text-muted-foreground/40" />
+          <Car className="h-6 w-6 text-muted-foreground/40" />
         )}
       </div>
-      <div className={cn('space-y-1 p-3', disp !== 'pronto' && 'opacity-70')}>
+      <div className={cn('min-w-0 flex-1 space-y-0.5', disp !== 'pronto' && 'opacity-70')}>
         <div className="flex items-baseline justify-between gap-2">
-          <span className="line-clamp-2 font-display text-sm font-semibold text-foreground">
+          <span className="line-clamp-1 font-display text-sm font-semibold text-foreground">
             {v.marca_modelo || 'Sem modelo'}
           </span>
           <span className="shrink-0 text-sm font-semibold text-foreground">
             {precoPrincipal(v, gestao)}
           </span>
         </div>
-        <div className="text-xs text-muted-foreground">
+        <div className="truncate text-xs text-muted-foreground">
           {[v.ano, vazio(v.kms_atuais) ? null : `${v.kms_atuais} km`, v.combustivel]
             .filter((x) => !vazio(x))
             .join(' · ') || '—'}
@@ -209,113 +210,132 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
 
   return (
     <div className="min-w-0 rounded-xl border border-border bg-card p-4">
-      <div
-        className={cn(
-          'flex h-72 w-full items-center justify-center overflow-hidden rounded-lg bg-muted/40 sm:h-[380px]',
-          disp !== 'pronto' && 'opacity-70',
-        )}
-      >
-        {fotos[foto] ? (
-          <img src={fotos[foto]} alt="" className="h-full w-full object-contain" />
-        ) : (
-          <Car className="h-12 w-12 text-muted-foreground/40" />
-        )}
-      </div>
-      {fotos.length > 1 && (
-        <div className="mt-2 flex gap-2 overflow-x-auto">
-          {fotos.map((f, i) => (
-            <button
-              key={f}
-              type="button"
-              onClick={() => setFoto(i)}
-              className={cn(
-                'h-12 w-16 shrink-0 overflow-hidden rounded-md border',
-                i === foto ? 'border-2 border-primary' : 'border-border',
-              )}
-            >
-              <img src={f} alt="" className="h-full w-full object-cover" />
-            </button>
-          ))}
+      <div className="flex flex-col gap-4 sm:flex-row">
+        {/* Foto pequena à esquerda */}
+        <div className="w-full shrink-0 sm:w-56">
+          <div
+            className={cn(
+              'flex aspect-[4/3] max-h-52 w-full items-center justify-center overflow-hidden rounded-lg bg-muted/40 sm:max-h-none',
+              disp !== 'pronto' && 'opacity-70',
+            )}
+          >
+            {fotos[foto] ? (
+              <img src={fotos[foto]} alt="" className="h-full w-full object-contain" />
+            ) : (
+              <Car className="h-10 w-10 text-muted-foreground/40" />
+            )}
+          </div>
+          {fotos.length > 1 && (
+            <div className="mt-2 flex gap-1.5 overflow-x-auto pb-1">
+              {fotos.map((f, i) => (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => setFoto(i)}
+                  className={cn(
+                    'h-9 w-12 shrink-0 overflow-hidden rounded border',
+                    i === foto ? 'border-2 border-primary' : 'border-border',
+                  )}
+                >
+                  <img src={f} alt="" className="h-full w-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-      )}
 
-      <div className="mt-3 flex items-start justify-between gap-3">
-        <div>
-          <h2 className="font-display text-lg font-bold text-foreground">
-            {v.marca_modelo || 'Sem modelo'}
-          </h2>
-          <p className="text-xs text-muted-foreground">
-            {[v.matricula, v.versao, v.cor, v.caixa].filter((x) => !vazio(x)).join(' · ') || '—'}
-          </p>
-          <div className="mt-2">
-            <BadgeEstado v={v} />
+        {/* Identificação e valores à direita */}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="font-display text-lg font-bold leading-tight text-foreground">
+                {v.marca_modelo || 'Sem modelo'}
+              </h2>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {[v.matricula, v.versao, v.cor, v.caixa].filter((x) => !vazio(x)).join(' · ') || '—'}
+              </p>
+              <div className="mt-1.5">
+                <BadgeEstado v={v} />
+              </div>
+            </div>
+            <Button variant="outline" size="sm" className="shrink-0" onClick={copiar}>
+              <Copy /> Copiar resumo
+            </Button>
+          </div>
+
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            {[
+              ['Preço venda', eur(v.preco_venda)],
+              ['Aluguer / sem', eur(v.valor_aluguer_semanal)],
+              ['Caução', eur(v.caucao)],
+            ].map(([label, valor]) => (
+              <div key={label} className="rounded-lg bg-muted/40 px-2.5 py-2">
+                <div className="text-[11px] text-muted-foreground">{label}</div>
+                <div className="font-display text-base font-bold text-foreground">{valor}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            {[
+              ['Crédito 120 m', eur(v.credito_120_meses, '/mês')],
+              ['Crédito 60 m', eur(v.credito_60_meses, '/mês')],
+              ['Crédito 48 m', eur(v.credito_48_meses, '/mês')],
+            ].map(([label, valor]) => (
+              <div key={label} className="rounded-lg border border-border px-2.5 py-1.5">
+                <div className="text-[11px] text-muted-foreground">{label}</div>
+                <div className="text-sm font-semibold text-foreground">{valor}</div>
+              </div>
+            ))}
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={copiar}>
-          <Copy /> Copiar resumo
-        </Button>
       </div>
 
-      <div className="mt-3 grid grid-cols-3 gap-2">
-        {[
-          ['Preço venda', eur(v.preco_venda)],
-          ['Aluguer / sem', eur(v.valor_aluguer_semanal)],
-          ['Caução', eur(v.caucao)],
-        ].map(([label, valor]) => (
-          <div key={label} className="rounded-lg bg-muted/40 p-2.5">
-            <div className="text-[11px] text-muted-foreground">{label}</div>
-            <div className="font-display text-base font-bold text-foreground">{valor}</div>
-          </div>
-        ))}
+      {/* Restante informação em colunas, sem espaço vazio */}
+      <div className="mt-4 border-t border-border pt-4 md:columns-2 md:gap-8 xl:columns-3">
+        <Bloco titulo="Viatura">
+          <Linha label="Marca / modelo">{txt(v.marca_modelo)}</Linha>
+          <Linha label="Versão">{txt(v.versao)}</Linha>
+          <Linha label="Matrícula">{txt(v.matricula)}</Linha>
+          <Linha label="Ano">{txt(v.ano)}</Linha>
+          <Linha label="KMs atuais">{km(v.kms_atuais)}</Linha>
+          <Linha label="Combustível">{txt(v.combustivel)}</Linha>
+          <Linha label="Cor">{txt(v.cor)}</Linha>
+          <Linha label="Caixa">{txt(v.caixa)}</Linha>
+        </Bloco>
+
+        <Bloco titulo="Motorização">
+          <Linha label="Cavalos">{txt(v.cavalos)}</Linha>
+          <Linha label="Autonomia">{km(v.autonomia_km)}</Linha>
+          <Linha label="Bateria">{vazio(v.bateria_kwh) ? '—' : `${v.bateria_kwh} kWh`}</Linha>
+          <Linha label="Estado da bateria">
+            {vazio(v.estado_bateria_pct) ? '—' : `${v.estado_bateria_pct}%`}
+          </Linha>
+          <Linha label="Bagageira">{vazio(v.volume_bagageira) ? '—' : `${v.volume_bagageira} L`}</Linha>
+        </Bloco>
+
+        <Bloco titulo="TVDE e garantias">
+          <Linha label="Categorias TVDE">{txt(v.categorias_tvde)}</Linha>
+          <Linha label="Fim elegibilidade">{txt(v.fim_elegibilidade_tvde)}</Linha>
+          <Linha label="Garantia viatura">{txt(v.garantia_viatura)}</Linha>
+          <Linha label="Garantia bateria">{txt(v.garantia_bateria)}</Linha>
+        </Bloco>
+
+        <Bloco titulo="Comercial">
+          <Linha label="Tipo de gestão">{txt(v.tipo_gestao)}</Linha>
+          <Linha label="Estado">{txt(v.estado)}</Linha>
+          <Linha label="Pronto previsto">{txt(dataPt(v.data_previsao_pronto))}</Linha>
+          <Linha label="Motorista atual">{txt(v.motorista_atual)}</Linha>
+          <Linha label="Documentos">
+            <LinkExterno href={v.docs_link} />
+          </Linha>
+          <Linha label="Fotos">
+            <LinkExterno href={v.fotos_link} />
+          </Linha>
+          <Linha label="Observações">{txt(v.obs)}</Linha>
+        </Bloco>
       </div>
 
-      <Bloco titulo="Viatura">
-        <Linha label="Marca / modelo">{txt(v.marca_modelo)}</Linha>
-        <Linha label="Versão">{txt(v.versao)}</Linha>
-        <Linha label="Matrícula">{txt(v.matricula)}</Linha>
-        <Linha label="Ano">{txt(v.ano)}</Linha>
-        <Linha label="KMs atuais">{km(v.kms_atuais)}</Linha>
-        <Linha label="Combustível">{txt(v.combustivel)}</Linha>
-        <Linha label="Cor">{txt(v.cor)}</Linha>
-        <Linha label="Caixa">{txt(v.caixa)}</Linha>
-        <Linha label="Autonomia">{km(v.autonomia_km)}</Linha>
-      </Bloco>
-
-      <Bloco titulo="Motorização">
-        <Linha label="Cavalos">{txt(v.cavalos)}</Linha>
-        <Linha label="Bateria">{vazio(v.bateria_kwh) ? "—" : `${v.bateria_kwh} kWh`}</Linha>
-        <Linha label="Estado da bateria">{vazio(v.estado_bateria_pct) ? "—" : `${v.estado_bateria_pct}%`}</Linha>
-        <Linha label="Volume da bagageira">{vazio(v.volume_bagageira) ? "—" : `${v.volume_bagageira} L`}</Linha>
-      </Bloco>
-
-      <Bloco titulo="Simulação de crédito (prestação mensal)">
-        <Linha label="120 meses (10 anos)">{eur(v.credito_120_meses, "/mês")}</Linha>
-        <Linha label="60 meses (5 anos)">{eur(v.credito_60_meses, "/mês")}</Linha>
-        <Linha label="48 meses (4 anos)">{eur(v.credito_48_meses, "/mês")}</Linha>
-      </Bloco>
-
-      <Bloco titulo="TVDE">
-        <Linha label="Categorias TVDE">{txt(v.categorias_tvde)}</Linha>
-        <Linha label="Fim de elegibilidade TVDE">{txt(v.fim_elegibilidade_tvde)}</Linha>
-        <Linha label="Garantia viatura">{txt(v.garantia_viatura)}</Linha>
-        <Linha label="Garantia bateria">{txt(v.garantia_bateria)}</Linha>
-      </Bloco>
-
-      <Bloco titulo="Comercial">
-        <Linha label="Tipo de gestão">{txt(v.tipo_gestao)}</Linha>
-        <Linha label="Estado">{txt(v.estado)}</Linha>
-        <Linha label="Pronto previsto">{txt(dataPt(v.data_previsao_pronto))}</Linha>
-        <Linha label="Motorista atual">{txt(v.motorista_atual)}</Linha>
-        <Linha label="Documentos">
-          <LinkExterno href={v.docs_link} />
-        </Linha>
-        <Linha label="Fotos">
-          <LinkExterno href={v.fotos_link} />
-        </Linha>
-        <Linha label="Observações">{txt(v.obs)}</Linha>
-      </Bloco>
-
-      <div className="mt-5 rounded-lg border border-dashed border-border p-3">
+      <div className="mt-1 rounded-lg border border-dashed border-border px-3 py-2">
         <button
           type="button"
           onClick={() => setInterno((s) => !s)}
@@ -325,7 +345,7 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
           {interno ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
         </button>
         {interno && (
-          <div className="mt-2">
+          <div className="mt-1">
             <Linha label="Proprietário">{txt(v.proprietario)}</Linha>
           </div>
         )}
@@ -432,8 +452,8 @@ const Stock = () => {
             {search ? `Nenhum resultado para "${search}"` : `Sem viaturas em ${gestao.toLowerCase()}`}
           </div>
         ) : (
-          <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-            <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-1 xl:grid-cols-2">
+          <div className="grid items-start gap-4 lg:grid-cols-[minmax(300px,380px)_minmax(0,1fr)]">
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
               {visiveis.map((v) => (
                 <CartaoViatura
                   key={v.id}
