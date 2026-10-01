@@ -5,9 +5,9 @@ import { RefreshCw, Star, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
-  importarFotoDaDrive,
+  driveFolderUrl,
+  importarFotosDaPasta,
   listDriveCarFolders,
-  listDriveFotos,
   uploadFoto,
 } from '@/lib/operacoes/central';
 import { normalizeText } from '@/lib/operacoes/constants';
@@ -15,7 +15,6 @@ import type { Carro } from '@/lib/operacoes/types';
 import { errorMessage, useUpdateCarroField } from '@/hooks/useOperacoes';
 import { NativeSelect } from './shared';
 
-const FOLDER_URL = (id: string) => `https://drive.google.com/drive/folders/${id}`;
 const folderIdFromLink = (link: string | null | undefined) =>
   (link || '').match(/\/folders\/([A-Za-z0-9_-]+)/)?.[1] || '';
 
@@ -69,31 +68,22 @@ export function FotosEditor({ carro }: { carro: Carro }) {
     if (!pasta) return;
     setBusy('A ler a pasta…');
     try {
-      const { semFotos, files } = await listDriveFotos(pasta);
-      if (semFotos) {
+      // já importadas: o nome do ficheiro no Supabase leva o id da foto da Drive
+      const r = await importarFotosDaPasta(pasta, fotos, (i, n) => setBusy(`A importar ${i}/${n}…`));
+      if (r.semFotos) {
         toast.error('Esta pasta não tem subpasta "fotos".');
         return;
       }
-      // já importadas: o nome do ficheiro no Supabase leva o id da foto da Drive
-      const novas = files.filter((f) => !fotos.some((u) => u.includes(`drive-${f.id}-`)));
-      if (!novas.length) {
-        toast.success(files.length ? 'Sem fotos novas para importar.' : 'A pasta "fotos" está vazia.');
+      if (r.erro) toast.error(`Erro ao importar: ${r.erro}`);
+      if (!r.urls.length && !r.erro) {
+        toast.success(r.totalNaPasta ? 'Sem fotos novas para importar.' : 'A pasta "fotos" está vazia.');
       }
-      const urls: string[] = [];
-      try {
-        for (const [i, f] of novas.entries()) {
-          setBusy(`A importar ${i + 1}/${novas.length}…`);
-          urls.push(await importarFotoDaDrive(f));
-        }
-      } catch (err) {
-        toast.error(`Erro ao importar: ${errorMessage(err)}`);
+      if (r.urls.length) {
+        const ok = await update(carro, 'fotos', [...fotos, ...r.urls]);
+        if (ok && !carro.foto_url) await update(carro, 'foto_url', r.urls[0]);
+        if (ok) toast.success(`${r.urls.length} foto(s) importada(s).`);
       }
-      if (urls.length) {
-        const ok = await update(carro, 'fotos', [...fotos, ...urls]);
-        if (ok && !carro.foto_url) await update(carro, 'foto_url', urls[0]);
-        if (ok) toast.success(`${urls.length} foto(s) importada(s).`);
-      }
-      if (FOLDER_URL(pasta) !== carro.fotos_link) await update(carro, 'fotos_link', FOLDER_URL(pasta));
+      if (driveFolderUrl(pasta) !== carro.fotos_link) await update(carro, 'fotos_link', driveFolderUrl(pasta));
     } catch (err) {
       toast.error(`Erro ao ler a Drive: ${errorMessage(err)}`);
     } finally {

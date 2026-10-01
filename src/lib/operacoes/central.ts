@@ -182,3 +182,30 @@ export async function importarFotoDaDrive(foto: DriveFoto): Promise<string> {
   const file = new File([bytes], foto.name, { type: contentType });
   return uploadFoto(file, `drive-${foto.id}`);
 }
+
+/**
+ * Importa para o Supabase as fotos novas da subpasta "fotos" de uma pasta da Drive.
+ * `existentes` = URLs já na galeria (para não duplicar). Devolve os URLs novos.
+ */
+export async function importarFotosDaPasta(
+  folderId: string,
+  existentes: string[],
+  onProgress?: (feitas: number, total: number) => void,
+): Promise<{ semFotos: boolean; totalNaPasta: number; urls: string[]; erro?: string }> {
+  const { semFotos, files } = await listDriveFotos(folderId);
+  if (semFotos) return { semFotos: true, totalNaPasta: 0, urls: [] };
+  const novas = files.filter((f) => !existentes.some((u) => u.includes(`drive-${f.id}-`)));
+  const urls: string[] = [];
+  let erro: string | undefined;
+  try {
+    for (const [i, f] of novas.entries()) {
+      onProgress?.(i + 1, novas.length);
+      urls.push(await importarFotoDaDrive(f));
+    }
+  } catch (e) {
+    erro = e instanceof Error ? e.message : String(e);
+  }
+  return { semFotos: false, totalNaPasta: files.length, urls, erro };
+}
+
+export const driveFolderUrl = (id: string) => `https://drive.google.com/drive/folders/${id}`;
