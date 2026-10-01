@@ -105,8 +105,8 @@ export function InvestidorDialog({
           <DialogTitle>{id ? 'Editar Investidor' : 'Novo Investidor'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={onSubmit}>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Nome" required className="col-span-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Field label="Nome" required className="sm:col-span-2">
               <Input required value={form.nome} onChange={(e) => set('nome', e.target.value)} />
             </Field>
             <Field label="Email">

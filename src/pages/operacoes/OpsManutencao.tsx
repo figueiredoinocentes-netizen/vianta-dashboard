@@ -11,7 +11,7 @@ import {
 import { destinoDepoisDePreparacao, matchesSearch } from '@/lib/operacoes/constants';
 import { useCarros, useUpdateCarroField } from '@/hooks/useOperacoes';
 import { useOps } from '@/components/operacoes/OpsContext';
-import { EmptyState, ErrorBox, OpsHeader, StatusSelect } from '@/components/operacoes/shared';
+import { EmptyState, ErrorBox, OpsHeader, StatusSelect, hideCols } from '@/components/operacoes/shared';
 
 export default function OpsManutencao() {
   const { search, openVehicle, openNovaViatura } = useOps();
@@ -34,7 +34,7 @@ export default function OpsManutencao() {
       ) : !lista.length ? (
         <EmptyState icon="🔧" text="Nenhum carro em manutenção" />
       ) : (
-        <div className="rounded-xl border border-border bg-card">
+        <div className={`rounded-xl border border-border bg-card ${hideCols(3)}`}>
           <Table>
             <TableHeader>
               <TableRow>

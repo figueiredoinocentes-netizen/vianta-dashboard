@@ -201,3 +201,19 @@ export function OpsHeader({
     </div>
   );
 }
+
+// Colunas escondidas em ecrãs pequenos (índice 1-based). Strings literais para o Tailwind as detetar.
+const HIDE_MOBILE: Record<number, string> = {
+  1: 'max-md:[&_th:nth-child(1)]:hidden max-md:[&_td:nth-child(1)]:hidden',
+  2: 'max-md:[&_th:nth-child(2)]:hidden max-md:[&_td:nth-child(2)]:hidden',
+  3: 'max-md:[&_th:nth-child(3)]:hidden max-md:[&_td:nth-child(3)]:hidden',
+  4: 'max-md:[&_th:nth-child(4)]:hidden max-md:[&_td:nth-child(4)]:hidden',
+  5: 'max-md:[&_th:nth-child(5)]:hidden max-md:[&_td:nth-child(5)]:hidden',
+  6: 'max-md:[&_th:nth-child(6)]:hidden max-md:[&_td:nth-child(6)]:hidden',
+  7: 'max-md:[&_th:nth-child(7)]:hidden max-md:[&_td:nth-child(7)]:hidden',
+  8: 'max-md:[&_th:nth-child(8)]:hidden max-md:[&_td:nth-child(8)]:hidden',
+  9: 'max-md:[&_th:nth-child(9)]:hidden max-md:[&_td:nth-child(9)]:hidden',
+  10: 'max-md:[&_th:nth-child(10)]:hidden max-md:[&_td:nth-child(10)]:hidden',
+};
+
+export const hideCols = (...cols: number[]) => cols.map((c) => HIDE_MOBILE[c]).join(' ');

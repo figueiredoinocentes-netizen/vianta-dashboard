@@ -50,7 +50,13 @@ const linkClass = (isActive: boolean) =>
       : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
   );
 
-const Sidebar = () => {
+interface SidebarProps {
+  /** Só relevante em ecrãs pequenos: a barra lateral abre como gaveta. */
+  aberto?: boolean;
+  onFechar?: () => void;
+}
+
+const Sidebar = ({ aberto = false, onFechar }: SidebarProps) => {
   const location = useLocation();
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -68,7 +74,21 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-border bg-sidebar flex flex-col">
+    <>
+    {/* Fundo escurecido atrás da gaveta (telemóvel) */}
+    {aberto && (
+      <div
+        className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+        onClick={onFechar}
+        aria-hidden="true"
+      />
+    )}
+    <aside
+      className={cn(
+        'fixed left-0 top-0 z-50 h-[100dvh] w-64 max-w-[85vw] border-r border-border bg-sidebar flex flex-col transition-transform duration-200 lg:z-40 lg:translate-x-0',
+        aberto ? 'translate-x-0' : '-translate-x-full',
+      )}
+    >
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-6 border-b border-border">
         <img src={viantaLogo} alt="Vianta logo" className="h-9 w-9 rounded-lg object-contain" />
@@ -134,6 +154,7 @@ const Sidebar = () => {
         </button>
       </div>
     </aside>
+    </>
   );
 };
 

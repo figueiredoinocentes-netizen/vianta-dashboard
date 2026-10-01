@@ -10,7 +10,7 @@ import {
 import { matchesSearch } from '@/lib/operacoes/constants';
 import { useCarros, useInvestidores } from '@/hooks/useOperacoes';
 import { useOps } from '@/components/operacoes/OpsContext';
-import { EmptyState, ErrorBox, OpsHeader } from '@/components/operacoes/shared';
+import { EmptyState, ErrorBox, OpsHeader, hideCols } from '@/components/operacoes/shared';
 
 export default function OpsInvestidores() {
   const { search, openInvestidor } = useOps();
@@ -33,7 +33,7 @@ export default function OpsInvestidores() {
       ) : !lista.length ? (
         <EmptyState icon="🤝" text="Nenhum investidor registado" />
       ) : (
-        <div className="rounded-xl border border-border bg-card">
+        <div className={`rounded-xl border border-border bg-card ${hideCols(2, 4, 5)}`}>
           <Table>
             <TableHeader>
               <TableRow>

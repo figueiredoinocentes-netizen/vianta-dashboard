@@ -62,8 +62,8 @@ export function NovoItemDialog({
           <DialogTitle>Novo Item</DialogTitle>
         </DialogHeader>
         <form onSubmit={onSubmit}>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Item" required className="col-span-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Field label="Item" required className="sm:col-span-2">
               <Input required value={form.item} onChange={(e) => set('item', e.target.value)} />
             </Field>
             <Field label="Categoria">
@@ -93,7 +93,7 @@ export function NovoItemDialog({
             <Field label="Unidade">
               <Input value={form.unidade} onChange={(e) => set('unidade', e.target.value)} />
             </Field>
-            <Field label="Fornecedor" className="col-span-2">
+            <Field label="Fornecedor" className="sm:col-span-2">
               <Input
                 value={form.fornecedor}
                 onChange={(e) => set('fornecedor', e.target.value)}

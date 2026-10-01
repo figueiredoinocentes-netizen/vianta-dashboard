@@ -10,7 +10,7 @@ import {
 import { matchesSearch } from '@/lib/operacoes/constants';
 import { useCarros } from '@/hooks/useOperacoes';
 import { useOps } from '@/components/operacoes/OpsContext';
-import { EmptyState, ErrorBox, OpsHeader, StatusSelect } from '@/components/operacoes/shared';
+import { EmptyState, ErrorBox, OpsHeader, StatusSelect, hideCols } from '@/components/operacoes/shared';
 
 export default function OpsFrota() {
   const { search, openVehicle, openNovaViatura } = useOps();
@@ -34,7 +34,7 @@ export default function OpsFrota() {
       ) : !lista.length ? (
         <EmptyState icon="🚗" text="Nenhum carro alugado de momento" />
       ) : (
-        <div className="rounded-xl border border-border bg-card">
+        <div className={`rounded-xl border border-border bg-card ${hideCols(4, 5, 6)}`}>
           <Table>
             <TableHeader>
               <TableRow>

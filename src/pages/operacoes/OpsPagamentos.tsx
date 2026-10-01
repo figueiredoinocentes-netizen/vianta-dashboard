@@ -11,7 +11,7 @@ import { BADGE_CLASS } from '@/lib/operacoes/constants';
 import { cn } from '@/lib/utils';
 import { useMotoristas, usePagamentos } from '@/hooks/useOperacoes';
 import { useOps } from '@/components/operacoes/OpsContext';
-import { EmptyState, ErrorBox, OpsHeader } from '@/components/operacoes/shared';
+import { EmptyState, ErrorBox, OpsHeader, hideCols } from '@/components/operacoes/shared';
 
 // Reaproveita as cores dos badges de estado da viatura.
 function estadoClass(estado: string | null) {
@@ -42,7 +42,7 @@ export default function OpsPagamentos() {
       ) : !pagamentos.length ? (
         <EmptyState icon="💰" text="Sem pagamentos registados" />
       ) : (
-        <div className="rounded-xl border border-border bg-card">
+        <div className={`rounded-xl border border-border bg-card ${hideCols(2, 3, 5, 6, 7, 10)}`}>
           <Table>
             <TableHeader>
               <TableRow>

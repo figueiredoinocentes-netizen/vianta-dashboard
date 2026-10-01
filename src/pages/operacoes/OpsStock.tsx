@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import { matchesSearch } from '@/lib/operacoes/constants';
 import { useCarros } from '@/hooks/useOperacoes';
 import { useOps } from '@/components/operacoes/OpsContext';
-import { EmptyState, ErrorBox, OpsHeader, StatusSelect } from '@/components/operacoes/shared';
+import { EmptyState, ErrorBox, OpsHeader, StatusSelect, hideCols } from '@/components/operacoes/shared';
 
 const STOCK_STATES = ['Para Venda', 'Para Aluguer', 'Manutenção', 'Em Preparação'];
 
@@ -41,7 +41,7 @@ export default function OpsStock() {
       ) : !lista.length ? (
         <EmptyState icon="🏪" text="Nenhum carro em stock" />
       ) : (
-        <div className="rounded-xl border border-border bg-card">
+        <div className={`rounded-xl border border-border bg-card ${hideCols(3, 4, 5, 7)}`}>
           <Table>
             <TableHeader>
               <TableRow>

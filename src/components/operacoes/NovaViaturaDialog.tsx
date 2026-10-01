@@ -126,11 +126,11 @@ export function NovaViaturaDialog({
           <DialogTitle>Nova Viatura</DialogTitle>
         </DialogHeader>
         <form onSubmit={onSubmit}>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Modelo" required className="col-span-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Field label="Modelo" required className="sm:col-span-2">
               <Input required value={form.modelo} onChange={(e) => set('modelo', e.target.value)} />
             </Field>
-            <Field label="Pasta da Drive (CARROS)" className="col-span-2">
+            <Field label="Pasta da Drive (CARROS)" className="sm:col-span-2">
               <NativeSelect
                 value={pasta}
                 disabled={folders.isLoading}
@@ -182,7 +182,7 @@ export function NovaViaturaDialog({
             <Field label="KMs">
               <Input type="number" value={form.kms} onChange={(e) => set('kms', e.target.value)} />
             </Field>
-            <Field label="Proprietário" className="col-span-2">
+            <Field label="Proprietário" className="sm:col-span-2">
               <NativeSelect
                 value={form.proprietario}
                 onChange={(e) => set('proprietario', e.target.value)}
@@ -192,7 +192,7 @@ export function NovaViaturaDialog({
               </NativeSelect>
             </Field>
             {form.proprietario === 'Investidor' && (
-              <Field label="Investidor" className="col-span-2">
+              <Field label="Investidor" className="sm:col-span-2">
                 <NativeSelect
                   value={form.investidorId}
                   onChange={(e) => set('investidorId', e.target.value)}

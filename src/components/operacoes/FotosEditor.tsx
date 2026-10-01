@@ -104,7 +104,7 @@ export function FotosEditor({ carro }: { carro: Carro }) {
       <div>
         <div className="mb-1 text-xs font-medium text-muted-foreground">Fotos do carro</div>
         {fotos.length > 0 && (
-          <div className="mb-2 grid grid-cols-4 gap-2">
+          <div className="mb-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
             {fotos.map((url) => {
               const capa = url === carro.foto_url;
               return (

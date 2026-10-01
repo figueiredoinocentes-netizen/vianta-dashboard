@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import { matchesSearch } from '@/lib/operacoes/constants';
 import { useArmazem } from '@/hooks/useOperacoes';
 import { useOps } from '@/components/operacoes/OpsContext';
-import { EmptyState, ErrorBox, OpsHeader } from '@/components/operacoes/shared';
+import { EmptyState, ErrorBox, OpsHeader, hideCols } from '@/components/operacoes/shared';
 
 export default function OpsArmazem() {
   const { search, openNovoItem } = useOps();
@@ -28,7 +28,7 @@ export default function OpsArmazem() {
       ) : !lista.length ? (
         <EmptyState icon="📦" text="Nenhum item no armazém" />
       ) : (
-        <div className="rounded-xl border border-border bg-card">
+        <div className={`rounded-xl border border-border bg-card ${hideCols(5, 6, 7)}`}>
           <Table>
             <TableHeader>
               <TableRow>

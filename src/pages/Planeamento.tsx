@@ -670,7 +670,7 @@ const Planeamento = () => {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-display font-bold text-foreground">Planeamento</h1>
             <p className="text-sm text-muted-foreground mt-1">Define objectivos mensais por oferta</p>

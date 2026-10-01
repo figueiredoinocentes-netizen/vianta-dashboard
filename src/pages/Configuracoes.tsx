@@ -759,7 +759,7 @@ export default function Configuracoes() {
         </div>
 
         <Tabs defaultValue="qualificacao" className="w-full">
-          <TabsList className="mb-4">
+          <TabsList className="mb-4 w-full justify-start overflow-x-auto">
             <TabsTrigger value="qualificacao">Regras de qualificação</TabsTrigger>
             <TabsTrigger value="funil">Funil visual</TabsTrigger>
             <TabsTrigger value="fontes">Mapeamento de fontes</TabsTrigger>

@@ -325,7 +325,7 @@ export function PipelineFunnelCard({
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Pipeline — {pipelineName}
           </CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Tabs value={timeMode} onValueChange={v => setTimeMode(v as TimeMode)}>
               <TabsList className="h-8">
                 <TabsTrigger value="year" className="text-xs px-3 h-7">Ano</TabsTrigger>

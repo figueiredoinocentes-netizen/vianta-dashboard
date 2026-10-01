@@ -267,9 +267,9 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
 
       <form onSubmit={onSubmit}>
         {tab === 'carac' && (
-          <div className="grid grid-cols-2 gap-3">
-            <div className="col-span-2 flex items-start gap-4">
-              <div className="flex h-52 w-60 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted/40">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="flex flex-col items-stretch gap-4 sm:col-span-2 sm:flex-row sm:items-start">
+              <div className="flex h-52 w-full shrink-0 items-center sm:w-60 justify-center overflow-hidden rounded-lg border border-border bg-muted/40">
                 {carro.foto_url ? (
                   <img src={carro.foto_url} alt="" className="h-full w-full object-contain" />
                 ) : (
@@ -279,7 +279,7 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
                 )}
               </div>
               <div className="grid min-w-0 flex-1 grid-cols-2 gap-3">
-                <Field label="Modelo" className="col-span-2">
+                <Field label="Modelo" className="sm:col-span-2">
                   <Input value={form.modelo} onChange={(e) => set('modelo', e.target.value)} />
                 </Field>
                 <Field label="Matrícula">
@@ -304,7 +304,7 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
                 </Field>
               </div>
             </div>
-            <Field label="Proprietário" className="col-span-2">
+            <Field label="Proprietário" className="sm:col-span-2">
               <NativeSelect
                 value={form.proprietario}
                 onChange={(e) => set('proprietario', e.target.value)}
@@ -314,7 +314,7 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
               </NativeSelect>
             </Field>
             {form.proprietario === 'Investidor' && (
-              <Field label="Investidor" className="col-span-2">
+              <Field label="Investidor" className="sm:col-span-2">
                 <NativeSelect
                   value={form.investidorId}
                   onChange={(e) => set('investidorId', e.target.value)}
@@ -345,14 +345,14 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
               </NativeSelect>
             </Field>
             {isVenda ? (
-              <Field label="Preço Venda (€)" className="col-span-2">
+              <Field label="Preço Venda (€)" className="sm:col-span-2">
                 <Input
                   value={form.precoVenda}
                   onChange={(e) => set('precoVenda', e.target.value)}
                 />
               </Field>
             ) : (
-              <Field label="Valor Aluguer (€/sem)" className="col-span-2">
+              <Field label="Valor Aluguer (€/sem)" className="sm:col-span-2">
                 <Input
                   value={form.precoAluguer}
                   onChange={(e) => set('precoAluguer', e.target.value)}
@@ -360,7 +360,7 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
               </Field>
             )}
             {form.estado !== 'Em Preparação' && (
-              <Field label="Motorista Atual" className="col-span-2">
+              <Field label="Motorista Atual" className="sm:col-span-2">
                 <NativeSelect
                   value={form.motoristaAtual}
                   onChange={(e) => set('motoristaAtual', e.target.value)}
@@ -375,7 +375,7 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
               </Field>
             )}
             {form.estado === 'Vendido' && (
-              <Field label="Cliente (comprador)" className="col-span-2">
+              <Field label="Cliente (comprador)" className="sm:col-span-2">
                 <div className="flex gap-2">
                   <NativeSelect
                     className="flex-1"
@@ -406,8 +406,8 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
         )}
 
         {tab === 'ficha' && (
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Versão" className="col-span-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Field label="Versão" className="sm:col-span-2">
               <Input value={form.versao} onChange={(e) => set('versao', e.target.value)} />
             </Field>
             <Field label="Cor">
@@ -445,7 +445,7 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
             <Field label="Caução (€)">
               <Input value={form.caucao} onChange={(e) => set('caucao', e.target.value)} />
             </Field>
-            <Field label="Categorias TVDE" className="col-span-2">
+            <Field label="Categorias TVDE" className="sm:col-span-2">
               <Input
                 value={form.categoriasTvde}
                 onChange={(e) => set('categoriasTvde', e.target.value)}
@@ -463,7 +463,7 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
                 onChange={(e) => set('garantiaBateria', e.target.value)}
               />
             </Field>
-            <div className="col-span-2 mt-2 border-t border-border pt-3 text-xs font-medium text-muted-foreground">
+            <div className="sm:col-span-2 mt-2 border-t border-border pt-3 text-xs font-medium text-muted-foreground">
               Simulação de crédito — prestação mensal (€)
             </div>
             <Field label="120 meses (10 anos)">
@@ -475,7 +475,7 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
             <Field label="48 meses (4 anos)">
               <Input value={form.credito48} onChange={(e) => set('credito48', e.target.value)} />
             </Field>
-            <div className="col-span-2">
+            <div className="sm:col-span-2">
               <FotosEditor carro={carro} />
             </div>
             <Field label="Fim de elegibilidade TVDE">
@@ -484,10 +484,10 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
                 onChange={(e) => set('fimElegibilidadeTvde', e.target.value)}
               />
             </Field>
-            <Field label="Documentos (link)" className="col-span-2">
+            <Field label="Documentos (link)" className="sm:col-span-2">
               <Input value={form.docsLink} onChange={(e) => set('docsLink', e.target.value)} />
             </Field>
-            <Field label="Observações" className="col-span-2">
+            <Field label="Observações" className="sm:col-span-2">
               <Input value={form.obs} onChange={(e) => set('obs', e.target.value)} />
             </Field>
           </div>

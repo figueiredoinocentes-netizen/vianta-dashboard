@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { Car, Copy, ExternalLink, Eye, EyeOff, Search } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -89,7 +90,7 @@ function Linha({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="flex items-baseline justify-between gap-4 border-b border-border py-1.5 last:border-b-0">
       <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="text-right text-sm text-foreground">{children}</span>
+      <span className="min-w-0 break-words text-right text-sm text-foreground">{children}</span>
     </div>
   );
 }
@@ -207,7 +208,7 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
   };
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
+    <div className="min-w-0 rounded-xl border border-border bg-card p-4">
       <div
         className={cn(
           'flex h-56 items-center justify-center overflow-hidden rounded-lg bg-muted/40',
@@ -333,11 +334,26 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
   );
 }
 
+/** true a partir de 1024 px (largura em que a ficha cabe ao lado da lista). */
+function useDesktop() {
+  const query = '(min-width: 1024px)';
+  const [ok, setOk] = useState(() => (typeof window !== 'undefined' ? window.matchMedia(query).matches : true));
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const on = () => setOk(mq.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+  return ok;
+}
+
 const Stock = () => {
   const { data: carros = [], isLoading, isError } = useCarros();
   const [gestao, setGestao] = useState<Gestao>('Venda');
   const [search, setSearch] = useState('');
   const [selecionadoId, setSelecionadoId] = useState<number | null>(null);
+  const [fichaAberta, setFichaAberta] = useState(false);
+  const desktop = useDesktop();
 
   const stock = useMemo(() => carros.filter((v) => ESTADOS_STOCK.includes(v.estado || '')), [carros]);
 
@@ -417,21 +433,40 @@ const Stock = () => {
           </div>
         ) : (
           <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-1 xl:grid-cols-2">
               {visiveis.map((v) => (
                 <CartaoViatura
                   key={v.id}
                   v={v}
                   gestao={gestao}
                   selecionado={selecionado?.id === v.id}
-                  onSelect={() => setSelecionadoId(v.id)}
+                  onSelect={() => {
+                    setSelecionadoId(v.id);
+                    if (!desktop) setFichaAberta(true);
+                  }}
                 />
               ))}
             </div>
-            <div className="lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
-              {selecionado && <Ficha v={selecionado} gestao={gestao} />}
-            </div>
+            {/* Ecrã largo: ficha ao lado da lista */}
+            {desktop && (
+              <div className="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto">
+                {selecionado && <Ficha v={selecionado} gestao={gestao} />}
+              </div>
+            )}
           </div>
+        )}
+
+        {/* Telemóvel/tablet: a ficha abre num pop-up ao tocar na viatura */}
+        {!desktop && (
+          <Dialog open={fichaAberta && !!selecionado} onOpenChange={setFichaAberta}>
+            <DialogContent
+              className="max-h-[92vh] w-[calc(100vw-1rem)] max-w-xl grid-cols-[minmax(0,1fr)] overflow-y-auto p-0"
+              aria-describedby={undefined}
+            >
+              <DialogTitle className="sr-only">Ficha da viatura</DialogTitle>
+              {selecionado && <Ficha v={selecionado} gestao={gestao} />}
+            </DialogContent>
+          </Dialog>
         )}
       </div>
     </DashboardLayout>
