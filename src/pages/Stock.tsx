@@ -392,6 +392,9 @@ function categoriasDe(v: Carro): string[] {
   return [...out];
 }
 
+// "GPL (gasolina)" e "GPL" contam como o mesmo combustível.
+const combLabel = (c: string | null | undefined) => (c || '').replace(/\s*\(.*?\)\s*/g, '').trim();
+
 function Chip({ ativo, onClick, children }: { ativo: boolean; onClick: () => void; children: ReactNode }) {
   return (
     <button
@@ -449,7 +452,7 @@ const Stock = () => {
 
   // Opções dos filtros: só o que existe nas viaturas do separador atual.
   const combustiveis = useMemo(
-    () => [...new Set(doTipo.map((v) => (v.combustivel || '').trim()).filter(Boolean))].sort(),
+    () => [...new Set(doTipo.map((v) => combLabel(v.combustivel)).filter(Boolean))].sort(),
     [doTipo],
   );
   const categorias = useMemo(
@@ -483,7 +486,7 @@ const Stock = () => {
         if (n == null) return false; // sem valor definido não cabe numa gama de preço
         return (min == null || n >= min) && (max == null || n <= max);
       })
-      .filter((v) => !combs.length || combs.includes((v.combustivel || '').trim()))
+      .filter((v) => !combs.length || combs.includes(combLabel(v.combustivel)))
       .filter((v) => {
         if (!cats.length) return true;
         const tem = categoriasDe(v);
