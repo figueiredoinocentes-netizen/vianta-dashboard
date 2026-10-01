@@ -130,7 +130,7 @@ export function VehicleDetailDialog({
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent
-        className="max-h-[90vh] max-w-2xl overflow-y-auto"
+        className="max-h-[90vh] max-w-3xl overflow-y-auto"
         aria-describedby={undefined}
       >
         {carro && <Body key={carro.id} carro={carro} onClose={onClose} />}
@@ -268,36 +268,42 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
       <form onSubmit={onSubmit}>
         {tab === 'carac' && (
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Foto" className="col-span-2">
-              {carro.foto_url && (
-                <div className="flex h-56 w-full items-center justify-center overflow-hidden rounded-lg border border-border bg-muted/40">
+            <div className="col-span-2 flex items-start gap-4">
+              <div className="flex h-52 w-60 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted/40">
+                {carro.foto_url ? (
                   <img src={carro.foto_url} alt="" className="h-full w-full object-contain" />
-                </div>
-              )}
-            </Field>
-            <Field label="Modelo" className="col-span-2">
-              <Input value={form.modelo} onChange={(e) => set('modelo', e.target.value)} />
-            </Field>
-            <Field label="Matrícula">
-              <Input value={form.matricula} onChange={(e) => set('matricula', e.target.value)} />
-            </Field>
-            <Field label="Ano">
-              <Input value={form.ano} onChange={(e) => set('ano', e.target.value)} />
-            </Field>
-            <Field label="Combustível">
-              <NativeSelect
-                value={form.combustivel}
-                onChange={(e) => set('combustivel', e.target.value)}
-              >
-                <option value="">Selecionar</option>
-                {COMBUSTIVEIS.map((c) => (
-                  <option key={c}>{c}</option>
-                ))}
-              </NativeSelect>
-            </Field>
-            <Field label="KMs">
-              <Input value={form.kms} onChange={(e) => set('kms', e.target.value)} />
-            </Field>
+                ) : (
+                  <span className="px-3 text-center text-xs text-muted-foreground">
+                    Sem foto. Importe-as no separador Ficha comercial.
+                  </span>
+                )}
+              </div>
+              <div className="grid min-w-0 flex-1 grid-cols-2 gap-3">
+                <Field label="Modelo" className="col-span-2">
+                  <Input value={form.modelo} onChange={(e) => set('modelo', e.target.value)} />
+                </Field>
+                <Field label="Matrícula">
+                  <Input value={form.matricula} onChange={(e) => set('matricula', e.target.value)} />
+                </Field>
+                <Field label="Ano">
+                  <Input value={form.ano} onChange={(e) => set('ano', e.target.value)} />
+                </Field>
+                <Field label="Combustível">
+                  <NativeSelect
+                    value={form.combustivel}
+                    onChange={(e) => set('combustivel', e.target.value)}
+                  >
+                    <option value="">Selecionar</option>
+                    {COMBUSTIVEIS.map((c) => (
+                      <option key={c}>{c}</option>
+                    ))}
+                  </NativeSelect>
+                </Field>
+                <Field label="KMs">
+                  <Input value={form.kms} onChange={(e) => set('kms', e.target.value)} />
+                </Field>
+              </div>
+            </div>
             <Field label="Proprietário" className="col-span-2">
               <NativeSelect
                 value={form.proprietario}
