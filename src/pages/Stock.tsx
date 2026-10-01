@@ -157,12 +157,12 @@ function CartaoViatura({
     >
       <div
         className={cn(
-          'flex h-36 items-center justify-center bg-muted/40',
+          'flex aspect-[4/3] w-full items-center justify-center overflow-hidden bg-muted/40',
           disp !== 'pronto' && 'opacity-60 grayscale',
         )}
       >
         {foto ? (
-          <img src={foto} alt="" loading="lazy" className="h-full w-full object-cover" />
+          <img src={foto} alt="" loading="lazy" className="h-full w-full object-contain" />
         ) : (
           <Car className="h-9 w-9 text-muted-foreground/40" />
         )}
@@ -211,12 +211,12 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
     <div className="min-w-0 rounded-xl border border-border bg-card p-4">
       <div
         className={cn(
-          'flex h-56 items-center justify-center overflow-hidden rounded-lg bg-muted/40',
+          'flex h-72 w-full items-center justify-center overflow-hidden rounded-lg bg-muted/40 sm:h-[380px]',
           disp !== 'pronto' && 'opacity-70',
         )}
       >
         {fotos[foto] ? (
-          <img src={fotos[foto]} alt="" className="h-full w-full object-cover" />
+          <img src={fotos[foto]} alt="" className="h-full w-full object-contain" />
         ) : (
           <Car className="h-12 w-12 text-muted-foreground/40" />
         )}
