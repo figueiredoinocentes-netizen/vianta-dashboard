@@ -100,11 +100,11 @@ const Sidebar = ({ aberto = false, onFechar }: SidebarProps) => {
         </div>
       </div>
 
-      {/* Aquisição / Operações */}
+      {/* Vendas / Operações */}
       <div className="px-3 pt-3">
         <div className="flex gap-1 rounded-lg bg-white/5 p-1">
           {[
-            { to: '/', label: 'Aquisição', active: !emOperacoes },
+            { to: '/', label: 'Vendas', active: !emOperacoes },
             { to: '/operacoes', label: 'Operações', active: emOperacoes },
           ].map((tab) => (
             <NavLink
