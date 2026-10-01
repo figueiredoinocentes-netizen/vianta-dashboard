@@ -359,6 +359,44 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
                 />
               </Field>
             )}
+            {form.gestao === 'Aluguer' && (() => {
+              const pvp = parseFloat(form.precoVenda || '0');
+              const total = pvp > 25000 ? 600 : 400;
+              const meta = total === 600 ? '300€' : '200€';
+              const p1 = total === 600 ? '100€' : '100€';
+              const p2 = total === 600 ? '100€' : '100€';
+              const p3 = total === 600 ? '+ 100€' : '';
+              return (
+                <div className="sm:col-span-2">
+                  <div className="rounded-lg border border-border bg-muted/40 p-4">
+                    <div className="mb-3 text-base font-semibold">
+                      💳 Caução: <span className="text-primary font-bold">{total}€</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div className="rounded-md bg-muted/60 p-3">
+                        <div className="mb-1.5 font-semibold text-foreground">📋 Prestações Vianta</div>
+                        <div className="mb-2 text-xs text-muted-foreground">Sem juros, gerido internamente</div>
+                        <div className="text-2xl font-bold text-primary">{meta}</div>
+                        <div className="text-xs text-muted-foreground">1.ª prestação (entrega)</div>
+                        <div className="mt-2 text-xs text-muted-foreground">Depois: <strong>{p1}</strong> + <strong>{p2}</strong> {p3} (mensal)</div>
+                      </div>
+                      <div className="rounded-md bg-muted/60 p-3">
+                        <div className="mb-1.5 font-semibold text-foreground">🏦 Parcela Já</div>
+                        <div className="mb-2 text-xs text-muted-foreground">Crédito no terminal, débito automático</div>
+                        <div className="mt-1 text-xs text-muted-foreground">
+                          <div className="mt-1 text-green-500">✅ CC português</div>
+                          <div className="text-green-500">✅ Cartão multibanco (mesma pessoa)</div>
+                          <div className="mt-1 text-yellow-400">Atenção: verificação BdP</div>
+                        </div>
+                        <div className="mt-2 rounded-md bg-indigo-500/15 px-2.5 py-1.5 text-[11px] text-indigo-300">
+                          ⚠️ Se faltar CC português ou cartão multibanco<br />da mesma pessoa → <span className="text-primary font-semibold">Opção 1</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
             {form.estado !== 'Em Preparação' && (
               <Field label="Motorista Atual" className="sm:col-span-2">
                 <NativeSelect
