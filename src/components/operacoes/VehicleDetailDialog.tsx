@@ -360,8 +360,9 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
               </Field>
             )}
             {form.gestao === 'Aluguer' && (() => {
-              const pvp = parseFloat(form.precoVenda || '0');
-              const total = pvp > 25000 ? 600 : 400;
+              const fromDb = parseFloat(form.caucao || '0');
+              const fromPvp = parseFloat(form.precoVenda || '0');
+              const total = fromDb > 0 ? fromDb : (fromPvp > 25000 ? 600 : 400);
               const meta = total === 600 ? '300€' : '200€';
               const p1 = total === 600 ? '100€' : '100€';
               const p2 = total === 600 ? '100€' : '100€';
