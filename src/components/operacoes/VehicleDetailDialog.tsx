@@ -18,7 +18,7 @@ import {
   getChecklistGroups,
   normalizeText,
 } from '@/lib/operacoes/constants';
-import { listDriveFiles, uploadDriveDoc, uploadFoto } from '@/lib/operacoes/central';
+import { listDriveFiles, uploadDriveDoc } from '@/lib/operacoes/central';
 import type { Carro, DriveFile } from '@/lib/operacoes/types';
 import {
   useCarros,
@@ -142,8 +142,7 @@ export function VehicleDetailDialog({
 function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
   const [tab, setTab] = useState<'carac' | 'ficha' | 'prep'>('carac');
   const [form, setForm] = useState<Form>(() => formFromCarro(carro));
-  const [foto, setFoto] = useState<File | null>(null);
-  const [saving, setSaving] = useState<'idle' | 'foto' | 'saving'>('idle');
+  const [saving, setSaving] = useState<'idle' | 'saving'>('idle');
   const [clienteOpen, setClienteOpen] = useState(false);
 
   const { data: investidores = [] } = useInvestidores();
@@ -177,21 +176,9 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
       ? investidores.find((i) => String(i.id) === form.investidorId)
       : null;
 
-    let fotoUrl: string | undefined;
-    if (foto) {
-      setSaving('foto');
-      try {
-        fotoUrl = await uploadFoto(foto);
-      } catch (err) {
-        toast.error(`Erro ao enviar imagem: ${errorMessage(err)}`);
-        setSaving('idle');
-        return;
-      }
-    }
     setSaving('saving');
 
     const updates: Record<string, string | number | null> = {
-      ...(fotoUrl ? { foto_url: fotoUrl } : {}),
       marca_modelo: form.modelo || null,
       matricula: form.matricula || null,
       ano: form.ano || null,
@@ -289,11 +276,6 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
                   className="mb-2 max-h-40 w-full rounded-lg border border-border object-cover"
                 />
               )}
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setFoto(e.target.files?.[0] || null)}
-              />
             </Field>
             <Field label="Modelo" className="col-span-2">
               <Input value={form.modelo} onChange={(e) => set('modelo', e.target.value)} />
@@ -527,7 +509,7 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
               Fechar
             </Button>
             <Button type="submit" disabled={saving !== 'idle'}>
-              {saving === 'foto' ? 'A enviar foto...' : 'Guardar Alterações'}
+              Guardar Alterações
             </Button>
           </div>
         </div>
