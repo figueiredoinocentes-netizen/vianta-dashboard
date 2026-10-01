@@ -270,11 +270,9 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
           <div className="grid grid-cols-2 gap-3">
             <Field label="Foto" className="col-span-2">
               {carro.foto_url && (
-                <img
-                  src={carro.foto_url}
-                  alt=""
-                  className="mb-2 max-h-40 w-full rounded-lg border border-border object-cover"
-                />
+                <div className="flex h-56 w-full items-center justify-center overflow-hidden rounded-lg border border-border bg-muted/40">
+                  <img src={carro.foto_url} alt="" className="h-full w-full object-contain" />
+                </div>
               )}
             </Field>
             <Field label="Modelo" className="col-span-2">
