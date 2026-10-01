@@ -11,11 +11,13 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: 'Method Not Allowed' };
 
   try {
-    const { filename, dataBase64 } = JSON.parse(event.body);
+    const { filename, dataBase64, prefix } = JSON.parse(event.body);
     if (!dataBase64) return { statusCode: 400, headers, body: JSON.stringify({ error: 'dataBase64 required' }) };
 
     const ext = (filename || 'image').split('.').pop() || 'jpg';
-    const name = Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+    // prefix opcional (ex.: "drive-<idDoFicheiro>") para reconhecer fotos já importadas da Drive
+    const safePrefix = prefix ? String(prefix).replace(/[^A-Za-z0-9_-]/g, '').slice(0, 60) + '-' : '';
+    const name = safePrefix + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
     const bucket = 'carros-fotos';
 
     const binary = Buffer.from(dataBase64, 'base64');

@@ -66,7 +66,6 @@ interface Form {
   credito48: string;
   fimElegibilidadeTvde: string;
   docsLink: string;
-  fotosLink: string;
   obs: string;
 }
 
@@ -107,7 +106,6 @@ function formFromCarro(v: Carro): Form {
     credito48: s(v.credito_48_meses),
     fimElegibilidadeTvde: s(v.fim_elegibilidade_tvde),
     docsLink: s(v.docs_link),
-    fotosLink: s(v.fotos_link),
     obs: s(v.obs),
   };
 }
@@ -225,7 +223,6 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
       credito_48_meses: form.credito48 || null,
       fim_elegibilidade_tvde: form.fimElegibilidadeTvde || null,
       docs_link: form.docsLink || null,
-      fotos_link: form.fotosLink || null,
       obs: form.obs || null,
     };
 
@@ -503,9 +500,6 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
             </Field>
             <Field label="Documentos (link)" className="col-span-2">
               <Input value={form.docsLink} onChange={(e) => set('docsLink', e.target.value)} />
-            </Field>
-            <Field label="Fotos (link)" className="col-span-2">
-              <Input value={form.fotosLink} onChange={(e) => set('fotosLink', e.target.value)} />
             </Field>
             <Field label="Observações" className="col-span-2">
               <Input value={form.obs} onChange={(e) => set('obs', e.target.value)} />

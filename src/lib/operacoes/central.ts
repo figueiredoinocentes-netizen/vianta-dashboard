@@ -93,13 +93,13 @@ function compressImage(file: File, maxDim: number, quality: number): Promise<str
   });
 }
 
-export async function uploadFoto(file: File): Promise<string> {
+export async function uploadFoto(file: File, prefix?: string): Promise<string> {
   const dataUrl = await compressImage(file, 1280, 0.75);
   const dataBase64 = dataUrl.split(',')[1];
   const r = await fetch(`${BASE}/upload-foto`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ filename: file.name, contentType: 'image/jpeg', dataBase64 }),
+    body: JSON.stringify({ filename: file.name, contentType: 'image/jpeg', dataBase64, prefix }),
   });
   const d = await readJson(r);
   if (!r.ok) throw new Error((d as { error?: string }).error || 'Erro ao enviar imagem');
@@ -143,4 +143,42 @@ export async function uploadDriveDoc(args: {
   });
   const d = await readJson(r);
   if (!r.ok) throw new Error((d as { error?: string }).error || 'Erro ao enviar');
+}
+
+// ── Fotos na Drive (CARROS/<viatura>/fotos) → Supabase Storage ──
+
+export interface DriveCarFolder {
+  id: string;
+  name: string;
+}
+
+export interface DriveFoto {
+  id: string;
+  name: string;
+  mimeType: string;
+}
+
+export async function listDriveCarFolders(): Promise<DriveCarFolder[]> {
+  const r = await fetch(`${BASE}/drive-fotos?action=folders`);
+  const d = await readJson(r);
+  if (!r.ok) throw new Error((d as { error?: string }).error || 'Erro ao ler a Drive');
+  return (d as { folders: DriveCarFolder[] }).folders;
+}
+
+export async function listDriveFotos(folderId: string): Promise<{ semFotos: boolean; files: DriveFoto[] }> {
+  const r = await fetch(`${BASE}/drive-fotos?action=list&folderId=${encodeURIComponent(folderId)}`);
+  const d = await readJson(r);
+  if (!r.ok) throw new Error((d as { error?: string }).error || 'Erro ao ler a Drive');
+  return d as { semFotos: boolean; files: DriveFoto[] };
+}
+
+/** Descarrega uma foto da Drive, comprime-a e envia-a para o Supabase. Devolve o URL público. */
+export async function importarFotoDaDrive(foto: DriveFoto): Promise<string> {
+  const r = await fetch(`${BASE}/drive-fotos?action=file&fileId=${encodeURIComponent(foto.id)}`);
+  const d = await readJson(r);
+  if (!r.ok) throw new Error((d as { error?: string }).error || 'Erro ao ler a foto');
+  const { dataBase64, contentType } = d as { dataBase64: string; contentType: string };
+  const bytes = Uint8Array.from(atob(dataBase64), (c) => c.charCodeAt(0));
+  const file = new File([bytes], foto.name, { type: contentType });
+  return uploadFoto(file, `drive-${foto.id}`);
 }
