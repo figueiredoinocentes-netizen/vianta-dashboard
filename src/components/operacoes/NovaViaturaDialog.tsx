@@ -16,7 +16,6 @@ import {
   importarFotosDaPasta,
   listDriveCarFolders,
   updateCentralField,
-  uploadFoto,
 } from '@/lib/operacoes/central';
 import { useCentralWrites, useInvestidores, errorMessage } from '@/hooks/useOperacoes';
 import { Field, NativeSelect } from './shared';
@@ -43,8 +42,7 @@ export function NovaViaturaDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const [form, setForm] = useState(EMPTY);
-  const [foto, setFoto] = useState<File | null>(null);
-  const [status, setStatus] = useState<'idle' | 'foto' | 'saving' | 'drive'>('idle');
+  const [status, setStatus] = useState<'idle' | 'saving' | 'drive'>('idle');
   const [pasta, setPasta] = useState('');
   const [pastaManual, setPastaManual] = useState(false);
   const qc = useQueryClient();
@@ -76,11 +74,6 @@ export function NovaViaturaDialog({
     e.preventDefault();
     setStatus('saving');
     try {
-      let fotoUrl: string | null = null;
-      if (foto) {
-        setStatus('foto');
-        fotoUrl = await uploadFoto(foto);
-      }
       const isInvestidor = form.proprietario === 'Investidor';
       const investidor = isInvestidor
         ? investidores.find((i) => String(i.id) === form.investidorId)
@@ -97,7 +90,6 @@ export function NovaViaturaDialog({
         estado: form.estado || null,
         preco_venda: form.precoVenda || null,
         valor_aluguer_semanal: form.precoAluguer || null,
-        foto_url: fotoUrl,
       });
       const novoId = rows[0]?.id;
       if (pasta && novoId) {
@@ -109,7 +101,7 @@ export function NovaViaturaDialog({
           if (r.erro) toast.error(`Erro ao importar fotos: ${r.erro}`);
           if (r.urls.length) {
             await updateCentralField('carros', novoId, 'fotos', r.urls);
-            if (!fotoUrl) await updateCentralField('carros', novoId, 'foto_url', r.urls[0]);
+            await updateCentralField('carros', novoId, 'foto_url', r.urls[0]);
             toast.success(`${r.urls.length} foto(s) importada(s) da Drive.`);
           }
         }
@@ -117,7 +109,6 @@ export function NovaViaturaDialog({
         await qc.invalidateQueries({ queryKey: ['central', 'carros'] });
       }
       setForm(EMPTY);
-      setFoto(null);
       setPasta('');
       setPastaManual(false);
       onOpenChange(false);
@@ -138,13 +129,6 @@ export function NovaViaturaDialog({
           <div className="grid grid-cols-2 gap-3">
             <Field label="Modelo" required className="col-span-2">
               <Input required value={form.modelo} onChange={(e) => set('modelo', e.target.value)} />
-            </Field>
-            <Field label="Foto" className="col-span-2">
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setFoto(e.target.files?.[0] || null)}
-              />
             </Field>
             <Field label="Pasta da Drive (CARROS)" className="col-span-2">
               <NativeSelect
@@ -258,7 +242,7 @@ export function NovaViaturaDialog({
               Cancelar
             </Button>
             <Button type="submit" disabled={busy}>
-              {status === 'foto' ? 'A enviar foto...' : status === 'drive' ? 'A importar fotos…' : 'Guardar'}
+              {status === 'drive' ? 'A importar fotos…' : 'Guardar'}
             </Button>
           </DialogFooter>
         </form>

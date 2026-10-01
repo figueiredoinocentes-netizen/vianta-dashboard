@@ -8,7 +8,6 @@ import {
   driveFolderUrl,
   importarFotosDaPasta,
   listDriveCarFolders,
-  uploadFoto,
 } from '@/lib/operacoes/central';
 import { normalizeText } from '@/lib/operacoes/constants';
 import type { Carro } from '@/lib/operacoes/types';
@@ -45,24 +44,6 @@ export function FotosEditor({ carro }: { carro: Carro }) {
       : undefined;
     setPasta(guardada || porMatricula?.id || '');
   }, [folders.data, carro.fotos_link, carro.matricula, pasta]);
-
-  async function adicionar(files: FileList | null) {
-    if (!files?.length) return;
-    const novas: string[] = [];
-    try {
-      for (const [i, file] of Array.from(files).entries()) {
-        setBusy(`A enviar ${i + 1}/${files.length}…`);
-        novas.push(await uploadFoto(file));
-      }
-    } catch (err) {
-      toast.error(`Erro ao enviar imagem: ${errorMessage(err)}`);
-    }
-    if (novas.length) {
-      const ok = await update(carro, 'fotos', [...fotos, ...novas]);
-      if (ok && !carro.foto_url) await update(carro, 'foto_url', novas[0]);
-    }
-    setBusy(null);
-  }
 
   async function importarDaDrive() {
     if (!pasta) return;
@@ -159,25 +140,9 @@ export function FotosEditor({ carro }: { carro: Carro }) {
             })}
           </div>
         )}
-        <div className="flex items-center gap-3">
-          <label className="inline-block cursor-pointer rounded border border-dashed border-border px-3 py-1.5 text-xs text-muted-foreground transition hover:border-primary hover:text-primary">
-            {busy || '📤 Adicionar fotos do computador'}
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              disabled={!!busy}
-              onChange={(e) => {
-                adicionar(e.target.files);
-                e.target.value = '';
-              }}
-            />
-          </label>
-          <span className="text-[11px] text-muted-foreground">
-            A estrela define a foto de capa (a que aparece nos cartões do Stock).
-          </span>
-        </div>
+        <p className="text-[11px] text-muted-foreground">
+          {busy || 'A estrela define a foto de capa (a que aparece nos cartões do Stock).'}
+        </p>
       </div>
     </div>
   );
