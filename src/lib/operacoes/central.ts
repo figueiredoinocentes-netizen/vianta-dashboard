@@ -108,8 +108,13 @@ export async function uploadFoto(file: File, prefix?: string): Promise<string> {
 
 // ── Documentos da viatura (Google Drive) ──
 
-export async function listDriveFiles(matricula: string, modelo: string): Promise<DriveListing> {
+export async function listDriveFiles(
+  matricula: string,
+  modelo: string,
+  folderId?: string,
+): Promise<DriveListing> {
   const params = new URLSearchParams({ matricula, modelo });
+  if (folderId) params.set('folderId', folderId);
   const r = await fetch(`${BASE}/drive?${params.toString()}`);
   if (!r.ok) return { files: [], folder: null };
   const d = await readJson(r);

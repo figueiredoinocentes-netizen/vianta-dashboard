@@ -110,8 +110,8 @@ export const handler = async (event) => {
     return { statusCode: 500, headers: cors(origin), body: JSON.stringify({ error: 'GOOGLE_DRIVE_SERVICE_ACCOUNT must be set' }) };
   }
 
-  const { matricula, modelo } = event.queryStringParameters || {};
-  if (!matricula && !modelo) {
+  const { matricula, modelo, folderId } = event.queryStringParameters || {};
+  if (!matricula && !modelo && !folderId) {
     return { statusCode: 400, headers: cors(origin), body: JSON.stringify({ error: 'matricula or modelo required' }) };
   }
 
@@ -134,7 +134,10 @@ export const handler = async (event) => {
       `'${root.id}' in parents and mimeType='${FOLDER_MIME}' and trashed=false`,
       'files(id,name,webViewLink)',
     );
-    const folder = findMatchingFolder(subRes.files || [], matricula, modelo);
+    // Pasta associada à viatura no ERP (folderId) tem prioridade; senão adivinha por matrícula/modelo.
+    const folder =
+      (folderId && (subRes.files || []).find((f) => f.id === folderId)) ||
+      findMatchingFolder(subRes.files || [], matricula, modelo);
     if (!folder) {
       return { statusCode: 200, headers: cors(origin), body: JSON.stringify({ folder: null, files: [] }) };
     }

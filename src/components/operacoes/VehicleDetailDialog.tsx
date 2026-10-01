@@ -550,8 +550,13 @@ function ChecklistEditor({ carro }: { carro: Carro }) {
   const [uploading, setUploading] = useState<string | null>(null);
 
   const drive = useQuery({
-    queryKey: ['drive', carro.id, carro.matricula, carro.marca_modelo],
-    queryFn: () => listDriveFiles(carro.matricula || '', carro.marca_modelo || ''),
+    queryKey: ['drive', carro.id, carro.matricula, carro.marca_modelo, carro.fotos_link],
+    queryFn: () =>
+      listDriveFiles(
+        carro.matricula || '',
+        carro.marca_modelo || '',
+        (carro.fotos_link || '').match(/\/folders\/([A-Za-z0-9_-]+)/)?.[1],
+      ),
     staleTime: 60_000,
     retry: false,
   });

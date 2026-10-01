@@ -2,11 +2,13 @@
 //   ?action=folders            -> pastas de viaturas dentro de CARROS
 //   ?action=list&folderId=ID   -> imagens da subpasta "fotos" dessa viatura
 //   ?action=file&fileId=ID     -> uma imagem (base64), para o browser comprimir e enviar para o Supabase
+import convertHeic from 'heic-convert';
 import { FOLDER_MIME, driveListAll, getAccessToken, listCarFolders } from '../lib/drive-auth.js';
 
 const PROD_ORIGIN = 'https://vianta-dashboard.netlify.app';
 const PREVIEW_ORIGIN_RE = /^https:\/\/[a-z0-9-]+--vianta-dashboard\.netlify\.app$/;
-const IMAGE_MIMES = ['image/jpeg', 'image/png', 'image/webp'];
+const HEIC_MIMES = ['image/heic', 'image/heif'];
+const IMAGE_MIMES = ['image/jpeg', 'image/png', 'image/webp', ...HEIC_MIMES];
 const MAX_DIRECT_BYTES = 4 * 1024 * 1024; // acima disto usa a miniatura grande (limite de 6 MB da função)
 
 const originOf = (event) => {
@@ -85,7 +87,12 @@ export const handler = async (event) => {
         contentType = 'image/jpeg';
       }
       if (!res.ok) return reply(origin, 502, { error: 'Falha ao ler a imagem' });
-      const buf = Buffer.from(await res.arrayBuffer());
+      let buf = Buffer.from(await res.arrayBuffer());
+      // HEIC/HEIF (fotos de iPhone) não são lidos pelos browsers: converte para JPEG aqui.
+      if (HEIC_MIMES.includes(meta.mimeType) && contentType === meta.mimeType) {
+        buf = Buffer.from(await convertHeic({ buffer: buf, format: 'JPEG', quality: 0.7 }));
+        contentType = 'image/jpeg';
+      }
       return reply(origin, 200, { contentType, dataBase64: buf.toString('base64') });
     }
 
