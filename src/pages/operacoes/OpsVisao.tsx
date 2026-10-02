@@ -4,6 +4,7 @@ import { getStats, parseEuros } from '@/lib/operacoes/constants';
 import { useCarros } from '@/hooks/useOperacoes';
 import { useOps } from '@/components/operacoes/OpsContext';
 import { ErrorBox, OpsHeader } from '@/components/operacoes/shared';
+import { MargensFrota } from '@/components/operacoes/MargensFrota';
 
 function Kpi({
   icon,
@@ -96,6 +97,7 @@ export default function OpsVisao() {
               </div>
             ))}
           </div>
+          <MargensFrota carros={carros} />
         </div>
       )}
     </>

@@ -46,7 +46,15 @@ export function resumoCarro(carro: Carro, movs: Movimento[]) {
   // Venda: preço de venda (registado ou o da ficha) − compra − custos.
   const receitaVenda = venda ? Math.max(venda, receitas) : receitas;
   const margem = carro.tipo_gestao === 'Venda' ? receitaVenda - compra - custos : receitas - custos;
-  return { custos, receitas, compra, venda, vendido, margem };
+  return {
+    custos,
+    receitas,
+    receita: carro.tipo_gestao === 'Venda' ? receitaVenda : receitas,
+    compra,
+    venda,
+    vendido,
+    margem,
+  };
 }
 
 // ── Ligação Preparação ↔ Custos ──
