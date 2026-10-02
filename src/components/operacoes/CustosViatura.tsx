@@ -11,7 +11,7 @@ import {
   useFinanceiro,
   useUpdateCarroField,
 } from '@/hooks/useOperacoes';
-import { TIPOS_CUSTO, TIPOS_RECEITA, eur, resumoCarro, semIva, toNum } from '@/lib/operacoes/custos';
+import { TIPOS_CUSTO, TIPOS_RECEITA, eur, tipoDaCategoria, resumoCarro, semIva, toNum } from '@/lib/operacoes/custos';
 import { Field, NativeSelect } from './shared';
 
 const hoje = () => new Date().toISOString().slice(0, 10);
@@ -111,7 +111,7 @@ export function CustosViatura({ carro }: { carro: Carro }) {
               >
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-medium">
-                    {m.tipo || 'Movimento'}
+                    {m.categoria || m.tipo || 'Movimento'}
                     {m.contraparte && (
                       <span className="font-normal text-muted-foreground"> · {m.contraparte}</span>
                     )}
@@ -232,7 +232,8 @@ function NovoMovimento({
       await onSave({
         carro_id: carro.id,
         data,
-        tipo,
+        tipo: tipoDaCategoria(tipo),
+        categoria: tipo,
         descricao: descricao || null,
         contraparte: fornecedor || null,
         kms: kms || null,
@@ -250,7 +251,7 @@ function NovoMovimento({
 
   return (
     <div className="grid grid-cols-2 gap-3 rounded-lg border border-primary/40 bg-muted/30 p-3">
-      <Field label="Tipo">
+      <Field label="Categoria">
         <NativeSelect value={tipo} onChange={(e) => setTipo(e.target.value)}>
           {[...TIPOS_CUSTO, ...TIPOS_RECEITA].map((t) => (
             <option key={t}>{t}</option>

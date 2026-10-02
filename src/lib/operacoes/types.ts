@@ -93,6 +93,7 @@ export interface Movimento {
   carro_id: number | null;
   data: string | null;
   tipo: string | null;
+  categoria: string | null;
   descricao: string | null;
   contraparte: string | null;
   valor: number | string | null;
