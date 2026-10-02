@@ -47,9 +47,9 @@ export const CHECKLIST_GROUPS_VENDA: Record<string, string[]> = {
     'Inspeção',
     'Livros de Manutenção e Manual de Utilizador',
     'Garantia',
+    '2ª chave (quando aplicável)',
   ],
   'A Fazer': [
-    '2ª chave (quando aplicável)',
     'Pneu suplente ou kit furos',
     'Triângulo e colete',
     'Cabo de carregador (aplicável a BEV)',
@@ -74,9 +74,9 @@ export const CHECKLIST_GROUPS_ALUGUER: Record<string, string[]> = {
     'Inspeção TVDE',
     'Livros de Manutenção e Manual de Utilizador',
     'Inscrição nas plataformas',
+    '2ª chave (juntar no arquivo da viatura)',
   ],
   'A Fazer': [
-    '2ª chave (juntar no arquivo da viatura)',
     'Pneu suplente ou kit furos',
     'Triângulo e colete',
     'Extintor',

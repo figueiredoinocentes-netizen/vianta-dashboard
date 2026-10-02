@@ -637,6 +637,7 @@ function DocumentosEditor({ carro }: { carro: Carro }) {
       <div className="mb-2 text-[11px] font-bold uppercase tracking-wider text-primary">Documentos</div>
       <div className="flex flex-col gap-1.5">
         {items.map((item) => {
+          const temFicheiro = item in DOC_KEYWORDS; // itens sem palavras-chave são só um visto
           const file = matchFileForItem(item, drive.data?.files);
           const inputId = `docup-${carro.id}-${normalizeText(item).replace(/[^a-z0-9]/g, '')}`;
           return (
@@ -651,7 +652,7 @@ function DocumentosEditor({ carro }: { carro: Carro }) {
                 {item}
               </label>
               <span className="inline-flex items-center gap-1.5">
-                {drive.isLoading ? (
+                {!temFicheiro ? null : drive.isLoading ? (
                   <span className="text-[11px] text-muted-foreground">a procurar...</span>
                 ) : uploading === item ? (
                   <span className="text-[11px] text-muted-foreground">a enviar...</span>
