@@ -31,8 +31,11 @@ export function toNum(x: unknown): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-export const eur = (n: number) =>
-  `${n < 0 ? '-' : ''}${Math.abs(n).toLocaleString('pt-PT', { maximumFractionDigits: 2, useGrouping: 'always' })} €`;
+export const eur = (n: number) => {
+  const [int, dec] = Math.abs(n).toFixed(2).split('.');
+  const milhares = int.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  return `${n < 0 ? '-' : ''}${milhares}${dec === '00' ? '' : ',' + dec} €`;
+};
 
 /** Valor de um movimento sem IVA (custo ou receita), com sinal. */
 export const semIva = (m: Movimento) => (m.valor_sem_iva != null ? toNum(m.valor_sem_iva) : toNum(m.valor));
