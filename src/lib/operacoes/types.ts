@@ -102,6 +102,21 @@ export interface Movimento {
   kms: string | null;
   comprovativo: string | null;
   obs: string | null;
+  ocorrencia_id?: number | null;
+}
+
+/** Dano, avaria ou aviso numa viatura, com fotos (tabela `ocorrencias`). */
+export interface Ocorrencia {
+  id: number;
+  carro_id: number;
+  data: string | null;
+  tipo: string | null;
+  descricao: string | null;
+  gravidade: string | null;
+  estado: string | null;
+  fotos: string[] | null;
+  reportado_por: string | null;
+  resolvido_em: string | null;
 }
 
 export interface DriveFile {

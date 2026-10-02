@@ -9,6 +9,7 @@ const TABLE_MAP = {
   investidores: 'investidores',
   clientes: 'clientes',
   financeiro: 'financeiro',
+  ocorrencias: 'ocorrencias',
 };
 
 const PROD_ORIGIN = 'https://vianta-dashboard.netlify.app';

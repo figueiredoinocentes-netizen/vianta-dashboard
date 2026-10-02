@@ -11,7 +11,8 @@ export type CentralType =
   | 'investidores'
   | 'clientes'
   | 'pagamentos'
-  | 'financeiro';
+  | 'financeiro'
+  | 'ocorrencias';
 
 async function readJson(r: Response) {
   return r.json().catch(() => ({}));

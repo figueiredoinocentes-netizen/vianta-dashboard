@@ -14,6 +14,7 @@ import type {
   Investidor,
   Motorista,
   Movimento,
+  Ocorrencia,
   Pagamento,
 } from '@/lib/operacoes/types';
 
@@ -34,6 +35,7 @@ export const useInvestidores = () => useCentralList<Investidor>('investidores');
 export const useClientes = () => useCentralList<Cliente>('clientes');
 export const usePagamentos = () => useCentralList<Pagamento>('pagamentos');
 
+export const useOcorrencias = () => useCentralList<Ocorrencia>('ocorrencias');
 export const useFinanceiro = () => useCentralList<Movimento>('financeiro');
 
 export function useRefreshOperacoes() {

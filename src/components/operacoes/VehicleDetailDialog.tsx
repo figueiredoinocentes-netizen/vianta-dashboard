@@ -33,6 +33,7 @@ import {
 } from '@/hooks/useOperacoes';
 import { ClienteDialog } from './ClienteDialog';
 import { CustosViatura, NovoMovimento } from './CustosViatura';
+import { OcorrenciasViatura } from './OcorrenciasViatura';
 import { categoriaDoItem, eur, movsPreparacao, prepObs, semIva } from '@/lib/operacoes/custos';
 import { FotosEditor } from './FotosEditor';
 import { DeleteConfirm, Field, NativeSelect } from './shared';
@@ -143,7 +144,7 @@ export function VehicleDetailDialog({
 }
 
 function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
-  const [tab, setTab] = useState<'carac' | 'ficha' | 'prep' | 'custos'>('carac');
+  const [tab, setTab] = useState<'carac' | 'ficha' | 'prep' | 'custos' | 'ocorr'>('carac');
   const [form, setForm] = useState<Form>(() => formFromCarro(carro));
   const [saving, setSaving] = useState<'idle' | 'saving'>('idle');
   const [clienteOpen, setClienteOpen] = useState(false);
@@ -252,6 +253,7 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
             ['carac', 'Características'],
             ['ficha', 'Ficha comercial'],
             ['prep', 'Preparação'],
+            ['ocorr', 'Ocorrências'],
             ['custos', 'Custos'],
           ] as const
         ).map(([id, label]) => (
@@ -269,9 +271,9 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
         ))}
       </div>
 
-      {tab === 'custos' && (
+      {(tab === 'custos' || tab === 'ocorr') && (
         <>
-          <CustosViatura carro={carro} />
+          {tab === 'custos' ? <CustosViatura carro={carro} /> : <OcorrenciasViatura carro={carro} />}
           <div className="mt-5 flex justify-end">
             <Button type="button" variant="outline" onClick={onClose}>
               Fechar
@@ -280,7 +282,7 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
         </>
       )}
 
-      <form onSubmit={onSubmit} className={tab === 'custos' ? 'hidden' : undefined}>
+      <form onSubmit={onSubmit} className={tab === 'custos' || tab === 'ocorr' ? 'hidden' : undefined}>
         {tab === 'carac' && (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="flex flex-col items-stretch gap-4 sm:col-span-2 sm:flex-row sm:items-start">
