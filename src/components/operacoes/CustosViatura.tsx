@@ -248,7 +248,7 @@ export function NovoMovimento({
         kms: kms || null,
         valor: sinal * Math.abs(t),
         valor_sem_iva: s == null ? null : sinal * Math.abs(s),
-        iva: s == null ? null : sinal * Math.abs(t - s),
+        iva: s == null ? null : sinal * Math.round(Math.abs(t - s) * 100) / 100,
         comprovativo,
         ...extra,
       });
