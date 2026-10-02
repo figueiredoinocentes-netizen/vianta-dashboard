@@ -177,20 +177,29 @@ function Stat({ label, value, tone }: { label: string; value: string; tone?: 'po
   );
 }
 
-function NovoMovimento({
+/** Formulário de registo de um movimento. `extra` junta campos fixos ao registo (ex.: ligação a um item da checklist). */
+export function NovoMovimento({
   carro,
   busy,
   onSave,
   onCancel,
+  cancelLabel = 'Cancelar',
+  defaultCategoria,
+  defaultDescricao = '',
+  extra,
 }: {
   carro: Carro;
   busy: boolean;
   onSave: (body: Record<string, unknown>) => Promise<void>;
   onCancel: () => void;
+  cancelLabel?: string;
+  defaultCategoria?: string;
+  defaultDescricao?: string;
+  extra?: Record<string, unknown>;
 }) {
-  const [tipo, setTipo] = useState<string>(TIPOS_CUSTO[0]);
+  const [tipo, setTipo] = useState<string>(defaultCategoria || TIPOS_CUSTO[0]);
   const [data, setData] = useState(hoje());
-  const [descricao, setDescricao] = useState('');
+  const [descricao, setDescricao] = useState(defaultDescricao);
   const [fornecedor, setFornecedor] = useState('');
   const [kms, setKms] = useState(String(carro.kms_atuais ?? ''));
   const [total, setTotal] = useState('');
@@ -241,6 +250,7 @@ function NovoMovimento({
         valor_sem_iva: s == null ? null : sinal * Math.abs(s),
         iva: s == null ? null : sinal * Math.abs(t - s),
         comprovativo,
+        ...extra,
       });
     } catch (e) {
       toast.error(`Erro ao registar: ${errorMessage(e)}`);
@@ -250,7 +260,13 @@ function NovoMovimento({
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3 rounded-lg border border-primary/40 bg-muted/30 p-3">
+    <div
+      className="grid grid-cols-2 gap-3 rounded-lg border border-primary/40 bg-muted/30 p-3"
+      // Dentro de um <form> (aba Preparação) o Enter nos campos não deve submeter a ficha da viatura.
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' && (e.target as HTMLElement).tagName === 'INPUT') e.preventDefault();
+      }}
+    >
       <Field label="Categoria">
         <NativeSelect value={tipo} onChange={(e) => setTipo(e.target.value)}>
           {[...TIPOS_CUSTO, ...TIPOS_RECEITA].map((t) => (
@@ -290,7 +306,7 @@ function NovoMovimento({
       </Field>
       <div className="col-span-2 flex justify-end gap-2">
         <Button type="button" variant="outline" onClick={onCancel}>
-          Cancelar
+          {cancelLabel}
         </Button>
         <Button type="button" disabled={busy || sending} onClick={submit}>
           {sending ? 'A guardar…' : 'Guardar'}

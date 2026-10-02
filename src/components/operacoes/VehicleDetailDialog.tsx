@@ -24,6 +24,7 @@ import {
   useCarros,
   useCentralWrites,
   useClientes,
+  useFinanceiro,
   useInvestidores,
   useMotoristas,
   useToggleChecklistItem,
@@ -31,7 +32,8 @@ import {
   errorMessage,
 } from '@/hooks/useOperacoes';
 import { ClienteDialog } from './ClienteDialog';
-import { CustosViatura } from './CustosViatura';
+import { CustosViatura, NovoMovimento } from './CustosViatura';
+import { categoriaDoItem, eur, movsPreparacao, prepObs, semIva } from '@/lib/operacoes/custos';
 import { FotosEditor } from './FotosEditor';
 import { DeleteConfirm, Field, NativeSelect } from './shared';
 
@@ -586,6 +588,14 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
 function ChecklistEditor({ carro }: { carro: Carro }) {
   const toggle = useToggleChecklistItem();
   const [uploading, setUploading] = useState<string | null>(null);
+  const [askCost, setAskCost] = useState<string | null>(null);
+  const { data: todosMovs = [] } = useFinanceiro();
+  const { create: createMov } = useCentralWrites('financeiro');
+  const movs = todosMovs.filter((m) => m.carro_id === carro.id);
+  const custoDoItem = (item: string) =>
+    movs.filter((m) => m.obs === prepObs(item)).reduce((a, m) => a - semIva(m), 0);
+  const temCusto = (item: string) => movs.some((m) => m.obs === prepObs(item));
+  const totalPrep = movsPreparacao(movs).reduce((a, m) => a - semIva(m), 0);
 
   const drive = useQuery({
     queryKey: ['drive', carro.id, carro.matricula, carro.marca_modelo, carro.fotos_link],
@@ -638,7 +648,13 @@ function ChecklistEditor({ carro }: { carro: Carro }) {
 
   return (
     <div>
-      <div className="mb-2 text-xs font-medium text-muted-foreground">Checklist de preparação</div>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <div className="text-xs font-medium text-muted-foreground">Checklist de preparação</div>
+        <div className="text-xs text-muted-foreground">
+          Custo de preparação (s/ IVA):{' '}
+          <span className="font-semibold text-foreground">{eur(totalPrep)}</span>
+        </div>
+      </div>
       {Object.entries(groups).map(([label, items]) => {
         if (!items.length) return null;
         const isDocs = label === 'Documentos';
@@ -657,11 +673,47 @@ function ChecklistEditor({ carro }: { carro: Carro }) {
                       <input
                         type="checkbox"
                         checked={!!done[item]}
-                        onChange={() => toggle(carro, item)}
+                        onChange={() => {
+                          const passaAFeito = !done[item];
+                          toggle(carro, item);
+                          if (passaAFeito && label === 'A Fazer' && !temCusto(item)) setAskCost(item);
+                        }}
                         className="accent-[hsl(var(--primary))]"
                       />
                       {item}
                     </label>
+                    {label === 'A Fazer' && temCusto(item) && (
+                      <span className="rounded bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+                        {eur(custoDoItem(item))}
+                      </span>
+                    )}
+                    {label === 'A Fazer' && done[item] && !temCusto(item) && askCost !== item && (
+                      <button
+                        type="button"
+                        onClick={() => setAskCost(item)}
+                        className="rounded border border-dashed border-border px-2 py-0.5 text-[11px] text-muted-foreground transition hover:border-primary hover:text-primary"
+                      >
+                        + custo
+                      </button>
+                    )}
+                    {askCost === item && (
+                      <div className="w-full">
+                        <NovoMovimento
+                          carro={carro}
+                          busy={createMov.isPending}
+                          cancelLabel="Sem custo"
+                          defaultCategoria={categoriaDoItem(item)}
+                          defaultDescricao={item}
+                          extra={{ obs: prepObs(item) }}
+                          onCancel={() => setAskCost(null)}
+                          onSave={async (body) => {
+                            await createMov.mutateAsync(body);
+                            setAskCost(null);
+                            toast.success('Custo registado');
+                          }}
+                        />
+                      </div>
+                    )}
                     {isDocs && (
                       <span className="inline-flex items-center gap-1.5">
                         {drive.isLoading ? (
