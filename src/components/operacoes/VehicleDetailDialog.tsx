@@ -677,6 +677,7 @@ function ChecklistEditor({ carro }: { carro: Carro }) {
                           const passaAFeito = !done[item];
                           toggle(carro, item);
                           if (passaAFeito && label === 'A Fazer' && !temCusto(item)) setAskCost(item);
+                          else if (!passaAFeito && askCost === item) setAskCost(null);
                         }}
                         className="accent-[hsl(var(--primary))]"
                       />
