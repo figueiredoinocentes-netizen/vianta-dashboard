@@ -13,6 +13,7 @@ import type {
   Cliente,
   Investidor,
   Motorista,
+  Movimento,
   Pagamento,
 } from '@/lib/operacoes/types';
 
@@ -32,6 +33,8 @@ export const useMotoristas = () => useCentralList<Motorista>('motoristas');
 export const useInvestidores = () => useCentralList<Investidor>('investidores');
 export const useClientes = () => useCentralList<Cliente>('clientes');
 export const usePagamentos = () => useCentralList<Pagamento>('pagamentos');
+
+export const useFinanceiro = () => useCentralList<Movimento>('financeiro');
 
 export function useRefreshOperacoes() {
   const qc = useQueryClient();

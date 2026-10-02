@@ -31,6 +31,7 @@ import {
   errorMessage,
 } from '@/hooks/useOperacoes';
 import { ClienteDialog } from './ClienteDialog';
+import { CustosViatura } from './CustosViatura';
 import { FotosEditor } from './FotosEditor';
 import { DeleteConfirm, Field, NativeSelect } from './shared';
 
@@ -140,7 +141,7 @@ export function VehicleDetailDialog({
 }
 
 function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
-  const [tab, setTab] = useState<'carac' | 'ficha' | 'prep'>('carac');
+  const [tab, setTab] = useState<'carac' | 'ficha' | 'prep' | 'custos'>('carac');
   const [form, setForm] = useState<Form>(() => formFromCarro(carro));
   const [saving, setSaving] = useState<'idle' | 'saving'>('idle');
   const [clienteOpen, setClienteOpen] = useState(false);
@@ -249,6 +250,7 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
             ['carac', 'Características'],
             ['ficha', 'Ficha comercial'],
             ['prep', 'Preparação'],
+            ['custos', 'Custos'],
           ] as const
         ).map(([id, label]) => (
           <button
@@ -265,7 +267,18 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
         ))}
       </div>
 
-      <form onSubmit={onSubmit}>
+      {tab === 'custos' && (
+        <>
+          <CustosViatura carro={carro} />
+          <div className="mt-5 flex justify-end">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Fechar
+            </Button>
+          </div>
+        </>
+      )}
+
+      <form onSubmit={onSubmit} className={tab === 'custos' ? 'hidden' : undefined}>
         {tab === 'carac' && (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="flex flex-col items-stretch gap-4 sm:col-span-2 sm:flex-row sm:items-start">

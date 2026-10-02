@@ -10,7 +10,8 @@ export type CentralType =
   | 'motoristas'
   | 'investidores'
   | 'clientes'
-  | 'pagamentos';
+  | 'pagamentos'
+  | 'financeiro';
 
 async function readJson(r: Response) {
   return r.json().catch(() => ({}));
@@ -129,7 +130,7 @@ export async function uploadDriveDoc(args: {
   filename: string;
   contentType: string;
   file: File;
-}): Promise<void> {
+}): Promise<{ id?: string; name?: string; webViewLink?: string } | undefined> {
   const dataBase64 = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve((reader.result as string).split(',')[1]);
@@ -148,6 +149,7 @@ export async function uploadDriveDoc(args: {
   });
   const d = await readJson(r);
   if (!r.ok) throw new Error((d as { error?: string }).error || 'Erro ao enviar');
+  return (d as { file?: { id?: string; name?: string; webViewLink?: string } }).file;
 }
 
 // ── Fotos na Drive (CARROS/<viatura>/fotos) → Supabase Storage ──

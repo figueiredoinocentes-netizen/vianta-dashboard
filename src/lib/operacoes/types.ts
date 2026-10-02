@@ -38,6 +38,7 @@ export interface Carro {
   fotos_link?: string | null;
   fotos?: string[] | null;
   obs?: string | null;
+  preco_compra?: string | number | null;
 }
 
 export interface Motorista {
@@ -84,6 +85,22 @@ export interface Pagamento {
   liquidio: number | string | null;
   estado: string | null;
   data_pagamento: string | null;
+}
+
+/** Movimento financeiro de uma viatura (tabela `financeiro`). Custos negativos, receitas positivas. */
+export interface Movimento {
+  id: number;
+  carro_id: number | null;
+  data: string | null;
+  tipo: string | null;
+  descricao: string | null;
+  contraparte: string | null;
+  valor: number | string | null;
+  valor_sem_iva: number | string | null;
+  iva: number | string | null;
+  kms: string | null;
+  comprovativo: string | null;
+  obs: string | null;
 }
 
 export interface DriveFile {
