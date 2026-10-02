@@ -32,7 +32,7 @@ export function toNum(x: unknown): number {
 }
 
 export const eur = (n: number) =>
-  `${n < 0 ? '-' : ''}${Math.abs(n).toLocaleString('pt-PT', { maximumFractionDigits: 2 })} €`;
+  `${n < 0 ? '-' : ''}${Math.abs(n).toLocaleString('pt-PT', { maximumFractionDigits: 2, useGrouping: 'always' })} €`;
 
 /** Valor de um movimento sem IVA (custo ou receita), com sinal. */
 export const semIva = (m: Movimento) => (m.valor_sem_iva != null ? toNum(m.valor_sem_iva) : toNum(m.valor));
