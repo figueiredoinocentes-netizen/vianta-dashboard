@@ -9,6 +9,7 @@ import {
   GRAVIDADES,
   ORIGEM_OCORR,
   ORIGEM_PREP,
+  TIPOS_COM_GRAVIDADE,
   TIPOS_TRABALHO,
   categoriaDoTrabalho,
   concluido,
@@ -23,7 +24,7 @@ import {
   useOcorrencias,
   useRefreshOperacoes,
 } from '@/hooks/useOperacoes';
-import { NovoMovimento } from './CustosViatura';
+import { NovoMovimento } from './NovoMovimento';
 import { Field, NativeSelect } from './shared';
 
 const hoje = () => new Date().toISOString().slice(0, 10);
@@ -95,10 +96,10 @@ export function TrabalhosViatura({ carro }: { carro: Carro }) {
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <div className="text-xs font-medium text-muted-foreground">Trabalhos e ocorrências</div>
+          <div className="text-xs font-medium text-muted-foreground">Tarefas e ocorrências</div>
           <div className="text-[11px] text-muted-foreground">
             {prep.length ? `Preparação: ${prepFeitos}/${prep.length} · ${eur(custoPrep)} · ` : ''}
-            Ocorrências: {eur(custoOcorr)} (s/ IVA)
+            Outras tarefas: {eur(custoOcorr)} (s/ IVA)
           </div>
         </div>
         {!adding && (
@@ -114,9 +115,11 @@ export function TrabalhosViatura({ carro }: { carro: Carro }) {
           busy={create.isPending}
           onCancel={() => setAdding(false)}
           onSave={async (body) => {
-            await create.mutateAsync(body);
+            const rows = (await create.mutateAsync(body)) as { id?: number }[];
             setAdding(false);
             toast.success('Registado');
+            // Já feito e sem custo registado: pergunta logo o custo.
+            if (body.estado === 'Feito' && rows[0]?.id) setCostFor(rows[0].id);
           }}
         />
       )}
@@ -149,9 +152,11 @@ export function TrabalhosViatura({ carro }: { carro: Carro }) {
                         {o.tipo} · preparação
                       </span>
                     ) : (
-                      <span className={`rounded px-1.5 py-0.5 text-[11px] ${gravidadeClass(o.gravidade)}`}>
-                        {o.gravidade}
-                      </span>
+                      TIPOS_COM_GRAVIDADE.includes(o.tipo || '') && (
+                        <span className={`rounded px-1.5 py-0.5 text-[11px] ${gravidadeClass(o.gravidade)}`}>
+                          {o.gravidade}
+                        </span>
+                      )
                     )}
                   </div>
                   {!prepTask && o.descricao && (
@@ -267,6 +272,7 @@ function NovoTrabalho({
   const [gravidade, setGravidade] = useState<string>('Média');
   const [descricao, setDescricao] = useState('');
   const [quem, setQuem] = useState('');
+  const [jaFeito, setJaFeito] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [sending, setSending] = useState(false);
 
@@ -280,7 +286,9 @@ function NovoTrabalho({
         carro_id: carro.id,
         origem,
         tipo,
-        gravidade: origem === ORIGEM_PREP ? 'Baixa' : gravidade,
+        gravidade: origem === ORIGEM_OCORR && TIPOS_COM_GRAVIDADE.includes(tipo) ? gravidade : 'Baixa',
+        estado: jaFeito ? 'Feito' : 'Por fazer',
+        resolvido_em: jaFeito ? new Date().toISOString().slice(0, 10) : null,
         descricao: descricao.trim() || null,
         reportado_por: quem.trim() || null,
         fotos,
@@ -301,7 +309,7 @@ function NovoTrabalho({
     >
       <Field label="Origem">
         <NativeSelect value={origem} onChange={(e) => setOrigem(e.target.value)}>
-          <option value={ORIGEM_OCORR}>Ocorrência (dano, avaria…)</option>
+          <option value={ORIGEM_OCORR}>Ocorrência ou outra tarefa</option>
           <option value={ORIGEM_PREP}>Preparação</option>
         </NativeSelect>
       </Field>
@@ -319,7 +327,7 @@ function NovoTrabalho({
           placeholder="ex.: risco no para-choques traseiro, lado esquerdo"
         />
       </Field>
-      {origem === ORIGEM_OCORR && (
+      {origem === ORIGEM_OCORR && TIPOS_COM_GRAVIDADE.includes(tipo) && (
         <Field label="Gravidade">
           <NativeSelect value={gravidade} onChange={(e) => setGravidade(e.target.value)}>
             {GRAVIDADES.map((g) => (
@@ -328,9 +336,21 @@ function NovoTrabalho({
           </NativeSelect>
         </Field>
       )}
-      <Field label="Reportado por" className={origem === ORIGEM_OCORR ? '' : 'col-span-2'}>
+      <Field
+        label="Reportado por"
+        className={origem === ORIGEM_OCORR && TIPOS_COM_GRAVIDADE.includes(tipo) ? '' : 'col-span-2'}
+      >
         <Input value={quem} onChange={(e) => setQuem(e.target.value)} />
       </Field>
+      <label className="col-span-2 flex cursor-pointer items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          checked={jaFeito}
+          onChange={(e) => setJaFeito(e.target.checked)}
+          className="accent-[hsl(var(--primary))]"
+        />
+        Já está feito (registar o custo a seguir)
+      </label>
       <Field label="Fotos" className="col-span-2">
         <Input
           type="file"

@@ -13,8 +13,15 @@ export const TIPOS_TRABALHO = [
   'Limpeza',
   'Equipamento',
   'Aviso',
+  'Seguro',
+  'IUC / IMT',
+  'Multa',
+  'Comissão',
+  'Inspeção',
   'Outro',
 ] as const;
+/** Tipos em que faz sentido indicar a gravidade. */
+export const TIPOS_COM_GRAVIDADE: readonly string[] = ['Dano', 'Avaria', 'Aviso'];
 export const GRAVIDADES = ['Baixa', 'Média', 'Alta'] as const;
 export const ESTADOS_TRABALHO = ['Por fazer', 'Em curso', 'Feito', 'Dispensado'] as const;
 
@@ -50,7 +57,7 @@ export function tipoDoItem(item: string): string {
 
 /** Categoria de custo (tabela `financeiro`) sugerida para um trabalho. */
 export function categoriaDoTrabalho(tipo: string | null, origem: string | null): string {
-  if (tipo === 'Pneus') return 'Pneus';
+  if (tipo === 'Pneus' || tipo === 'Seguro' || tipo === 'IUC / IMT' || tipo === 'Multa' || tipo === 'Comissão') return tipo;
   if (origem === ORIGEM_PREP && tipo !== 'Mecânica') return 'Preparação';
   return 'Manutenção';
 }

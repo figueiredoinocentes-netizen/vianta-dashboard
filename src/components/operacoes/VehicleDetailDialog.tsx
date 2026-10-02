@@ -30,7 +30,6 @@ import {
   errorMessage,
 } from '@/hooks/useOperacoes';
 import { ClienteDialog } from './ClienteDialog';
-import { CustosViatura } from './CustosViatura';
 import { TrabalhosViatura } from './TrabalhosViatura';
 import { FotosEditor } from './FotosEditor';
 import { DeleteConfirm, Field, NativeSelect } from './shared';
@@ -46,6 +45,7 @@ interface Form {
   gestao: string;
   estado: string;
   precoVenda: string;
+  precoCompra: string;
   precoAluguer: string;
   motoristaAtual: string;
   clienteId: string;
@@ -86,6 +86,7 @@ function formFromCarro(v: Carro): Form {
     gestao: v.tipo_gestao || 'Aluguer',
     estado: v.estado || 'Alugado',
     precoVenda: s(v.preco_venda),
+    precoCompra: s(v.preco_compra),
     precoAluguer: s(v.valor_aluguer_semanal),
     motoristaAtual: s(v.motorista_atual),
     clienteId: v.cliente_id ? String(v.cliente_id) : '',
@@ -141,7 +142,7 @@ export function VehicleDetailDialog({
 }
 
 function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
-  const [tab, setTab] = useState<'carac' | 'ficha' | 'prep' | 'custos'>('carac');
+  const [tab, setTab] = useState<'carac' | 'ficha' | 'prep'>('carac');
   const [form, setForm] = useState<Form>(() => formFromCarro(carro));
   const [saving, setSaving] = useState<'idle' | 'saving'>('idle');
   const [clienteOpen, setClienteOpen] = useState(false);
@@ -190,6 +191,7 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
       tipo_gestao: form.gestao || null,
       estado: form.estado || null,
       preco_venda: isVenda ? form.precoVenda || null : null,
+      preco_compra: form.precoCompra || null,
       valor_aluguer_semanal: !isVenda ? form.precoAluguer || null : null,
       motorista_atual: form.estado === 'Em Preparação' ? null : form.motoristaAtual || null,
       cliente_id: form.estado === 'Vendido' && form.clienteId ? Number(form.clienteId) : null,
@@ -249,8 +251,7 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
           [
             ['carac', 'Características'],
             ['ficha', 'Ficha comercial'],
-            ['prep', 'Trabalhos'],
-            ['custos', 'Custos'],
+            ['prep', 'Tarefas'],
           ] as const
         ).map(([id, label]) => (
           <button
@@ -267,18 +268,7 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
         ))}
       </div>
 
-      {tab === 'custos' && (
-        <>
-          <CustosViatura carro={carro} />
-          <div className="mt-5 flex justify-end">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Fechar
-            </Button>
-          </div>
-        </>
-      )}
-
-      <form onSubmit={onSubmit} className={tab === 'custos' ? 'hidden' : undefined}>
+      <form onSubmit={onSubmit}>
         {tab === 'carac' && (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="flex flex-col items-stretch gap-4 sm:col-span-2 sm:flex-row sm:items-start">
@@ -356,6 +346,13 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
                   <option key={st}>{st}</option>
                 ))}
               </NativeSelect>
+            </Field>
+            <Field label="Preço de compra (€, s/ IVA)" className="sm:col-span-2">
+              <Input
+                inputMode="decimal"
+                value={form.precoCompra}
+                onChange={(e) => set('precoCompra', e.target.value)}
+              />
             </Field>
             {isVenda ? (
               <Field label="Preço Venda (€)" className="sm:col-span-2">

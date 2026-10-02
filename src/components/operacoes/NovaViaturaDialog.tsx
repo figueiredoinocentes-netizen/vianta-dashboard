@@ -32,6 +32,7 @@ const EMPTY = {
   estado: 'Em Preparação',
   precoVenda: '',
   precoAluguer: '',
+  precoCompra: '',
 };
 
 export function NovaViaturaDialog({
@@ -89,6 +90,7 @@ export function NovaViaturaDialog({
         tipo_gestao: form.gestao || null,
         estado: form.estado || null,
         preco_venda: form.precoVenda || null,
+        preco_compra: form.precoCompra || null,
         valor_aluguer_semanal: form.precoAluguer || null,
       });
       const novoId = rows[0]?.id;
@@ -221,6 +223,13 @@ export function NovaViaturaDialog({
                   <option key={s}>{s}</option>
                 ))}
               </NativeSelect>
+            </Field>
+            <Field label="Preço de compra (€, s/ IVA)">
+              <Input
+                type="number"
+                value={form.precoCompra}
+                onChange={(e) => set('precoCompra', e.target.value)}
+              />
             </Field>
             <Field label="Preço Venda (€)">
               <Input

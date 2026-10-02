@@ -37,7 +37,7 @@ export default function OpsManutencao() {
       {!!pendentes.length && (
         <div className="mb-6 rounded-xl border border-border bg-card p-4">
           <div className="mb-3 text-sm font-semibold">
-            Ocorrências por resolver <span className="text-muted-foreground">({pendentes.length})</span>
+            Tarefas por fazer <span className="text-muted-foreground">({pendentes.length})</span>
           </div>
           <div className="flex flex-col gap-2">
             {pendentes.map(({ o, carro }) => (

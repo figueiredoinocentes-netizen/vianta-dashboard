@@ -13,15 +13,6 @@ export const TIPOS_CUSTO = [
   'Comissão',
   'Outro',
 ] as const;
-export const TIPOS_RECEITA = ['Receita aluguer', 'Receita slot', 'Receita venda'] as const;
-
-/** Mapeia a categoria escolhida para o `tipo` aceite pela tabela (financeiro_tipo_check). */
-export function tipoDaCategoria(categoria: string): string {
-  if (categoria === 'Receita aluguer') return 'Receita_Aluguer';
-  if (categoria === 'Receita slot') return 'Receita_Slot';
-  if (categoria === 'Receita venda') return 'Venda';
-  return 'Custo';
-}
 
 /** Aceita "12500", "12.500,50", "300€/semana" … e devolve um número (0 se vazio). */
 export function toNum(x: unknown): number {
