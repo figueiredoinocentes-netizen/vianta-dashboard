@@ -1,5 +1,6 @@
 // Cálculo de custos e margens por viatura (tabela `financeiro`).
-import type { Carro, Movimento } from './types';
+import type { Carro, Movimento, Ocorrencia } from './types';
+import { ePreparacao } from './trabalhos';
 
 export const TIPOS_CUSTO = [
   'Manutenção',
@@ -60,18 +61,9 @@ export function resumoCarro(carro: Carro, movs: Movimento[]) {
   };
 }
 
-// ── Ligação Preparação ↔ Custos ──
-// Um custo registado a partir de um item da checklist guarda `obs = "prep:<item>"`.
-export const PREP_PREFIX = 'prep:';
-export const prepObs = (item: string) => `${PREP_PREFIX}${item}`;
-
-/** Categoria sugerida para o custo de um item da checklist de preparação. */
-export function categoriaDoItem(item: string): string {
-  if (/^pneus/i.test(item)) return 'Pneus';
-  if (/^mec[aâ]nica/i.test(item)) return 'Manutenção';
-  return 'Preparação';
-}
-
-/** Custos de preparação de uma viatura: ligados a itens da checklist ou categoria "Preparação". */
-export const movsPreparacao = (movs: Movimento[]) =>
-  movs.filter((m) => m.obs?.startsWith(PREP_PREFIX) || m.categoria === 'Preparação');
+// ── Custos de preparação ──
+/** Custos de preparação: ligados a trabalhos de origem "Preparação" (ou com categoria "Preparação"). */
+export const movsPreparacao = (movs: Movimento[], ocorrencias: Ocorrencia[]) => {
+  const ids = new Set(ocorrencias.filter(ePreparacao).map((o) => o.id));
+  return movs.filter((m) => (m.ocorrencia_id != null && ids.has(m.ocorrencia_id)) || m.categoria === 'Preparação');
+};

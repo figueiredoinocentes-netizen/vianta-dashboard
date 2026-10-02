@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/table';
 import { destinoDepoisDePreparacao, matchesSearch } from '@/lib/operacoes/constants';
 import { useCarros, useOcorrencias, useUpdateCarroField } from '@/hooks/useOperacoes';
-import { gravidadeClass } from '@/components/operacoes/OcorrenciasViatura';
+import { emAberto, ePreparacao, gravidadeClass } from '@/lib/operacoes/trabalhos';
 import { useOps } from '@/components/operacoes/OpsContext';
 import { EmptyState, ErrorBox, OpsHeader, StatusSelect, hideCols } from '@/components/operacoes/shared';
 
@@ -20,7 +20,7 @@ export default function OpsManutencao() {
   const update = useUpdateCarroField();
   const { data: ocorrencias = [] } = useOcorrencias();
   const pendentes = ocorrencias
-    .filter((o) => o.estado !== 'Resolvido')
+    .filter((o) => emAberto(o) && !ePreparacao(o))
     .map((o) => ({ o, carro: carros.find((c) => c.id === o.carro_id) }))
     .filter((x) => x.carro && matchesSearch(search, x.carro))
     .sort((a, b) => (b.o.gravidade === 'Alta' ? 1 : 0) - (a.o.gravidade === 'Alta' ? 1 : 0));

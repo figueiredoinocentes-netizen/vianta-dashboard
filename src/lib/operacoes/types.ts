@@ -114,6 +114,8 @@ export interface Ocorrencia {
   descricao: string | null;
   gravidade: string | null;
   estado: string | null;
+  origem: string | null;
+  item: string | null;
   fotos: string[] | null;
   reportado_por: string | null;
   resolvido_em: string | null;

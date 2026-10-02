@@ -4,6 +4,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { updateCentralField, uploadFoto } from '@/lib/operacoes/central';
 import { eur, semIva } from '@/lib/operacoes/custos';
+import {
+  ESTADOS_TRABALHO,
+  GRAVIDADES,
+  ORIGEM_OCORR,
+  ORIGEM_PREP,
+  TIPOS_TRABALHO,
+  categoriaDoTrabalho,
+  concluido,
+  ePreparacao,
+  gravidadeClass,
+} from '@/lib/operacoes/trabalhos';
 import type { Carro, Ocorrencia } from '@/lib/operacoes/types';
 import {
   errorMessage,
@@ -15,21 +26,13 @@ import {
 import { NovoMovimento } from './CustosViatura';
 import { Field, NativeSelect } from './shared';
 
-export const TIPOS_OCORRENCIA = ['Dano', 'Avaria', 'Aviso', 'Outro'] as const;
-export const GRAVIDADES = ['Baixa', 'Média', 'Alta'] as const;
-export const ESTADOS_OCORRENCIA = ['Por resolver', 'Em reparação', 'Resolvido'] as const;
-
-export const gravidadeClass = (g: string | null) =>
-  g === 'Alta'
-    ? 'bg-red-500/15 text-red-300'
-    : g === 'Média'
-      ? 'bg-amber-500/15 text-amber-300'
-      : 'bg-muted text-muted-foreground';
-
 const hoje = () => new Date().toISOString().slice(0, 10);
 
-/** Ocorrências (danos, avarias, avisos) de uma viatura, com fotos e custo da reparação. */
-export function OcorrenciasViatura({ carro, reportadoPor }: { carro: Carro; reportadoPor?: string }) {
+/**
+ * Trabalhos de uma viatura: itens da preparação (checklist "A Fazer") e ocorrências
+ * (danos, avarias, avisos). Cada um tem estado, fotos opcionais e custos ligados.
+ */
+export function TrabalhosViatura({ carro }: { carro: Carro }) {
   const { data: todas = [], isLoading } = useOcorrencias();
   const { data: movs = [] } = useFinanceiro();
   const { create, remove } = useCentralWrites('ocorrencias');
@@ -43,27 +46,60 @@ export function OcorrenciasViatura({ carro, reportadoPor }: { carro: Carro; repo
       todas
         .filter((o) => o.carro_id === carro.id)
         .sort((a, b) => {
-          const pend = (o: Ocorrencia) => (o.estado === 'Resolvido' ? 1 : 0);
-          return pend(a) - pend(b) || String(b.data || '').localeCompare(String(a.data || ''));
+          const fim = (o: Ocorrencia) => (concluido(o) ? 1 : 0);
+          const org = (o: Ocorrencia) => (ePreparacao(o) ? 1 : 0);
+          return (
+            fim(a) - fim(b) ||
+            org(a) - org(b) ||
+            (ePreparacao(a) ? a.id - b.id : String(b.data || '').localeCompare(String(a.data || '')))
+          );
         }),
     [todas, carro.id],
   );
 
+  const custoDe = (o: Ocorrencia) => {
+    const cs = movs.filter((m) => m.ocorrencia_id === o.id);
+    return { n: cs.length, total: -cs.reduce((a, m) => a + semIva(m), 0) };
+  };
+  const prep = lista.filter(ePreparacao);
+  const prepFeitos = prep.filter(concluido).length;
+  const custoPrep = prep.reduce((a, o) => a + custoDe(o).total, 0);
+  const custoOcorr = lista.filter((o) => !ePreparacao(o)).reduce((a, o) => a + custoDe(o).total, 0);
+
   async function setEstado(o: Ocorrencia, estado: string) {
     try {
       await updateCentralField('ocorrencias', o.id, 'estado', estado);
-      await updateCentralField('ocorrencias', o.id, 'resolvido_em', estado === 'Resolvido' ? hoje() : null);
+      await updateCentralField('ocorrencias', o.id, 'resolvido_em', estado === 'Feito' ? hoje() : null);
       refresh();
+      // Ao dar como feito, pergunta o custo (pode ficar sem custo).
+      if (estado === 'Feito' && !custoDe(o).n) setCostFor(o.id);
+      else if (costFor === o.id && estado !== 'Feito') setCostFor(null);
     } catch (e) {
       toast.error(`Erro ao guardar: ${errorMessage(e)}`);
     }
   }
 
+  async function addFotos(o: Ocorrencia, files: File[]) {
+    if (!files.length) return;
+    try {
+      const novas: string[] = [];
+      for (const f of files) novas.push(await uploadFoto(f, `ocorrencia-${carro.id}`));
+      await updateCentralField('ocorrencias', o.id, 'fotos', [...(o.fotos || []), ...novas]);
+      refresh();
+    } catch (e) {
+      toast.error(`Erro ao enviar fotos: ${errorMessage(e)}`);
+    }
+  }
+
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <div className="text-xs font-medium text-muted-foreground">
-          Danos, avarias e avisos desta viatura
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <div className="text-xs font-medium text-muted-foreground">Trabalhos e ocorrências</div>
+          <div className="text-[11px] text-muted-foreground">
+            {prep.length ? `Preparação: ${prepFeitos}/${prep.length} · ${eur(custoPrep)} · ` : ''}
+            Ocorrências: {eur(custoOcorr)} (s/ IVA)
+          </div>
         </div>
         {!adding && (
           <Button type="button" size="sm" onClick={() => setAdding(true)}>
@@ -73,15 +109,14 @@ export function OcorrenciasViatura({ carro, reportadoPor }: { carro: Carro; repo
       </div>
 
       {adding && (
-        <NovaOcorrencia
+        <NovoTrabalho
           carro={carro}
-          reportadoPor={reportadoPor}
           busy={create.isPending}
           onCancel={() => setAdding(false)}
           onSave={async (body) => {
             await create.mutateAsync(body);
             setAdding(false);
-            toast.success('Ocorrência registada');
+            toast.success('Registado');
           }}
         />
       )}
@@ -90,36 +125,53 @@ export function OcorrenciasViatura({ carro, reportadoPor }: { carro: Carro; repo
         <p className="text-sm text-muted-foreground">A carregar…</p>
       ) : !lista.length ? (
         <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-          Sem ocorrências registadas nesta viatura.
+          Sem trabalhos nem ocorrências nesta viatura.
+          {carro.estado === 'Em Preparação' && ' Os itens da preparação são criados automaticamente.'}
         </p>
       ) : (
         lista.map((o) => {
-          const custos = movs.filter((m) => m.ocorrencia_id === o.id);
-          const total = -custos.reduce((a, m) => a + semIva(m), 0);
+          const c = custoDe(o);
+          const prepTask = ePreparacao(o);
+          const feito = concluido(o);
           return (
-            <div key={o.id} className="rounded-lg border border-border bg-card p-3">
+            <div
+              key={o.id}
+              className={'rounded-lg border border-border bg-card p-3 ' + (feito ? 'opacity-70' : '')}
+            >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
-                    {o.tipo || 'Ocorrência'}
-                    <span className={`rounded px-1.5 py-0.5 text-[11px] ${gravidadeClass(o.gravidade)}`}>
-                      {o.gravidade}
+                    <span className={o.estado === 'Dispensado' ? 'line-through' : ''}>
+                      {prepTask ? o.descricao || o.item : o.tipo || 'Ocorrência'}
                     </span>
+                    {prepTask ? (
+                      <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[11px] font-normal text-primary">
+                        {o.tipo} · preparação
+                      </span>
+                    ) : (
+                      <span className={`rounded px-1.5 py-0.5 text-[11px] ${gravidadeClass(o.gravidade)}`}>
+                        {o.gravidade}
+                      </span>
+                    )}
                   </div>
-                  {o.descricao && <div className="mt-0.5 text-sm text-foreground/80">{o.descricao}</div>}
+                  {!prepTask && o.descricao && (
+                    <div className="mt-0.5 text-sm text-foreground/80">{o.descricao}</div>
+                  )}
                   <div className="mt-0.5 text-[11px] text-muted-foreground">
                     {o.data}
                     {o.reportado_por ? ` · ${o.reportado_por}` : ''}
-                    {o.resolvido_em ? ` · resolvido a ${o.resolvido_em}` : ''}
+                    {o.resolvido_em ? ` · feito a ${o.resolvido_em}` : ''}
                   </div>
                 </div>
                 <NativeSelect
                   className="h-8 w-auto text-xs"
-                  value={o.estado || 'Por resolver'}
+                  value={o.estado || 'Por fazer'}
                   onChange={(e) => setEstado(o, e.target.value)}
                 >
-                  {ESTADOS_OCORRENCIA.map((s) => (
-                    <option key={s}>{s}</option>
+                  {ESTADOS_TRABALHO.map((s) => (
+                    <option key={s} value={s}>
+                      {s === 'Dispensado' ? 'Não se aplica' : s}
+                    </option>
                   ))}
                 </NativeSelect>
               </div>
@@ -136,26 +188,40 @@ export function OcorrenciasViatura({ carro, reportadoPor }: { carro: Carro; repo
 
               <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs">
                 <span className="text-muted-foreground">
-                  Custo da reparação:{' '}
-                  <span className="font-semibold text-foreground">{custos.length ? eur(total) : '—'}</span>
+                  Custo: <span className="font-semibold text-foreground">{c.n ? eur(c.total) : '—'}</span>
                 </span>
-                <span className="flex gap-3">
+                <span className="flex flex-wrap items-center gap-3">
+                  <label className="cursor-pointer text-primary hover:underline">
+                    + foto
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={(e) => {
+                        addFotos(o, Array.from(e.target.files || []));
+                        e.target.value = '';
+                      }}
+                    />
+                  </label>
                   <button
                     type="button"
                     className="text-primary hover:underline"
                     onClick={() => setCostFor(costFor === o.id ? null : o.id)}
                   >
-                    + custo da reparação
+                    + custo
                   </button>
-                  <button
-                    type="button"
-                    className="text-muted-foreground hover:text-destructive"
-                    onClick={() => {
-                      if (window.confirm('Apagar esta ocorrência? Os custos registados ficam.')) remove.mutate(o.id);
-                    }}
-                  >
-                    apagar
-                  </button>
+                  {!prepTask && (
+                    <button
+                      type="button"
+                      className="text-muted-foreground hover:text-destructive"
+                      onClick={() => {
+                        if (window.confirm('Apagar esta ocorrência? Os custos registados ficam.')) remove.mutate(o.id);
+                      }}
+                    >
+                      apagar
+                    </button>
+                  )}
                 </span>
               </div>
 
@@ -164,8 +230,9 @@ export function OcorrenciasViatura({ carro, reportadoPor }: { carro: Carro; repo
                   <NovoMovimento
                     carro={carro}
                     busy={createMov.isPending}
-                    defaultCategoria="Manutenção"
-                    defaultDescricao={`${o.tipo || 'Ocorrência'}: ${o.descricao || ''}`.trim()}
+                    cancelLabel={feito && !c.n ? 'Sem custo' : 'Cancelar'}
+                    defaultCategoria={categoriaDoTrabalho(o.tipo, o.origem)}
+                    defaultDescricao={o.descricao || o.item || o.tipo || ''}
                     extra={{ ocorrencia_id: o.id }}
                     onCancel={() => setCostFor(null)}
                     onSave={async (body) => {
@@ -184,36 +251,36 @@ export function OcorrenciasViatura({ carro, reportadoPor }: { carro: Carro; repo
   );
 }
 
-function NovaOcorrencia({
+function NovoTrabalho({
   carro,
-  reportadoPor,
   busy,
   onSave,
   onCancel,
 }: {
   carro: Carro;
-  reportadoPor?: string;
   busy: boolean;
   onSave: (body: Record<string, unknown>) => Promise<void>;
   onCancel: () => void;
 }) {
-  const [tipo, setTipo] = useState<string>(TIPOS_OCORRENCIA[0]);
+  const [origem, setOrigem] = useState<string>(carro.estado === 'Em Preparação' ? ORIGEM_PREP : ORIGEM_OCORR);
+  const [tipo, setTipo] = useState<string>(TIPOS_TRABALHO[0]);
   const [gravidade, setGravidade] = useState<string>('Média');
   const [descricao, setDescricao] = useState('');
-  const [quem, setQuem] = useState(reportadoPor || '');
+  const [quem, setQuem] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [sending, setSending] = useState(false);
 
   async function submit() {
-    if (!descricao.trim() && !files.length) return toast.error('Descreva a ocorrência ou junte uma foto.');
+    if (!descricao.trim() && !files.length) return toast.error('Descreva o trabalho ou junte uma foto.');
     setSending(true);
     try {
       const fotos: string[] = [];
       for (const f of files) fotos.push(await uploadFoto(f, `ocorrencia-${carro.id}`));
       await onSave({
         carro_id: carro.id,
+        origem,
         tipo,
-        gravidade,
+        gravidade: origem === ORIGEM_PREP ? 'Baixa' : gravidade,
         descricao: descricao.trim() || null,
         reportado_por: quem.trim() || null,
         fotos,
@@ -232,17 +299,16 @@ function NovaOcorrencia({
         if (e.key === 'Enter' && (e.target as HTMLElement).tagName === 'INPUT') e.preventDefault();
       }}
     >
-      <Field label="Tipo">
-        <NativeSelect value={tipo} onChange={(e) => setTipo(e.target.value)}>
-          {TIPOS_OCORRENCIA.map((t) => (
-            <option key={t}>{t}</option>
-          ))}
+      <Field label="Origem">
+        <NativeSelect value={origem} onChange={(e) => setOrigem(e.target.value)}>
+          <option value={ORIGEM_OCORR}>Ocorrência (dano, avaria…)</option>
+          <option value={ORIGEM_PREP}>Preparação</option>
         </NativeSelect>
       </Field>
-      <Field label="Gravidade">
-        <NativeSelect value={gravidade} onChange={(e) => setGravidade(e.target.value)}>
-          {GRAVIDADES.map((g) => (
-            <option key={g}>{g}</option>
+      <Field label="Tipo">
+        <NativeSelect value={tipo} onChange={(e) => setTipo(e.target.value)}>
+          {TIPOS_TRABALHO.map((t) => (
+            <option key={t}>{t}</option>
           ))}
         </NativeSelect>
       </Field>
@@ -253,7 +319,16 @@ function NovaOcorrencia({
           placeholder="ex.: risco no para-choques traseiro, lado esquerdo"
         />
       </Field>
-      <Field label="Reportado por" className="col-span-2">
+      {origem === ORIGEM_OCORR && (
+        <Field label="Gravidade">
+          <NativeSelect value={gravidade} onChange={(e) => setGravidade(e.target.value)}>
+            {GRAVIDADES.map((g) => (
+              <option key={g}>{g}</option>
+            ))}
+          </NativeSelect>
+        </Field>
+      )}
+      <Field label="Reportado por" className={origem === ORIGEM_OCORR ? '' : 'col-span-2'}>
         <Input value={quem} onChange={(e) => setQuem(e.target.value)} />
       </Field>
       <Field label="Fotos" className="col-span-2">

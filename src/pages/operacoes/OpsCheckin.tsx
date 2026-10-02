@@ -9,7 +9,18 @@ import {
   matchesSearch,
 } from '@/lib/operacoes/constants';
 import type { Carro } from '@/lib/operacoes/types';
-import { useCarros, useToggleChecklistItem, useUpdateCarroField } from '@/hooks/useOperacoes';
+import { toast } from 'sonner';
+import { updateCentralField } from '@/lib/operacoes/central';
+import { ePreparacao, emAberto } from '@/lib/operacoes/trabalhos';
+import type { Ocorrencia } from '@/lib/operacoes/types';
+import {
+  errorMessage,
+  useCarros,
+  useOcorrencias,
+  useRefreshOperacoes,
+  useToggleChecklistItem,
+  useUpdateCarroField,
+} from '@/hooks/useOperacoes';
 import { useOps } from '@/components/operacoes/OpsContext';
 import { EmptyState, ErrorBox, OpsHeader } from '@/components/operacoes/shared';
 
@@ -33,36 +44,70 @@ function PrevisaoBadge({ v }: { v: Carro }) {
 
 function MissingTags({ v }: { v: Carro }) {
   const toggle = useToggleChecklistItem();
+  const refresh = useRefreshOperacoes();
+  const { data: ocorrencias = [] } = useOcorrencias();
   const done = v.checklist_prep || {};
+  const docs = (getChecklistGroups(v).Documentos || []).filter((item) => !done[item]);
+  const trabalhos = ocorrencias.filter((o) => o.carro_id === v.id && ePreparacao(o) && emAberto(o));
+
+  const marcarFeito = async (e: React.MouseEvent, o: Ocorrencia) => {
+    e.stopPropagation();
+    try {
+      await updateCentralField('ocorrencias', o.id, 'estado', 'Feito');
+      await updateCentralField('ocorrencias', o.id, 'resolvido_em', new Date().toISOString().slice(0, 10));
+      refresh();
+    } catch (err) {
+      toast.error(`Erro ao guardar: ${errorMessage(err)}`);
+    }
+  };
+
+  const tagClass =
+    'rounded-md border border-border bg-muted px-2 py-0.5 text-[11px] text-amber-400 transition hover:border-amber-400 hover:bg-amber-950';
   return (
     <div className="space-y-2">
-      {Object.entries(getChecklistGroups(v)).map(([label, items]) => {
-        const missing = items.filter((item) => !done[item]);
-        if (!missing.length) return null;
-        return (
-          <div key={label}>
-            <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              {label}
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {missing.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  title="Clique para marcar como feito"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggle(v, item);
-                  }}
-                  className="rounded-md border border-border bg-muted px-2 py-0.5 text-[11px] text-amber-400 transition hover:border-amber-400 hover:bg-amber-950"
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
+      {!!docs.length && (
+        <div>
+          <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            Documentos
           </div>
-        );
-      })}
+          <div className="flex flex-wrap gap-1.5">
+            {docs.map((item) => (
+              <button
+                key={item}
+                type="button"
+                title="Clique para marcar como feito"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggle(v, item);
+                }}
+                className={tagClass}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      {!!trabalhos.length && (
+        <div>
+          <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            A Fazer
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {trabalhos.map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                title="Clique para marcar como feito (o custo regista-se na ficha da viatura)"
+                onClick={(e) => marcarFeito(e, o)}
+                className={tagClass}
+              >
+                {o.descricao || o.item || o.tipo}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -71,6 +116,7 @@ export default function OpsCheckin() {
   const { search, openVehicle, openNovaViatura } = useOps();
   const { data: carros = [], isLoading, isError } = useCarros();
   const update = useUpdateCarroField();
+  const { data: ocorrencias = [] } = useOcorrencias();
   const lista = carros.filter((v) => v.estado === 'Em Preparação').filter((v) => matchesSearch(search, v));
 
   return (
@@ -91,6 +137,7 @@ export default function OpsCheckin() {
         <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
           {lista.map((v) => {
             const missing = getMissingItems(v);
+            const abertos = ocorrencias.filter((o) => o.carro_id === v.id && ePreparacao(o) && emAberto(o));
             return (
               <div
                 key={v.id}
@@ -125,7 +172,7 @@ export default function OpsCheckin() {
                     </div>
                   </div>
                   <PrevisaoBadge v={v} />
-                  {missing.length ? (
+                  {missing.length || abertos.length ? (
                     <MissingTags v={v} />
                   ) : getChecklist(v).length ? (
                     <div className="text-xs text-green-500">✓ Checklist completa</div>

@@ -14,7 +14,6 @@ import {
   COMBUSTIVEIS,
   DOC_KEYWORDS,
   STATUSES,
-  getChecklist,
   getChecklistGroups,
   normalizeText,
 } from '@/lib/operacoes/constants';
@@ -24,7 +23,6 @@ import {
   useCarros,
   useCentralWrites,
   useClientes,
-  useFinanceiro,
   useInvestidores,
   useMotoristas,
   useToggleChecklistItem,
@@ -32,9 +30,8 @@ import {
   errorMessage,
 } from '@/hooks/useOperacoes';
 import { ClienteDialog } from './ClienteDialog';
-import { CustosViatura, NovoMovimento } from './CustosViatura';
-import { OcorrenciasViatura } from './OcorrenciasViatura';
-import { categoriaDoItem, eur, movsPreparacao, prepObs, semIva } from '@/lib/operacoes/custos';
+import { CustosViatura } from './CustosViatura';
+import { TrabalhosViatura } from './TrabalhosViatura';
 import { FotosEditor } from './FotosEditor';
 import { DeleteConfirm, Field, NativeSelect } from './shared';
 
@@ -144,7 +141,7 @@ export function VehicleDetailDialog({
 }
 
 function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
-  const [tab, setTab] = useState<'carac' | 'ficha' | 'prep' | 'custos' | 'ocorr'>('carac');
+  const [tab, setTab] = useState<'carac' | 'ficha' | 'prep' | 'custos'>('carac');
   const [form, setForm] = useState<Form>(() => formFromCarro(carro));
   const [saving, setSaving] = useState<'idle' | 'saving'>('idle');
   const [clienteOpen, setClienteOpen] = useState(false);
@@ -252,8 +249,7 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
           [
             ['carac', 'Características'],
             ['ficha', 'Ficha comercial'],
-            ['prep', 'Preparação'],
-            ['ocorr', 'Ocorrências'],
+            ['prep', 'Trabalhos'],
             ['custos', 'Custos'],
           ] as const
         ).map(([id, label]) => (
@@ -271,9 +267,9 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
         ))}
       </div>
 
-      {(tab === 'custos' || tab === 'ocorr') && (
+      {tab === 'custos' && (
         <>
-          {tab === 'custos' ? <CustosViatura carro={carro} /> : <OcorrenciasViatura carro={carro} />}
+          <CustosViatura carro={carro} />
           <div className="mt-5 flex justify-end">
             <Button type="button" variant="outline" onClick={onClose}>
               Fechar
@@ -282,7 +278,7 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
         </>
       )}
 
-      <form onSubmit={onSubmit} className={tab === 'custos' || tab === 'ocorr' ? 'hidden' : undefined}>
+      <form onSubmit={onSubmit} className={tab === 'custos' ? 'hidden' : undefined}>
         {tab === 'carac' && (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="flex flex-col items-stretch gap-4 sm:col-span-2 sm:flex-row sm:items-start">
@@ -558,7 +554,8 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
                 onChange={(e) => set('previsaoPronto', e.target.value)}
               />
             </Field>
-            <ChecklistEditor carro={carro} />
+            <DocumentosEditor carro={carro} />
+            <TrabalhosViatura carro={carro} />
           </div>
         )}
 
@@ -586,18 +583,10 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
   );
 }
 
-/** Checklist de preparação, com os documentos ligados à pasta da viatura na Drive. */
-function ChecklistEditor({ carro }: { carro: Carro }) {
+/** Documentos da viatura (checklist), ligados à pasta da viatura na Drive. */
+function DocumentosEditor({ carro }: { carro: Carro }) {
   const toggle = useToggleChecklistItem();
   const [uploading, setUploading] = useState<string | null>(null);
-  const [askCost, setAskCost] = useState<string | null>(null);
-  const { data: todosMovs = [] } = useFinanceiro();
-  const { create: createMov } = useCentralWrites('financeiro');
-  const movs = todosMovs.filter((m) => m.carro_id === carro.id);
-  const custoDoItem = (item: string) =>
-    movs.filter((m) => m.obs === prepObs(item)).reduce((a, m) => a - semIva(m), 0);
-  const temCusto = (item: string) => movs.some((m) => m.obs === prepObs(item));
-  const totalPrep = movsPreparacao(movs).reduce((a, m) => a - semIva(m), 0);
 
   const drive = useQuery({
     queryKey: ['drive', carro.id, carro.matricula, carro.marca_modelo, carro.fotos_link],
@@ -611,19 +600,14 @@ function ChecklistEditor({ carro }: { carro: Carro }) {
     retry: false,
   });
 
-  const groups = getChecklistGroups(carro);
+  const items = getChecklistGroups(carro).Documentos || [];
   const done = carro.checklist_prep || {};
 
-  if (!getChecklist(carro).length) {
+  if (!items.length) {
     return (
-      <div>
-        <div className="mb-2 text-xs font-medium text-muted-foreground">
-          Checklist de preparação
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Sem checklist definida para {carro.tipo_gestao || 'este tipo'}.
-        </p>
-      </div>
+      <p className="text-sm text-muted-foreground">
+        Sem checklist de documentos definida para {carro.tipo_gestao || 'este tipo'}.
+      </p>
     );
   }
 
@@ -650,120 +634,64 @@ function ChecklistEditor({ carro }: { carro: Carro }) {
 
   return (
     <div>
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <div className="text-xs font-medium text-muted-foreground">Checklist de preparação</div>
-        <div className="text-xs text-muted-foreground">
-          Custo de preparação (s/ IVA):{' '}
-          <span className="font-semibold text-foreground">{eur(totalPrep)}</span>
-        </div>
-      </div>
-      {Object.entries(groups).map(([label, items]) => {
-        if (!items.length) return null;
-        const isDocs = label === 'Documentos';
-        return (
-          <div key={label} className="mb-4">
-            <div className="mb-2 text-[11px] font-bold uppercase tracking-wider text-primary">
-              {label}
-            </div>
-            <div className="flex flex-col gap-1.5">
-              {items.map((item) => {
-                const file = isDocs ? matchFileForItem(item, drive.data?.files) : null;
-                const inputId = `docup-${carro.id}-${normalizeText(item).replace(/[^a-z0-9]/g, '')}`;
-                return (
-                  <div key={item} className="flex flex-wrap items-center gap-2">
-                    <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
-                      <input
-                        type="checkbox"
-                        checked={!!done[item]}
-                        onChange={() => {
-                          const passaAFeito = !done[item];
-                          toggle(carro, item);
-                          if (passaAFeito && label === 'A Fazer' && !temCusto(item)) setAskCost(item);
-                          else if (!passaAFeito && askCost === item) setAskCost(null);
-                        }}
-                        className="accent-[hsl(var(--primary))]"
-                      />
-                      {item}
-                    </label>
-                    {label === 'A Fazer' && temCusto(item) && (
-                      <span className="rounded bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
-                        {eur(custoDoItem(item))}
-                      </span>
-                    )}
-                    {label === 'A Fazer' && done[item] && !temCusto(item) && askCost !== item && (
-                      <button
-                        type="button"
-                        onClick={() => setAskCost(item)}
-                        className="rounded border border-dashed border-border px-2 py-0.5 text-[11px] text-muted-foreground transition hover:border-primary hover:text-primary"
+      <div className="mb-2 text-[11px] font-bold uppercase tracking-wider text-primary">Documentos</div>
+      <div className="flex flex-col gap-1.5">
+        {items.map((item) => {
+          const file = matchFileForItem(item, drive.data?.files);
+          const inputId = `docup-${carro.id}-${normalizeText(item).replace(/[^a-z0-9]/g, '')}`;
+          return (
+            <div key={item} className="flex flex-wrap items-center gap-2">
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
+                <input
+                  type="checkbox"
+                  checked={!!done[item]}
+                  onChange={() => toggle(carro, item)}
+                  className="accent-[hsl(var(--primary))]"
+                />
+                {item}
+              </label>
+              <span className="inline-flex items-center gap-1.5">
+                {drive.isLoading ? (
+                  <span className="text-[11px] text-muted-foreground">a procurar...</span>
+                ) : uploading === item ? (
+                  <span className="text-[11px] text-muted-foreground">a enviar...</span>
+                ) : (
+                  <>
+                    {file && (
+                      <a
+                        href={file.webViewLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="max-w-[160px] truncate rounded bg-primary/10 px-2 py-0.5 text-[11px] text-primary hover:underline"
                       >
-                        + custo
-                      </button>
+                        📄 {file.name}
+                      </a>
                     )}
-                    {askCost === item && (
-                      <div className="w-full">
-                        <NovoMovimento
-                          carro={carro}
-                          busy={createMov.isPending}
-                          cancelLabel="Sem custo"
-                          defaultCategoria={categoriaDoItem(item)}
-                          defaultDescricao={item}
-                          extra={{ obs: prepObs(item) }}
-                          onCancel={() => setAskCost(null)}
-                          onSave={async (body) => {
-                            await createMov.mutateAsync(body);
-                            setAskCost(null);
-                            toast.success('Custo registado');
+                    {drive.data?.folder && (
+                      <label
+                        htmlFor={inputId}
+                        title={file ? 'Substituir ficheiro' : 'Enviar documento'}
+                        className="cursor-pointer whitespace-nowrap rounded border border-dashed border-border px-2 py-0.5 text-[11px] text-muted-foreground transition hover:border-primary hover:text-primary"
+                      >
+                        {file ? '🔄' : '📤 Adicionar'}
+                        <input
+                          type="file"
+                          id={inputId}
+                          className="hidden"
+                          onChange={(e) => {
+                            onUpload(item, e.target.files?.[0]);
+                            e.target.value = '';
                           }}
                         />
-                      </div>
+                      </label>
                     )}
-                    {isDocs && (
-                      <span className="inline-flex items-center gap-1.5">
-                        {drive.isLoading ? (
-                          <span className="text-[11px] text-muted-foreground">a procurar...</span>
-                        ) : uploading === item ? (
-                          <span className="text-[11px] text-muted-foreground">a enviar...</span>
-                        ) : (
-                          <>
-                            {file && (
-                              <a
-                                href={file.webViewLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="max-w-[160px] truncate rounded bg-primary/10 px-2 py-0.5 text-[11px] text-primary hover:underline"
-                              >
-                                📄 {file.name}
-                              </a>
-                            )}
-                            {drive.data?.folder && (
-                              <label
-                                htmlFor={inputId}
-                                title={file ? 'Substituir ficheiro' : 'Enviar documento'}
-                                className="cursor-pointer whitespace-nowrap rounded border border-dashed border-border px-2 py-0.5 text-[11px] text-muted-foreground transition hover:border-primary hover:text-primary"
-                              >
-                                {file ? '🔄' : '📤 Adicionar'}
-                                <input
-                                  type="file"
-                                  id={inputId}
-                                  className="hidden"
-                                  onChange={(e) => {
-                                    onUpload(item, e.target.files?.[0]);
-                                    e.target.value = '';
-                                  }}
-                                />
-                              </label>
-                            )}
-                          </>
-                        )}
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
+                  </>
+                )}
+              </span>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }

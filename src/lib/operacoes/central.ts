@@ -34,7 +34,7 @@ export async function listCentral<T>(type: CentralType): Promise<T[]> {
 
 export async function createCentral<T = { id: number }>(
   type: CentralType,
-  body: Record<string, unknown>,
+  body: Record<string, unknown> | Record<string, unknown>[],
 ): Promise<T[]> {
   const r = await fetch(`${BASE}/central?type=${type}`, {
     method: 'POST',

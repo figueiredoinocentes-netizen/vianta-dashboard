@@ -6,12 +6,14 @@ import { NovaViaturaDialog } from '@/components/operacoes/NovaViaturaDialog';
 import { NovoItemDialog } from '@/components/operacoes/NovoItemDialog';
 import { InvestidorDialog } from '@/components/operacoes/InvestidorDialog';
 import { VehicleDetailDialog } from '@/components/operacoes/VehicleDetailDialog';
+import { useAutoTrabalhosPreparacao } from '@/hooks/useOperacoes';
 
 /**
  * Casca da área Operações: um único layout, a pesquisa global partilhada entre
  * secções e os pop-ups (que qualquer secção pode abrir através do contexto).
  */
 export default function OperacoesLayout() {
+  useAutoTrabalhosPreparacao();
   const [search, setSearch] = useState('');
   const [vehicleId, setVehicleId] = useState<number | null>(null);
   const [novaViatura, setNovaViatura] = useState(false);

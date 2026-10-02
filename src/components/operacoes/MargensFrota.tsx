@@ -4,7 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { eur, movsPreparacao, resumoCarro, semIva } from '@/lib/operacoes/custos';
 import type { Carro } from '@/lib/operacoes/types';
-import { useFinanceiro } from '@/hooks/useOperacoes';
+import { useFinanceiro, useOcorrencias } from '@/hooks/useOperacoes';
 import { useOps } from './OpsContext';
 import { StatusBadge } from './shared';
 
@@ -20,6 +20,7 @@ const FILTROS: [Filtro, string][] = [
 export function MargensFrota({ carros }: { carros: Carro[] }) {
   const { openVehicle } = useOps();
   const { data: movs = [], isLoading } = useFinanceiro();
+  const { data: ocorrencias = [] } = useOcorrencias();
   const [filtro, setFiltro] = useState<Filtro>('todas');
   const [soComDados, setSoComDados] = useState(true);
   const [asc, setAsc] = useState(false);
@@ -30,7 +31,7 @@ export function MargensFrota({ carros }: { carros: Carro[] }) {
       .map((c) => {
         const ms = movs.filter((m) => m.carro_id === c.id);
         const r = resumoCarro(c, ms);
-        const prep = -movsPreparacao(ms).reduce((a, m) => a + semIva(m), 0);
+        const prep = -movsPreparacao(ms, ocorrencias.filter((o) => o.carro_id === c.id)).reduce((a, m) => a + semIva(m), 0);
         const temDados = !!(r.compra || r.custos || r.receitas);
         return { c, r, prep, outros: r.custos - prep, temDados };
       })
@@ -39,7 +40,7 @@ export function MargensFrota({ carros }: { carros: Carro[] }) {
         filtro === 'todas' ? true : filtro === 'vendidas' ? x.r.vendido : x.c.tipo_gestao === filtro,
       )
       .sort((a, b) => (asc ? a.r.margem - b.r.margem : b.r.margem - a.r.margem));
-  }, [carros, movs, filtro, soComDados, asc]);
+  }, [carros, movs, ocorrencias, filtro, soComDados, asc]);
 
   const tot = linhas.reduce(
     (t, x) => ({

@@ -115,9 +115,10 @@ export function getChecklist(v: Carro): string[] {
   return Object.values(getChecklistGroups(v)).flat();
 }
 
+/** Documentos da checklist ainda por validar (os itens "A Fazer" são trabalhos, em `ocorrencias`). */
 export function getMissingItems(v: Carro): string[] {
   const done = v.checklist_prep || {};
-  return getChecklist(v).filter((item) => !done[item]);
+  return (getChecklistGroups(v).Documentos || []).filter((item) => !done[item]);
 }
 
 export function destinoDepoisDePreparacao(v: Carro): string {
