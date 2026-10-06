@@ -213,6 +213,90 @@ function CaucaoPlanos({ v }: { v: Carro }) {
   );
 }
 
+/** Garantia de fábrica por marca (fonte: Offer Document / Garantias Stand). */
+function garantiaFabrica(v: Carro): string | null {
+  const m = normalizeText(v.marca_modelo || '');
+  if (m.includes('hyundai')) return 'Hyundai: 7 anos sem limite de km · bateria 8 anos/160.000 km';
+  if (/bmgb/.test(m)) return 'MG: 7 anos/150.000 km';
+  if (m.includes('opel')) return 'Opel: 1 ano sem limite + 3 anos/90.000 km · bateria 8 anos/160.000 km';
+  if (m.includes('tesla')) return 'Tesla: 4 anos/80.000 km · bateria/motor 8 anos (160-240.000 km consoante modelo)';
+  return null;
+}
+
+function PainelOferta({ titulo, angulo, itens, naoE }: {
+  titulo: string;
+  angulo: string;
+  itens: string[];
+  naoE: string;
+}) {
+  return (
+    <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
+      <div className="text-[11px] font-semibold uppercase tracking-wider text-primary/80">{titulo}</div>
+      <div className="mt-0.5 text-sm font-semibold text-foreground">{angulo}</div>
+      <ul className="mt-2 grid gap-x-6 gap-y-1 text-xs text-foreground sm:grid-cols-2">
+        {itens.map((i) => (
+          <li key={i} className="flex gap-1.5">
+            <span className="text-emerald-400">✓</span>
+            <span>{i}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-2 text-[11px] text-muted-foreground">Não é para: {naoE}</div>
+    </div>
+  );
+}
+
+function OfertaAluguer() {
+  return (
+    <PainelOferta
+      titulo="Oferta Aluguer TVDE"
+      angulo="Entra esta semana. O teu único trabalho é conduzir."
+      itens={[
+        'Viatura pronta a trabalhar (dístico e seguro)',
+        'Manutenção a cargo da Vianta',
+        'Pagamentos semanais (segundas-feiras)',
+        'Viatura de substituição garantida',
+        'Saída com 15 dias de aviso, sem contrato longo',
+        'Suporte direto com o gestor de frota',
+        'App com histórico de despesas e ganhos',
+      ]}
+      naoE="quem já tem viatura própria (→ Slot) ou quer ser dono do carro (→ Venda)."
+    />
+  );
+}
+
+function OfertaVenda({ v }: { v: Carro }) {
+  const fabrica = garantiaFabrica(v);
+  return (
+    <>
+      <PainelOferta
+        titulo="Oferta Venda TVDE"
+        angulo="O carro certo, o crédito tratado, pronto a operar em TVDE."
+        itens={[
+          'Viatura pronta a operar (dístico, inspeção, extintor)',
+          'Mediação de financiamento e seguro',
+          'Garantia Standard Vianta: motor e caixa, 18 meses (extensível a 36, com custo adicional)',
+          'Acompanhamento pós-venda',
+          'Integração na frota Vianta com Slot',
+        ]}
+        naoE="quem não tem capital nem crédito aprovável (→ começar no Aluguer)."
+      />
+      {fabrica && (
+        <div className="mt-2 rounded-lg bg-muted/40 px-3 py-2 text-xs text-foreground">
+          <span className="font-semibold">Garantia de fábrica · </span>
+          {fabrica}
+        </div>
+      )}
+    </>
+  );
+}
+
+/** Linha só aparece se tiver valor — para o comercial não ler "—" em tudo. */
+function Dado({ label, valor }: { label: string; valor: string | null }) {
+  if (valor == null) return null;
+  return <Linha label={label}>{valor}</Linha>;
+}
+
 function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
   const fotos = fotosDe(v);
   const [foto, setFoto] = useState(0);
@@ -314,40 +398,65 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
             ))}
           </div>
           )}
-          {gestao === 'Aluguer' && <CaucaoPlanos v={v} />}
+          {gestao === 'Aluguer' ? (
+            <>
+              <OfertaAluguer />
+              <CaucaoPlanos v={v} />
+            </>
+          ) : (
+            <OfertaVenda v={v} />
+          )}
         </div>
       </div>
 
-      {/* Restante informação em colunas, sem espaço vazio */}
-      <div className="mt-4 border-t border-border pt-4 md:columns-2 md:gap-8 xl:columns-3">
-        <Bloco titulo="Viatura">
-          <Linha label="Marca / modelo">{txt(v.marca_modelo)}</Linha>
-          <Linha label="Versão">{txt(v.versao)}</Linha>
-          <Linha label="Matrícula">{txt(v.matricula)}</Linha>
-          <Linha label="Ano">{txt(v.ano)}</Linha>
-          <Linha label="KMs atuais">{km(v.kms_atuais)}</Linha>
-          <Linha label="Combustível">{txt(v.combustivel)}</Linha>
-          <Linha label="Cor">{txt(v.cor)}</Linha>
-          <Linha label="Caixa">{txt(v.caixa)}</Linha>
-        </Bloco>
-
-        <Bloco titulo="Motorização">
-          <Linha label="Cavalos">{txt(v.cavalos)}</Linha>
-          <Linha label="Autonomia">{km(v.autonomia_km)}</Linha>
-          <Linha label="Bateria">{vazio(v.bateria_kwh) ? '—' : `${v.bateria_kwh} kWh`}</Linha>
-          <Linha label="Estado da bateria">
-            {vazio(v.estado_bateria_pct) ? '—' : `${v.estado_bateria_pct}%`}
-          </Linha>
-          <Linha label="Bagageira">{vazio(v.volume_bagageira) ? '—' : `${v.volume_bagageira} L`}</Linha>
-        </Bloco>
-
-        <Bloco titulo="TVDE e garantias">
-          <Linha label="Categorias TVDE">{txt(v.categorias_tvde)}</Linha>
-          <Linha label="Fim elegibilidade">{txt(v.fim_elegibilidade_tvde)}</Linha>
-          <Linha label="Garantia viatura">{txt(v.garantia_viatura)}</Linha>
-          <Linha label="Garantia bateria">{txt(v.garantia_bateria)}</Linha>
-        </Bloco>
-      </div>
+      {/* Só os dados que existem, agrupados */}
+      {(() => {
+        const t = (x: unknown) => (vazio(x) ? null : String(x));
+        const blocos: { titulo: string; linhas: [string, string | null][] }[] = [
+          {
+            titulo: 'Viatura',
+            linhas: [
+              ['Matrícula', t(v.matricula)],
+              ['Ano', t(v.ano)],
+              ['KMs atuais', vazio(v.kms_atuais) ? null : `${v.kms_atuais} km`],
+              ['Combustível', t(v.combustivel)],
+              ['Caixa', t(v.caixa)],
+              ['Cor', t(v.cor)],
+              ['Cavalos', t(v.cavalos)],
+              ['Bagageira', vazio(v.volume_bagageira) ? null : `${v.volume_bagageira} L`],
+            ],
+          },
+          {
+            titulo: 'Elétrico',
+            linhas: [
+              ['Autonomia', vazio(v.autonomia_km) ? null : `${v.autonomia_km} km`],
+              ['Bateria', vazio(v.bateria_kwh) ? null : `${v.bateria_kwh} kWh`],
+              ['Estado da bateria', vazio(v.estado_bateria_pct) ? null : `${v.estado_bateria_pct}%`],
+            ],
+          },
+          {
+            titulo: 'TVDE e garantias',
+            linhas: [
+              ['Categorias TVDE', t(v.categorias_tvde)],
+              ['Fim elegibilidade', t(v.fim_elegibilidade_tvde)],
+              ['Garantia viatura', t(v.garantia_viatura)],
+              ['Garantia bateria', t(v.garantia_bateria)],
+            ],
+          },
+        ];
+        const visiveis = blocos.filter((b) => b.linhas.some(([, x]) => x != null));
+        return (
+          <div className="mt-4 border-t border-border pt-4 md:columns-2 md:gap-8 xl:columns-3">
+            {visiveis.map((b) => (
+              <Bloco key={b.titulo} titulo={b.titulo}>
+                {b.linhas.map(([l, x]) => (
+                  <Dado key={l} label={l} valor={x} />
+                ))}
+              </Bloco>
+            ))}
+          </div>
+        );
+      })()}
     </div>
   );
 }
