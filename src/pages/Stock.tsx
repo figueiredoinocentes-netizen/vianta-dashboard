@@ -188,6 +188,47 @@ function CartaoViatura({
   );
 }
 
+/** Planos de pagamento da caução (só para viaturas em aluguer). */
+function CaucaoPlanos({ v }: { v: Carro }) {
+  const fromDb = parseFloat(String(v.caucao ?? '0'));
+  const fromPvp = parseFloat(String(v.preco_venda ?? '0'));
+  const total = fromDb > 0 ? fromDb : fromPvp > 25000 ? 600 : 400;
+  const meta = total === 600 ? '300€' : '200€';
+  const p3 = total === 600 ? '+ 100€' : '';
+  return (
+    <div className="mt-3 rounded-lg border border-border bg-muted/40 p-4">
+      <div className="mb-3 text-base font-semibold">
+        💳 Caução: <span className="font-bold text-primary">{total}€</span>
+      </div>
+      <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+        <div className="rounded-md bg-muted/60 p-3">
+          <div className="mb-1.5 font-semibold text-foreground">📋 Prestações Vianta</div>
+          <div className="mb-2 text-xs text-muted-foreground">Sem juros, gerido internamente</div>
+          <div className="text-2xl font-bold text-primary">{meta}</div>
+          <div className="text-xs text-muted-foreground">1.ª prestação (entrega)</div>
+          <div className="mt-2 text-xs text-muted-foreground">
+            Depois: <strong>100€</strong> + <strong>100€</strong> {p3} (mensal)
+          </div>
+        </div>
+        <div className="rounded-md bg-muted/60 p-3">
+          <div className="mb-1.5 font-semibold text-foreground">🏦 Parcela Já</div>
+          <div className="mb-2 text-xs text-muted-foreground">Crédito no terminal, débito automático</div>
+          <div className="mt-1 text-xs text-muted-foreground">
+            <div className="mt-1 text-green-500">✅ CC português</div>
+            <div className="text-green-500">✅ Cartão multibanco (mesma pessoa)</div>
+            <div className="mt-1 text-yellow-400">Atenção: verificação BdP</div>
+          </div>
+          <div className="mt-2 rounded-md bg-indigo-500/15 px-2.5 py-1.5 text-[11px] text-indigo-300">
+            ⚠️ Se faltar CC português ou cartão multibanco
+            <br />
+            da mesma pessoa → <span className="font-semibold text-primary">Opção 1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
   const fotos = fotosDe(v);
   const [foto, setFoto] = useState(0);
@@ -287,6 +328,7 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
               </div>
             ))}
           </div>
+          {gestao === 'Aluguer' && <CaucaoPlanos v={v} />}
         </div>
       </div>
 
