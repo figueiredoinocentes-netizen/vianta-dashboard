@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { toast } from 'sonner';
-import { Car, Copy, ExternalLink, Eye, EyeOff, Search } from 'lucide-react';
+import { Car, Copy, Search } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -106,22 +106,6 @@ function Bloco({ titulo, children }: { titulo: string; children: ReactNode }) {
   );
 }
 
-function LinkExterno({ href }: { href: string | null | undefined }) {
-  if (vazio(href)) return <>—</>;
-  const url = String(href);
-  if (!/^https?:\/\//i.test(url)) return <>{url}</>;
-  return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center gap-1 text-primary hover:underline"
-    >
-      Abrir <ExternalLink className="h-3 w-3" />
-    </a>
-  );
-}
-
 function BadgeEstado({ v }: { v: Carro }) {
   const disp = disponibilidade(v);
   const quando = dataPt(v.data_previsao_pronto);
@@ -188,15 +172,126 @@ function CartaoViatura({
   );
 }
 
+/** Planos de pagamento da caução (só para viaturas em aluguer). */
+function CaucaoPlanos({ v }: { v: Carro }) {
+  const fromDb = parseFloat(String(v.caucao ?? '0'));
+  const fromPvp = parseFloat(String(v.preco_venda ?? '0'));
+  const total = fromDb > 0 ? fromDb : fromPvp > 25000 ? 600 : 400;
+  const meta = total === 600 ? '300€' : '200€';
+  const p3 = total === 600 ? '+ 100€' : '';
+  return (
+    <div className="mt-3 rounded-lg border border-border bg-muted/40 p-4">
+      <div className="mb-3 text-base font-semibold">
+        💳 Caução: <span className="font-bold text-primary">{total}€</span>
+      </div>
+      <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+        <div className="rounded-md bg-muted/60 p-3">
+          <div className="mb-1.5 font-semibold text-foreground">📋 Prestações Vianta</div>
+          <div className="mb-2 text-xs text-muted-foreground">Sem juros, gerido internamente</div>
+          <div className="text-2xl font-bold text-primary">{meta}</div>
+          <div className="text-xs text-muted-foreground">1.ª prestação (entrega)</div>
+          <div className="mt-2 text-xs text-muted-foreground">
+            Depois: <strong>100€</strong> + <strong>100€</strong> {p3} (mensal)
+          </div>
+        </div>
+        <div className="rounded-md bg-muted/60 p-3">
+          <div className="mb-1.5 font-semibold text-foreground">🏦 Parcela Já</div>
+          <div className="mb-2 text-xs text-muted-foreground">Crédito no terminal, débito automático</div>
+          <div className="text-2xl font-bold text-primary">
+            6 × {(total / 6).toLocaleString('pt-PT', { maximumFractionDigits: 2 })}€
+          </div>
+          <div className="mb-2 text-xs text-muted-foreground">Caução de {total}€ em 6 prestações, sem juros</div>
+          <div className="mt-1 text-xs text-muted-foreground">
+            <div className="mt-1 text-green-500">✅ CC português</div>
+            <div className="text-green-500">✅ Cartão multibanco (mesma pessoa)</div>
+            <div className="text-green-500">✅ Sem dívidas no Banco de Portugal</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Garantia de fábrica por marca (fonte: Offer Document / Garantias Stand). */
+function garantiaFabrica(v: Carro): string | null {
+  const m = normalizeText(v.marca_modelo || '');
+  if (m.includes('hyundai')) return 'Hyundai: 7 anos sem limite de km · bateria 8 anos/160.000 km';
+  if (/\bmg\b/.test(m)) return 'MG: 7 anos/150.000 km';
+  if (m.includes('opel')) return 'Opel: 1 ano sem limite + 3 anos/90.000 km · bateria 8 anos/160.000 km';
+  if (m.includes('tesla')) return 'Tesla: 4 anos/80.000 km · bateria/motor 8 anos (160-240.000 km consoante modelo)';
+  return null;
+}
+
+function PainelOferta({ titulo, itens }: { titulo: string; itens: string[] }) {
+  return (
+    <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
+      <div className="text-[11px] font-semibold uppercase tracking-wider text-primary/80">{titulo}</div>
+      <ul className="mt-2 grid gap-x-6 gap-y-1 text-xs text-foreground">
+        {itens.map((i) => (
+          <li key={i} className="flex gap-1.5">
+            <span className="text-emerald-400">✓</span>
+            <span>{i}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function OfertaAluguer() {
+  return (
+    <PainelOferta
+      titulo="Oferta Aluguer TVDE"
+      itens={[
+        'Viatura pronta a trabalhar (dístico e seguro)',
+        'Manutenção a cargo da Vianta',
+        'Pagamentos semanais (segundas-feiras)',
+        'Viatura de substituição garantida',
+        'Saída com 15 dias de aviso, sem contrato longo',
+        'Suporte direto com o gestor de frota',
+        'App com histórico de despesas e ganhos',
+      ]}
+    />
+  );
+}
+
+function OfertaVenda({ v }: { v: Carro }) {
+  const fabrica = garantiaFabrica(v);
+  return (
+    <>
+      <PainelOferta
+        titulo="Oferta Venda TVDE"
+        itens={[
+          'Viatura pronta a operar (dístico, inspeção, extintor)',
+          'Mediação de financiamento e seguro',
+          'Garantia Standard Vianta: motor e caixa, 18 meses (extensível a 36, com custo adicional)',
+          'Acompanhamento pós-venda',
+          'Integração na frota Vianta com Slot',
+        ]}
+      />
+      {fabrica && (
+        <div className="rounded-lg bg-muted/40 px-3 py-2 text-xs text-foreground">
+          <span className="font-semibold">Garantia de fábrica · </span>
+          {fabrica}
+        </div>
+      )}
+    </>
+  );
+}
+
+/** Linha só aparece se tiver valor — para o comercial não ler "—" em tudo. */
+function Dado({ label, valor }: { label: string; valor: string | null }) {
+  if (valor == null) return null;
+  return <Linha label={label}>{valor}</Linha>;
+}
+
 function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
   const fotos = fotosDe(v);
   const [foto, setFoto] = useState(0);
-  const [interno, setInterno] = useState(false);
   const disp = disponibilidade(v);
 
   useEffect(() => {
     setFoto(0);
-    setInterno(false);
   }, [v.id]);
 
   const copiar = async () => {
@@ -257,24 +352,45 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
               <div className="mt-1.5">
                 <BadgeEstado v={v} />
               </div>
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-primary/80">
+                  Categorias TVDE
+                </span>
+                {vazio(v.categorias_tvde) ? (
+                  <span className="text-sm text-muted-foreground">—</span>
+                ) : (
+                  String(v.categorias_tvde)
+                    .split(/[,;/]/)
+                    .map((c) => c.trim())
+                    .filter(Boolean)
+                    .map((c) => (
+                      <span key={c} className="rounded bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">
+                        {c}
+                      </span>
+                    ))
+                )}
+              </div>
             </div>
             <Button variant="outline" size="sm" className="shrink-0" onClick={copiar}>
               <Copy /> Copiar resumo
             </Button>
           </div>
 
-          <div className="mt-3 grid grid-cols-3 gap-2">
-            {[
-              ['Preço venda', eur(v.preco_venda)],
-              ['Aluguer / sem', eur(v.valor_aluguer_semanal)],
-              ['Caução', eur(v.caucao)],
-            ].map(([label, valor]) => (
+          <div className={cn('mt-3 grid gap-2', gestao === 'Aluguer' ? 'grid-cols-2' : 'grid-cols-1')}>
+            {(gestao === 'Aluguer'
+              ? [
+                  ['Aluguer / sem', eur(v.valor_aluguer_semanal)],
+                  ['Caução', eur(v.caucao)],
+                ]
+              : [['Preço venda', eur(v.preco_venda)]]
+            ).map(([label, valor]) => (
               <div key={label} className="rounded-lg bg-muted/40 px-2.5 py-2">
                 <div className="text-[11px] text-muted-foreground">{label}</div>
                 <div className="font-display text-base font-bold text-foreground">{valor}</div>
               </div>
             ))}
           </div>
+          {gestao !== 'Aluguer' && (
           <div className="mt-2 grid grid-cols-3 gap-2">
             {[
               ['Crédito 120 m', eur(v.credito_120_meses, '/mês')],
@@ -287,69 +403,69 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
               </div>
             ))}
           </div>
+          )}
         </div>
       </div>
 
-      {/* Restante informação em colunas, sem espaço vazio */}
-      <div className="mt-4 border-t border-border pt-4 md:columns-2 md:gap-8 xl:columns-3">
-        <Bloco titulo="Viatura">
-          <Linha label="Marca / modelo">{txt(v.marca_modelo)}</Linha>
-          <Linha label="Versão">{txt(v.versao)}</Linha>
-          <Linha label="Matrícula">{txt(v.matricula)}</Linha>
-          <Linha label="Ano">{txt(v.ano)}</Linha>
-          <Linha label="KMs atuais">{km(v.kms_atuais)}</Linha>
-          <Linha label="Combustível">{txt(v.combustivel)}</Linha>
-          <Linha label="Cor">{txt(v.cor)}</Linha>
-          <Linha label="Caixa">{txt(v.caixa)}</Linha>
-        </Bloco>
-
-        <Bloco titulo="Motorização">
-          <Linha label="Cavalos">{txt(v.cavalos)}</Linha>
-          <Linha label="Autonomia">{km(v.autonomia_km)}</Linha>
-          <Linha label="Bateria">{vazio(v.bateria_kwh) ? '—' : `${v.bateria_kwh} kWh`}</Linha>
-          <Linha label="Estado da bateria">
-            {vazio(v.estado_bateria_pct) ? '—' : `${v.estado_bateria_pct}%`}
-          </Linha>
-          <Linha label="Bagageira">{vazio(v.volume_bagageira) ? '—' : `${v.volume_bagageira} L`}</Linha>
-        </Bloco>
-
-        <Bloco titulo="TVDE e garantias">
-          <Linha label="Categorias TVDE">{txt(v.categorias_tvde)}</Linha>
-          <Linha label="Fim elegibilidade">{txt(v.fim_elegibilidade_tvde)}</Linha>
-          <Linha label="Garantia viatura">{txt(v.garantia_viatura)}</Linha>
-          <Linha label="Garantia bateria">{txt(v.garantia_bateria)}</Linha>
-        </Bloco>
-
-        <Bloco titulo="Comercial">
-          <Linha label="Tipo de gestão">{txt(v.tipo_gestao)}</Linha>
-          <Linha label="Estado">{txt(v.estado)}</Linha>
-          <Linha label="Pronto previsto">{txt(dataPt(v.data_previsao_pronto))}</Linha>
-          <Linha label="Motorista atual">{txt(v.motorista_atual)}</Linha>
-          <Linha label="Documentos">
-            <LinkExterno href={v.docs_link} />
-          </Linha>
-          <Linha label="Fotos">
-            <LinkExterno href={v.fotos_link} />
-          </Linha>
-          <Linha label="Observações">{txt(v.obs)}</Linha>
-        </Bloco>
-      </div>
-
-      <div className="mt-1 rounded-lg border border-dashed border-border px-3 py-2">
-        <button
-          type="button"
-          onClick={() => setInterno((s) => !s)}
-          className="flex w-full items-center justify-between text-xs text-muted-foreground hover:text-foreground"
-        >
-          <span>Dados internos — não mostrar ao cliente</span>
-          {interno ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-        </button>
-        {interno && (
-          <div className="mt-1">
-            <Linha label="Proprietário">{txt(v.proprietario)}</Linha>
-          </div>
+      {/* Oferta + caução em largura total, por baixo da foto */}
+      <div className={cn('mt-4 grid items-start gap-3 [&>*]:mt-0', gestao !== 'Aluguer' && 'lg:grid-cols-2')}>
+        {gestao === 'Aluguer' ? (
+          <>
+            <OfertaAluguer />
+            <CaucaoPlanos v={v} />
+          </>
+        ) : (
+          <OfertaVenda v={v} />
         )}
       </div>
+
+      {/* Só os dados que existem, agrupados */}
+      {(() => {
+        const t = (x: unknown) => (vazio(x) ? null : String(x));
+        const blocos: { titulo: string; linhas: [string, string | null][] }[] = [
+          {
+            titulo: 'Viatura',
+            linhas: [
+              ['Matrícula', t(v.matricula)],
+              ['Ano', t(v.ano)],
+              ['KMs atuais', vazio(v.kms_atuais) ? null : `${v.kms_atuais} km`],
+              ['Combustível', t(v.combustivel)],
+              ['Caixa', t(v.caixa)],
+              ['Cor', t(v.cor)],
+              ['Cavalos', t(v.cavalos)],
+              ['Bagageira', vazio(v.volume_bagageira) ? null : `${v.volume_bagageira} L`],
+            ],
+          },
+          {
+            titulo: 'Elétrico',
+            linhas: [
+              ['Autonomia', vazio(v.autonomia_km) ? null : `${v.autonomia_km} km`],
+              ['Bateria', vazio(v.bateria_kwh) ? null : `${v.bateria_kwh} kWh`],
+              ['Estado da bateria', vazio(v.estado_bateria_pct) ? null : `${v.estado_bateria_pct}%`],
+            ],
+          },
+          {
+            titulo: 'TVDE e garantias',
+            linhas: [
+              ['Fim elegibilidade', t(v.fim_elegibilidade_tvde)],
+              ['Garantia viatura', t(v.garantia_viatura)],
+              ['Garantia bateria', t(v.garantia_bateria)],
+            ],
+          },
+        ];
+        const visiveis = blocos.filter((b) => b.linhas.some(([, x]) => x != null));
+        return (
+          <div className="mt-4 border-t border-border pt-4 md:columns-2 md:gap-8 xl:columns-3">
+            {visiveis.map((b) => (
+              <Bloco key={b.titulo} titulo={b.titulo}>
+                {b.linhas.map(([l, x]) => (
+                  <Dado key={l} label={l} valor={x} />
+                ))}
+              </Bloco>
+            ))}
+          </div>
+        );
+      })()}
     </div>
   );
 }
