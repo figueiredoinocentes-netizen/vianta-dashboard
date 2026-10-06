@@ -206,11 +206,6 @@ function CaucaoPlanos({ v }: { v: Carro }) {
             <div className="text-green-500">✅ Cartão multibanco (mesma pessoa)</div>
             <div className="text-green-500">✅ Sem dívidas no Banco de Portugal</div>
           </div>
-          <div className="mt-2 rounded-md bg-indigo-500/15 px-2.5 py-1.5 text-[11px] text-indigo-300">
-            ⚠️ Se faltar CC português ou cartão multibanco
-            <br />
-            da mesma pessoa → <span className="font-semibold text-primary">Opção 1</span>
-          </div>
         </div>
       </div>
     </div>
