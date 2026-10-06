@@ -217,7 +217,7 @@ function CaucaoPlanos({ v }: { v: Carro }) {
 function garantiaFabrica(v: Carro): string | null {
   const m = normalizeText(v.marca_modelo || '');
   if (m.includes('hyundai')) return 'Hyundai: 7 anos sem limite de km · bateria 8 anos/160.000 km';
-  if (/bmgb/.test(m)) return 'MG: 7 anos/150.000 km';
+  if (/\bmg\b/.test(m)) return 'MG: 7 anos/150.000 km';
   if (m.includes('opel')) return 'Opel: 1 ano sem limite + 3 anos/90.000 km · bateria 8 anos/160.000 km';
   if (m.includes('tesla')) return 'Tesla: 4 anos/80.000 km · bateria/motor 8 anos (160-240.000 km consoante modelo)';
   return null;
