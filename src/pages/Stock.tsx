@@ -99,27 +99,23 @@ function resumoWhatsApp(v: Carro, gestao: Gestao) {
   // Blocos separados por linha em branco (formato WhatsApp: *negrito*).
   const blocos: string[] = [];
   if (gestao === 'Aluguer') {
-    blocos.push([`*${titulo}*`, specs].filter(Boolean).join('
-'));
+    blocos.push([`*${titulo}*`, specs].filter(Boolean).join('\n'));
     blocos.push(
       [
         `*Aluguer:* ${eur(v.valor_aluguer_semanal, ' por semana')}`,
         vazio(v.categorias_tvde) ? '' : `*Categorias TVDE:* ${v.categorias_tvde}`,
       ]
         .filter(Boolean)
-        .join('
-'),
+        .join('\n'),
     );
-    blocos.push(['*Oferta Vianta:*', ...ITENS_RESUMO_ALUGUER.map((i) => `• ${i}`)].join('
-'));
+    blocos.push(['*Oferta Vianta:*', ...ITENS_RESUMO_ALUGUER.map((i) => `• ${i}`)].join('\n'));
     const c = planosCaucao(v);
     blocos.push(
       [
         `*Caução:* ${c.total}€ — duas opções de pagamento:`,
         `Opção 1 — Prestações Vianta: ${c.primeira}€ na entrega, depois ${c.depois} (mensal)`,
         `Opção 2 — Parcela Já: 6 × ${c.prestacao}€ sem juros. Requer CC português, cartão multibanco da mesma pessoa e sem dívidas no Banco de Portugal`,
-      ].join('
-'),
+      ].join('\n'),
     );
   } else {
     const linhas = [titulo, specs, `Preço: ${eur(v.preco_venda)}`];
@@ -127,13 +123,10 @@ function resumoWhatsApp(v: Carro, gestao: Gestao) {
       .filter(([, x]) => !vazio(x))
       .map(([l, x]) => `${l}: ${x} €/mês`);
     if (cred.length) linhas.push(`Crédito (prestação): ${cred.join(' · ')}`);
-    blocos.push(linhas.filter(Boolean).join('
-'));
+    blocos.push(linhas.filter(Boolean).join('\n'));
   }
   if (disponivel) blocos.push(disponivel);
-  return blocos.join('
-
-');
+  return blocos.join('\n\n');
 }
 
 function Linha({ label, children }: { label: string; children: ReactNode }) {
