@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { toast } from 'sonner';
-import { Car, Copy, Search } from 'lucide-react';
+import { Car, Copy, FileText, Search } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -91,6 +91,13 @@ function planosCaucao(v: Carro) {
   const depois = total === 600 ? '100€ + 100€ + 100€' : '100€ + 100€';
   const prestacao = (total / 6).toLocaleString('pt-PT', { maximumFractionDigits: 2 });
   return { total, primeira, depois, prestacao };
+}
+
+const URL_PROPOSTAS = 'https://propostas-vianta.netlify.app/';
+
+/** Abre o gerador de propostas já com esta viatura selecionada. */
+function urlProposta(v: Carro, gestao: Gestao) {
+  return `${URL_PROPOSTAS}?carro=${v.id}&tipo=${gestao === 'Aluguer' ? 'aluguer' : 'venda'}`;
 }
 
 function resumoWhatsApp(v: Carro, gestao: Gestao) {
@@ -448,9 +455,16 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
                 )}
               </div>
             </div>
-            <Button variant="outline" size="sm" className="shrink-0" onClick={copiar}>
-              <Copy /> Copiar resumo
-            </Button>
+            <div className="flex shrink-0 flex-wrap justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={copiar}>
+                <Copy /> Copiar resumo
+              </Button>
+              <Button size="sm" asChild>
+                <a href={urlProposta(v, gestao)} target="_blank" rel="noopener noreferrer">
+                  <FileText /> Criar proposta
+                </a>
+              </Button>
+            </div>
           </div>
 
           <div className={cn('mt-3 grid gap-2', gestao === 'Aluguer' ? 'grid-cols-2' : 'grid-cols-1')}>
