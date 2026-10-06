@@ -61,6 +61,14 @@ function precoPrincipal(v: Carro, gestao: Gestao) {
     : eur(v.preco_venda);
 }
 
+const ITENS_OFERTA_VENDA = [
+  'Viatura pronta a operar (dístico, inspeção, extintor)',
+  'Mediação de financiamento e seguro',
+  'Garantia Standard Vianta: motor e caixa, 18 meses (extensível a 36, com custo adicional)',
+  'Acompanhamento pós-venda',
+  'Integração na frota Vianta com Slot',
+];
+
 const ITENS_OFERTA_ALUGUER = [
   'Viatura pronta a trabalhar (dístico e seguro)',
   'Manutenção a cargo da Vianta',
@@ -118,12 +126,25 @@ function resumoWhatsApp(v: Carro, gestao: Gestao) {
       ].join('\n'),
     );
   } else {
-    const linhas = [titulo, specs, `Preço: ${eur(v.preco_venda)}`];
+    blocos.push([`*${titulo}*`, specs].filter(Boolean).join('\n'));
+    blocos.push(
+      [
+        `*Preço:* ${eur(v.preco_venda)}`,
+        vazio(v.categorias_tvde) ? '' : `*Categorias TVDE:* ${v.categorias_tvde}`,
+      ]
+        .filter(Boolean)
+        .join('\n'),
+    );
     const cred = [['120 meses', v.credito_120_meses], ['60 meses', v.credito_60_meses], ['48 meses', v.credito_48_meses]]
       .filter(([, x]) => !vazio(x))
-      .map(([l, x]) => `${l}: ${x} €/mês`);
-    if (cred.length) linhas.push(`Crédito (prestação): ${cred.join(' · ')}`);
-    blocos.push(linhas.filter(Boolean).join('\n'));
+      .map(([l, x]) => `• ${l}: ${x} €/mês`);
+    if (cred.length) blocos.push(['*Crédito (prestação):*', ...cred].join('\n'));
+    const fabrica = garantiaFabrica(v);
+    blocos.push(
+      ['*Oferta Vianta:*', ...ITENS_OFERTA_VENDA.map((i) => `• ${i}`), fabrica ? `• Garantia de fábrica — ${fabrica}` : '']
+        .filter(Boolean)
+        .join('\n'),
+    );
   }
   if (disponivel) blocos.push(disponivel);
   return blocos.join('\n\n');
@@ -292,13 +313,7 @@ function OfertaVenda({ v }: { v: Carro }) {
     <>
       <PainelOferta
         titulo="Oferta Venda TVDE"
-        itens={[
-          'Viatura pronta a operar (dístico, inspeção, extintor)',
-          'Mediação de financiamento e seguro',
-          'Garantia Standard Vianta: motor e caixa, 18 meses (extensível a 36, com custo adicional)',
-          'Acompanhamento pós-venda',
-          'Integração na frota Vianta com Slot',
-        ]}
+        itens={ITENS_OFERTA_VENDA}
       />
       {fabrica && (
         <div className="rounded-lg bg-muted/40 px-3 py-2 text-xs text-foreground">
