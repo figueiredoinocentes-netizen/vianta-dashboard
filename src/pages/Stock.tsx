@@ -227,7 +227,7 @@ function PainelOferta({ titulo, itens }: { titulo: string; itens: string[] }) {
   return (
     <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
       <div className="text-[11px] font-semibold uppercase tracking-wider text-primary/80">{titulo}</div>
-      <ul className="mt-2 grid gap-x-6 gap-y-1 text-xs text-foreground sm:grid-cols-2">
+      <ul className="mt-2 grid gap-x-6 gap-y-1 text-xs text-foreground">
         {itens.map((i) => (
           <li key={i} className="flex gap-1.5">
             <span className="text-emerald-400">✓</span>
@@ -271,7 +271,7 @@ function OfertaVenda({ v }: { v: Carro }) {
         ]}
       />
       {fabrica && (
-        <div className="mt-2 rounded-lg bg-muted/40 px-3 py-2 text-xs text-foreground">
+        <div className="rounded-lg bg-muted/40 px-3 py-2 text-xs text-foreground">
           <span className="font-semibold">Garantia de fábrica · </span>
           {fabrica}
         </div>
@@ -387,15 +387,19 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
             ))}
           </div>
           )}
-          {gestao === 'Aluguer' ? (
-            <>
-              <OfertaAluguer />
-              <CaucaoPlanos v={v} />
-            </>
-          ) : (
-            <OfertaVenda v={v} />
-          )}
         </div>
+      </div>
+
+      {/* Oferta + caução em largura total, por baixo da foto */}
+      <div className="mt-4 grid items-start gap-3 lg:grid-cols-2 [&>*]:mt-0">
+        {gestao === 'Aluguer' ? (
+          <>
+            <OfertaAluguer />
+            <CaucaoPlanos v={v} />
+          </>
+        ) : (
+          <OfertaVenda v={v} />
+        )}
       </div>
 
       {/* Só os dados que existem, agrupados */}
