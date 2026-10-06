@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { toast } from 'sonner';
-import { Car, Copy, ExternalLink, Eye, EyeOff, Search } from 'lucide-react';
+import { Car, Copy, Search } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -103,22 +103,6 @@ function Bloco({ titulo, children }: { titulo: string; children: ReactNode }) {
       </h3>
       <div>{children}</div>
     </section>
-  );
-}
-
-function LinkExterno({ href }: { href: string | null | undefined }) {
-  if (vazio(href)) return <>—</>;
-  const url = String(href);
-  if (!/^https?:\/\//i.test(url)) return <>{url}</>;
-  return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center gap-1 text-primary hover:underline"
-    >
-      Abrir <ExternalLink className="h-3 w-3" />
-    </a>
   );
 }
 
@@ -232,12 +216,10 @@ function CaucaoPlanos({ v }: { v: Carro }) {
 function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
   const fotos = fotosDe(v);
   const [foto, setFoto] = useState(0);
-  const [interno, setInterno] = useState(false);
   const disp = disponibilidade(v);
 
   useEffect(() => {
     setFoto(0);
-    setInterno(false);
   }, [v.id]);
 
   const copiar = async () => {
@@ -304,18 +286,25 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
             </Button>
           </div>
 
-          <div className="mt-3 grid grid-cols-3 gap-2">
-            {[
-              ['Preço venda', eur(v.preco_venda)],
-              ['Aluguer / sem', eur(v.valor_aluguer_semanal)],
-              ['Caução', eur(v.caucao)],
-            ].map(([label, valor]) => (
+          <div className={cn('mt-3 grid gap-2', gestao === 'Aluguer' ? 'grid-cols-2' : 'grid-cols-3')}>
+            {(gestao === 'Aluguer'
+              ? [
+                  ['Aluguer / sem', eur(v.valor_aluguer_semanal)],
+                  ['Caução', eur(v.caucao)],
+                ]
+              : [
+                  ['Preço venda', eur(v.preco_venda)],
+                  ['Aluguer / sem', eur(v.valor_aluguer_semanal)],
+                  ['Caução', eur(v.caucao)],
+                ]
+            ).map(([label, valor]) => (
               <div key={label} className="rounded-lg bg-muted/40 px-2.5 py-2">
                 <div className="text-[11px] text-muted-foreground">{label}</div>
                 <div className="font-display text-base font-bold text-foreground">{valor}</div>
               </div>
             ))}
           </div>
+          {gestao !== 'Aluguer' && (
           <div className="mt-2 grid grid-cols-3 gap-2">
             {[
               ['Crédito 120 m', eur(v.credito_120_meses, '/mês')],
@@ -328,6 +317,7 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
               </div>
             ))}
           </div>
+          )}
           {gestao === 'Aluguer' && <CaucaoPlanos v={v} />}
         </div>
       </div>
@@ -361,36 +351,6 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
           <Linha label="Garantia viatura">{txt(v.garantia_viatura)}</Linha>
           <Linha label="Garantia bateria">{txt(v.garantia_bateria)}</Linha>
         </Bloco>
-
-        <Bloco titulo="Comercial">
-          <Linha label="Tipo de gestão">{txt(v.tipo_gestao)}</Linha>
-          <Linha label="Estado">{txt(v.estado)}</Linha>
-          <Linha label="Pronto previsto">{txt(dataPt(v.data_previsao_pronto))}</Linha>
-          <Linha label="Motorista atual">{txt(v.motorista_atual)}</Linha>
-          <Linha label="Documentos">
-            <LinkExterno href={v.docs_link} />
-          </Linha>
-          <Linha label="Fotos">
-            <LinkExterno href={v.fotos_link} />
-          </Linha>
-          <Linha label="Observações">{txt(v.obs)}</Linha>
-        </Bloco>
-      </div>
-
-      <div className="mt-1 rounded-lg border border-dashed border-border px-3 py-2">
-        <button
-          type="button"
-          onClick={() => setInterno((s) => !s)}
-          className="flex w-full items-center justify-between text-xs text-muted-foreground hover:text-foreground"
-        >
-          <span>Dados internos — não mostrar ao cliente</span>
-          {interno ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-        </button>
-        {interno && (
-          <div className="mt-1">
-            <Linha label="Proprietário">{txt(v.proprietario)}</Linha>
-          </div>
-        )}
       </div>
     </div>
   );
