@@ -353,6 +353,24 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
               <div className="mt-1.5">
                 <BadgeEstado v={v} />
               </div>
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-primary/80">
+                  Categorias TVDE
+                </span>
+                {vazio(v.categorias_tvde) ? (
+                  <span className="text-sm text-muted-foreground">—</span>
+                ) : (
+                  String(v.categorias_tvde)
+                    .split(/[,;/]/)
+                    .map((c) => c.trim())
+                    .filter(Boolean)
+                    .map((c) => (
+                      <span key={c} className="rounded bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">
+                        {c}
+                      </span>
+                    ))
+                )}
+              </div>
             </div>
             <Button variant="outline" size="sm" className="shrink-0" onClick={copiar}>
               <Copy /> Copiar resumo
@@ -430,7 +448,6 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
           {
             titulo: 'TVDE e garantias',
             linhas: [
-              ['Categorias TVDE', t(v.categorias_tvde)],
               ['Fim elegibilidade', t(v.fim_elegibilidade_tvde)],
               ['Garantia viatura', t(v.garantia_viatura)],
               ['Garantia bateria', t(v.garantia_bateria)],
