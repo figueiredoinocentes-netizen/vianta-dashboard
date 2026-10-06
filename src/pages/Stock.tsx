@@ -61,6 +61,27 @@ function precoPrincipal(v: Carro, gestao: Gestao) {
     : eur(v.preco_venda);
 }
 
+const ITENS_OFERTA_ALUGUER = [
+  'Viatura pronta a trabalhar (dístico e seguro)',
+  'Manutenção a cargo da Vianta',
+  'Pagamentos semanais (segundas-feiras)',
+  'Viatura de substituição garantida',
+  'Saída com 15 dias de aviso, sem contrato longo',
+  'Suporte direto com o gestor de frota',
+  'App com histórico de despesas e ganhos',
+];
+
+/** Valores dos planos de pagamento da caução. */
+function planosCaucao(v: Carro) {
+  const fromDb = parseFloat(String(v.caucao ?? '0'));
+  const fromPvp = parseFloat(String(v.preco_venda ?? '0'));
+  const total = fromDb > 0 ? fromDb : fromPvp > 25000 ? 600 : 400;
+  const primeira = total === 600 ? 300 : 200;
+  const depois = total === 600 ? '100€ + 100€ + 100€' : '100€ + 100€';
+  const prestacao = (total / 6).toLocaleString('pt-PT', { maximumFractionDigits: 2 });
+  return { total, primeira, depois, prestacao };
+}
+
 function resumoWhatsApp(v: Carro, gestao: Gestao) {
   const titulo = [v.marca_modelo, v.versao].filter((x) => !vazio(x)).join(' ');
   const linhas = [
@@ -71,7 +92,15 @@ function resumoWhatsApp(v: Carro, gestao: Gestao) {
   ];
   if (gestao === 'Aluguer') {
     linhas.push(`Aluguer: ${eur(v.valor_aluguer_semanal, ' por semana')}`);
-    if (!vazio(v.caucao)) linhas.push(`Caução: ${v.caucao} €`);
+    if (!vazio(v.categorias_tvde)) linhas.push(`Categorias TVDE: ${v.categorias_tvde}`);
+    linhas.push('', 'Oferta Vianta:', ...ITENS_OFERTA_ALUGUER.map((i) => `• ${i}`));
+    const c = planosCaucao(v);
+    linhas.push(
+      '',
+      `Caução: ${c.total}€ — duas opções de pagamento:`,
+      `Opção 1 — Prestações Vianta (sem juros, gerido internamente): ${c.primeira}€ na entrega, depois ${c.depois} (mensal)`,
+      `Opção 2 — Parcela Já (crédito no terminal, débito automático): 6 × ${c.prestacao}€ sem juros. Requer CC português, cartão multibanco da mesma pessoa e sem dívidas no Banco de Portugal`,
+    );
   } else {
     linhas.push(`Preço: ${eur(v.preco_venda)}`);
     const cred = [['120 meses', v.credito_120_meses], ['60 meses', v.credito_60_meses], ['48 meses', v.credito_48_meses]]
@@ -174,11 +203,7 @@ function CartaoViatura({
 
 /** Planos de pagamento da caução (só para viaturas em aluguer). */
 function CaucaoPlanos({ v }: { v: Carro }) {
-  const fromDb = parseFloat(String(v.caucao ?? '0'));
-  const fromPvp = parseFloat(String(v.preco_venda ?? '0'));
-  const total = fromDb > 0 ? fromDb : fromPvp > 25000 ? 600 : 400;
-  const meta = total === 600 ? '300€' : '200€';
-  const p3 = total === 600 ? '+ 100€' : '';
+  const { total, primeira, depois, prestacao } = planosCaucao(v);
   return (
     <div className="mt-3 rounded-lg border border-border bg-muted/40 p-4">
       <div className="mb-3 text-base font-semibold">
@@ -188,17 +213,17 @@ function CaucaoPlanos({ v }: { v: Carro }) {
         <div className="rounded-md bg-muted/60 p-3">
           <div className="mb-1.5 font-semibold text-foreground">📋 Prestações Vianta</div>
           <div className="mb-2 text-xs text-muted-foreground">Sem juros, gerido internamente</div>
-          <div className="text-2xl font-bold text-primary">{meta}</div>
+          <div className="text-2xl font-bold text-primary">{primeira}€</div>
           <div className="text-xs text-muted-foreground">1.ª prestação (entrega)</div>
           <div className="mt-2 text-xs text-muted-foreground">
-            Depois: <strong>100€</strong> + <strong>100€</strong> {p3} (mensal)
+            Depois: <strong>{depois}</strong> (mensal)
           </div>
         </div>
         <div className="rounded-md bg-muted/60 p-3">
           <div className="mb-1.5 font-semibold text-foreground">🏦 Parcela Já</div>
           <div className="mb-2 text-xs text-muted-foreground">Crédito no terminal, débito automático</div>
           <div className="text-2xl font-bold text-primary">
-            6 × {(total / 6).toLocaleString('pt-PT', { maximumFractionDigits: 2 })}€
+            6 × {prestacao}€
           </div>
           <div className="mb-2 text-xs text-muted-foreground">Caução de {total}€ em 6 prestações, sem juros</div>
           <div className="mt-1 text-xs text-muted-foreground">
@@ -242,15 +267,7 @@ function OfertaAluguer() {
   return (
     <PainelOferta
       titulo="Oferta Aluguer TVDE"
-      itens={[
-        'Viatura pronta a trabalhar (dístico e seguro)',
-        'Manutenção a cargo da Vianta',
-        'Pagamentos semanais (segundas-feiras)',
-        'Viatura de substituição garantida',
-        'Saída com 15 dias de aviso, sem contrato longo',
-        'Suporte direto com o gestor de frota',
-        'App com histórico de despesas e ganhos',
-      ]}
+      itens={ITENS_OFERTA_ALUGUER}
     />
   );
 }
