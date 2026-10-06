@@ -139,12 +139,7 @@ function resumoWhatsApp(v: Carro, gestao: Gestao) {
       .filter(([, x]) => !vazio(x))
       .map(([l, x]) => `• ${l}: ${x} €/mês`);
     if (cred.length) blocos.push(['*Crédito (prestação):*', ...cred].join('\n'));
-    const fabrica = garantiaFabrica(v);
-    blocos.push(
-      ['*Oferta Vianta:*', ...ITENS_OFERTA_VENDA.map((i) => `• ${i}`), fabrica ? `• Garantia de fábrica — ${fabrica}` : '']
-        .filter(Boolean)
-        .join('\n'),
-    );
+    blocos.push(['*Oferta Vianta:*', ...itensOfertaVenda(v).map((i) => `• ${i}`)].join('\n'));
   }
   if (disponivel) blocos.push(disponivel);
   return blocos.join('\n\n');
@@ -272,14 +267,64 @@ function CaucaoPlanos({ v }: { v: Carro }) {
   );
 }
 
-/** Garantia de fábrica por marca (fonte: Offer Document / Garantias Stand). */
-function garantiaFabrica(v: Carro): string | null {
+type Prazo = { anos: number; km: number | null };
+type RegraMarca = { nome: string; geral: Prazo; bateria?: Prazo };
+
+/** Garantias de fábrica por marca (fonte: Offer Document / Garantias Stand). */
+function regraMarca(v: Carro): RegraMarca | null {
   const m = normalizeText(v.marca_modelo || '');
-  if (m.includes('hyundai')) return 'Hyundai: 7 anos sem limite de km · bateria 8 anos/160.000 km';
-  if (/\bmg\b/.test(m)) return 'MG: 7 anos/150.000 km';
-  if (m.includes('opel')) return 'Opel: 1 ano sem limite + 3 anos/90.000 km · bateria 8 anos/160.000 km';
-  if (m.includes('tesla')) return 'Tesla: 4 anos/80.000 km · bateria/motor 8 anos (160-240.000 km consoante modelo)';
+  if (m.includes('hyundai'))
+    return { nome: 'Hyundai', geral: { anos: 7, km: null }, bateria: { anos: 8, km: 160000 } };
+  if (/\bmg\b/.test(m)) return { nome: 'MG', geral: { anos: 7, km: 150000 } };
+  if (m.includes('opel'))
+    return { nome: 'Opel', geral: { anos: 3, km: 90000 }, bateria: { anos: 8, km: 160000 } };
+  if (m.includes('tesla'))
+    return { nome: 'Tesla', geral: { anos: 4, km: 80000 }, bateria: { anos: 8, km: 160000 } };
   return null;
+}
+
+const textoPrazo = (p: Prazo) =>
+  `${p.anos} anos ${p.km == null ? 'sem limite de km' : `/ ${p.km.toLocaleString('pt-PT')} km`}`;
+
+/** Primeiro dia do mês/ano de matrícula (só o ano → 1 de janeiro, o mais conservador). */
+function inicioGarantia(v: Carro): Date | null {
+  const m = String(v.ano ?? '').match(/(?:(\d{1,2})\/)?(\d{4})/);
+  if (!m) return null;
+  return new Date(Number(m[2]), m[1] ? Number(m[1]) - 1 : 0, 1);
+}
+
+function kmsAtuais(v: Carro): number | null {
+  const n = parseInt(String(v.kms_atuais ?? '').split(',')[0].replace(/\D/g, ''), 10);
+  return Number.isFinite(n) ? n : null;
+}
+
+function prazoValido(v: Carro, p: Prazo): boolean {
+  const inicio = inicioGarantia(v);
+  if (!inicio) return false;
+  const fim = new Date(inicio);
+  fim.setFullYear(fim.getFullYear() + p.anos);
+  if (fim.getTime() < Date.now()) return false;
+  if (p.km == null) return true;
+  const k = kmsAtuais(v);
+  return k != null && k <= p.km;
+}
+
+/**
+ * Pontos da oferta de Venda. Se a viatura ainda tem garantia da marca, mostra-a
+ * no lugar da Garantia Standard Vianta; senão mantém a da Vianta.
+ */
+function itensOfertaVenda(v: Carro): string[] {
+  const regra = regraMarca(v);
+  const itens = [...ITENS_OFERTA_VENDA];
+  if (!regra) return itens;
+  const i = itens.findIndex((x) => x.startsWith('Garantia Standard Vianta'));
+  if (prazoValido(v, regra.geral) && i >= 0) {
+    itens[i] = `Garantia de fábrica ${regra.nome} ainda válida: ${textoPrazo(regra.geral)}`;
+  }
+  if (regra.bateria && prazoValido(v, regra.bateria)) {
+    itens.splice(i >= 0 ? i + 1 : itens.length, 0, `Garantia da bateria (${regra.nome}): ${textoPrazo(regra.bateria)}`);
+  }
+  return itens;
 }
 
 function PainelOferta({ titulo, itens }: { titulo: string; itens: string[] }) {
@@ -308,21 +353,7 @@ function OfertaAluguer() {
 }
 
 function OfertaVenda({ v }: { v: Carro }) {
-  const fabrica = garantiaFabrica(v);
-  return (
-    <>
-      <PainelOferta
-        titulo="Oferta Venda TVDE"
-        itens={ITENS_OFERTA_VENDA}
-      />
-      {fabrica && (
-        <div className="rounded-lg bg-muted/40 px-3 py-2 text-xs text-foreground">
-          <span className="font-semibold">Garantia de fábrica · </span>
-          {fabrica}
-        </div>
-      )}
-    </>
-  );
+  return <PainelOferta titulo="Oferta Venda TVDE" itens={itensOfertaVenda(v)} />;
 }
 
 /** Linha só aparece se tiver valor — para o comercial não ler "—" em tudo. */
