@@ -200,7 +200,8 @@ function CaucaoPlanos({ v }: { v: Carro }) {
           <div className="mt-1 text-xs text-muted-foreground">
             <div className="mt-1 text-green-500">✅ CC português</div>
             <div className="text-green-500">✅ Cartão multibanco (mesma pessoa)</div>
-            <div className="mt-1 text-yellow-400">Atenção: verificação BdP</div>
+            <div className="text-green-500">✅ Sem dívidas no Banco de Portugal</div>
+            <div className="text-green-500">✅ Pode parcelar até 6 meses sem juros</div>
           </div>
           <div className="mt-2 rounded-md bg-indigo-500/15 px-2.5 py-1.5 text-[11px] text-indigo-300">
             ⚠️ Se faltar CC português ou cartão multibanco
