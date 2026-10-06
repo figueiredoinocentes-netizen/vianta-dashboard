@@ -197,11 +197,12 @@ function CaucaoPlanos({ v }: { v: Carro }) {
         <div className="rounded-md bg-muted/60 p-3">
           <div className="mb-1.5 font-semibold text-foreground">🏦 Parcela Já</div>
           <div className="mb-2 text-xs text-muted-foreground">Crédito no terminal, débito automático</div>
+          <div className="text-2xl font-bold text-primary">6 meses</div>
+          <div className="mb-2 text-xs text-muted-foreground">Até 6 prestações, sem juros</div>
           <div className="mt-1 text-xs text-muted-foreground">
             <div className="mt-1 text-green-500">✅ CC português</div>
             <div className="text-green-500">✅ Cartão multibanco (mesma pessoa)</div>
             <div className="text-green-500">✅ Sem dívidas no Banco de Portugal</div>
-            <div className="text-green-500">✅ Pode parcelar até 6 meses sem juros</div>
           </div>
           <div className="mt-2 rounded-md bg-indigo-500/15 px-2.5 py-1.5 text-[11px] text-indigo-300">
             ⚠️ Se faltar CC português ou cartão multibanco
