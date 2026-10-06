@@ -197,8 +197,10 @@ function CaucaoPlanos({ v }: { v: Carro }) {
         <div className="rounded-md bg-muted/60 p-3">
           <div className="mb-1.5 font-semibold text-foreground">🏦 Parcela Já</div>
           <div className="mb-2 text-xs text-muted-foreground">Crédito no terminal, débito automático</div>
-          <div className="text-2xl font-bold text-primary">6 meses</div>
-          <div className="mb-2 text-xs text-muted-foreground">Até 6 prestações, sem juros</div>
+          <div className="text-2xl font-bold text-primary">
+            6 × {(total / 6).toLocaleString('pt-PT', { maximumFractionDigits: 2 })}€
+          </div>
+          <div className="mb-2 text-xs text-muted-foreground">Caução de {total}€ em 6 prestações, sem juros</div>
           <div className="mt-1 text-xs text-muted-foreground">
             <div className="mt-1 text-green-500">✅ CC português</div>
             <div className="text-green-500">✅ Cartão multibanco (mesma pessoa)</div>
