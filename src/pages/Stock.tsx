@@ -71,6 +71,9 @@ const ITENS_OFERTA_ALUGUER = [
   'App com histórico de despesas e ganhos',
 ];
 
+/** Pontos da oferta no texto copiado (sem a substituição garantida, por indicação do Francisco). */
+const ITENS_RESUMO_ALUGUER = ITENS_OFERTA_ALUGUER.filter((i) => !i.startsWith('Viatura de substituição'));
+
 /** Valores dos planos de pagamento da caução. */
 function planosCaucao(v: Carro) {
   const fromDb = parseFloat(String(v.caucao ?? '0'));
@@ -84,35 +87,53 @@ function planosCaucao(v: Carro) {
 
 function resumoWhatsApp(v: Carro, gestao: Gestao) {
   const titulo = [v.marca_modelo, v.versao].filter((x) => !vazio(x)).join(' ');
-  const linhas = [
-    titulo,
-    [v.ano, vazio(v.kms_atuais) ? null : `${v.kms_atuais} km`, v.combustivel, v.caixa, v.cor]
-      .filter((x) => !vazio(x))
-      .join(' · '),
-  ];
+  const specs = [v.ano, vazio(v.kms_atuais) ? null : `${v.kms_atuais} km`, v.combustivel, v.caixa, v.cor]
+    .filter((x) => !vazio(x))
+    .join(' · ');
+  const disponivel = (() => {
+    if (disponibilidade(v) === 'pronto') return '';
+    const quando = dataPt(v.data_previsao_pronto);
+    return quando ? `Disponível a partir de ${quando}` : 'Ainda não disponível';
+  })();
+
+  // Blocos separados por linha em branco (formato WhatsApp: *negrito*).
+  const blocos: string[] = [];
   if (gestao === 'Aluguer') {
-    linhas.push(`Aluguer: ${eur(v.valor_aluguer_semanal, ' por semana')}`);
-    if (!vazio(v.categorias_tvde)) linhas.push(`Categorias TVDE: ${v.categorias_tvde}`);
-    linhas.push('', 'Oferta Vianta:', ...ITENS_OFERTA_ALUGUER.map((i) => `• ${i}`));
+    blocos.push([`*${titulo}*`, specs].filter(Boolean).join('
+'));
+    blocos.push(
+      [
+        `*Aluguer:* ${eur(v.valor_aluguer_semanal, ' por semana')}`,
+        vazio(v.categorias_tvde) ? '' : `*Categorias TVDE:* ${v.categorias_tvde}`,
+      ]
+        .filter(Boolean)
+        .join('
+'),
+    );
+    blocos.push(['*Oferta Vianta:*', ...ITENS_RESUMO_ALUGUER.map((i) => `• ${i}`)].join('
+'));
     const c = planosCaucao(v);
-    linhas.push(
-      '',
-      `Caução: ${c.total}€ — duas opções de pagamento:`,
-      `Opção 1 — Prestações Vianta (sem juros, gerido internamente): ${c.primeira}€ na entrega, depois ${c.depois} (mensal)`,
-      `Opção 2 — Parcela Já (crédito no terminal, débito automático): 6 × ${c.prestacao}€ sem juros. Requer CC português, cartão multibanco da mesma pessoa e sem dívidas no Banco de Portugal`,
+    blocos.push(
+      [
+        `*Caução:* ${c.total}€ — duas opções de pagamento:`,
+        `Opção 1 — Prestações Vianta: ${c.primeira}€ na entrega, depois ${c.depois} (mensal)`,
+        `Opção 2 — Parcela Já: 6 × ${c.prestacao}€ sem juros. Requer CC português, cartão multibanco da mesma pessoa e sem dívidas no Banco de Portugal`,
+      ].join('
+'),
     );
   } else {
-    linhas.push(`Preço: ${eur(v.preco_venda)}`);
+    const linhas = [titulo, specs, `Preço: ${eur(v.preco_venda)}`];
     const cred = [['120 meses', v.credito_120_meses], ['60 meses', v.credito_60_meses], ['48 meses', v.credito_48_meses]]
       .filter(([, x]) => !vazio(x))
       .map(([l, x]) => `${l}: ${x} €/mês`);
     if (cred.length) linhas.push(`Crédito (prestação): ${cred.join(' · ')}`);
+    blocos.push(linhas.filter(Boolean).join('
+'));
   }
-  if (disponibilidade(v) !== 'pronto') {
-    const quando = dataPt(v.data_previsao_pronto);
-    linhas.push(quando ? `Disponível a partir de ${quando}` : 'Ainda não disponível');
-  }
-  return linhas.filter(Boolean).join('\n');
+  if (disponivel) blocos.push(disponivel);
+  return blocos.join('
+
+');
 }
 
 function Linha({ label, children }: { label: string; children: ReactNode }) {
