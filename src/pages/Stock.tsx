@@ -61,29 +61,88 @@ function precoPrincipal(v: Carro, gestao: Gestao) {
     : eur(v.preco_venda);
 }
 
+const ITENS_OFERTA_VENDA = [
+  'Viatura pronta a operar (dístico, inspeção, extintor)',
+  'Mediação de financiamento e seguro',
+  'Garantia Standard Vianta: motor e caixa, 18 meses (extensível a 36, com custo adicional)',
+  'Acompanhamento pós-venda',
+  'Integração na frota Vianta com Slot',
+];
+
+const ITENS_OFERTA_ALUGUER = [
+  'Viatura pronta a trabalhar (dístico e seguro)',
+  'Manutenção a cargo da Vianta',
+  'Pagamentos semanais (segundas-feiras)',
+  'Viatura de substituição garantida',
+  'Saída com 15 dias de aviso, sem contrato longo',
+  'Suporte direto com o gestor de frota',
+  'App com histórico de despesas e ganhos',
+];
+
+/** Pontos da oferta no texto copiado (sem a substituição garantida, por indicação do Francisco). */
+const ITENS_RESUMO_ALUGUER = ITENS_OFERTA_ALUGUER.filter((i) => !i.startsWith('Viatura de substituição'));
+
+/** Valores dos planos de pagamento da caução. */
+function planosCaucao(v: Carro) {
+  const fromDb = parseFloat(String(v.caucao ?? '0'));
+  const fromPvp = parseFloat(String(v.preco_venda ?? '0'));
+  const total = fromDb > 0 ? fromDb : fromPvp > 25000 ? 600 : 400;
+  const primeira = total === 600 ? 300 : 200;
+  const depois = total === 600 ? '100€ + 100€ + 100€' : '100€ + 100€';
+  const prestacao = (total / 6).toLocaleString('pt-PT', { maximumFractionDigits: 2 });
+  return { total, primeira, depois, prestacao };
+}
+
 function resumoWhatsApp(v: Carro, gestao: Gestao) {
   const titulo = [v.marca_modelo, v.versao].filter((x) => !vazio(x)).join(' ');
-  const linhas = [
-    titulo,
-    [v.ano, vazio(v.kms_atuais) ? null : `${v.kms_atuais} km`, v.combustivel, v.caixa, v.cor]
-      .filter((x) => !vazio(x))
-      .join(' · '),
-  ];
+  const specs = [v.ano, vazio(v.kms_atuais) ? null : `${v.kms_atuais} km`, v.combustivel, v.caixa, v.cor]
+    .filter((x) => !vazio(x))
+    .join(' · ');
+  const disponivel = (() => {
+    if (disponibilidade(v) === 'pronto') return '';
+    const quando = dataPt(v.data_previsao_pronto);
+    return quando ? `Disponível a partir de ${quando}` : 'Ainda não disponível';
+  })();
+
+  // Blocos separados por linha em branco (formato WhatsApp: *negrito*).
+  const blocos: string[] = [];
   if (gestao === 'Aluguer') {
-    linhas.push(`Aluguer: ${eur(v.valor_aluguer_semanal, ' por semana')}`);
-    if (!vazio(v.caucao)) linhas.push(`Caução: ${v.caucao} €`);
+    blocos.push([`*${titulo}*`, specs].filter(Boolean).join('\n'));
+    blocos.push(
+      [
+        `*Aluguer:* ${eur(v.valor_aluguer_semanal, ' por semana')}`,
+        vazio(v.categorias_tvde) ? '' : `*Categorias TVDE:* ${v.categorias_tvde}`,
+      ]
+        .filter(Boolean)
+        .join('\n'),
+    );
+    blocos.push(['*Oferta Vianta:*', ...ITENS_RESUMO_ALUGUER.map((i) => `• ${i}`)].join('\n'));
+    const c = planosCaucao(v);
+    blocos.push(
+      [
+        `*Caução:* ${c.total}€ — duas opções de pagamento:`,
+        `Opção 1 — Prestações Vianta: ${c.primeira}€ na entrega, depois ${c.depois} (mensal)`,
+        `Opção 2 — Parcela Já: 6 × ${c.prestacao}€ sem juros. Requer CC português, cartão multibanco da mesma pessoa e sem dívidas no Banco de Portugal`,
+      ].join('\n'),
+    );
   } else {
-    linhas.push(`Preço: ${eur(v.preco_venda)}`);
+    blocos.push([`*${titulo}*`, specs].filter(Boolean).join('\n'));
+    blocos.push(
+      [
+        `*Preço:* ${eur(v.preco_venda)}`,
+        vazio(v.categorias_tvde) ? '' : `*Categorias TVDE:* ${v.categorias_tvde}`,
+      ]
+        .filter(Boolean)
+        .join('\n'),
+    );
     const cred = [['120 meses', v.credito_120_meses], ['60 meses', v.credito_60_meses], ['48 meses', v.credito_48_meses]]
       .filter(([, x]) => !vazio(x))
-      .map(([l, x]) => `${l}: ${x} €/mês`);
-    if (cred.length) linhas.push(`Crédito (prestação): ${cred.join(' · ')}`);
+      .map(([l, x]) => `• ${l}: ${x} €/mês`);
+    if (cred.length) blocos.push(['*Crédito (prestação):*', ...cred].join('\n'));
+    blocos.push(['*Oferta Vianta:*', ...itensOfertaVenda(v).map((i) => `• ${i}`)].join('\n'));
   }
-  if (disponibilidade(v) !== 'pronto') {
-    const quando = dataPt(v.data_previsao_pronto);
-    linhas.push(quando ? `Disponível a partir de ${quando}` : 'Ainda não disponível');
-  }
-  return linhas.filter(Boolean).join('\n');
+  if (disponivel) blocos.push(disponivel);
+  return blocos.join('\n\n');
 }
 
 function Linha({ label, children }: { label: string; children: ReactNode }) {
@@ -174,11 +233,7 @@ function CartaoViatura({
 
 /** Planos de pagamento da caução (só para viaturas em aluguer). */
 function CaucaoPlanos({ v }: { v: Carro }) {
-  const fromDb = parseFloat(String(v.caucao ?? '0'));
-  const fromPvp = parseFloat(String(v.preco_venda ?? '0'));
-  const total = fromDb > 0 ? fromDb : fromPvp > 25000 ? 600 : 400;
-  const meta = total === 600 ? '300€' : '200€';
-  const p3 = total === 600 ? '+ 100€' : '';
+  const { total, primeira, depois, prestacao } = planosCaucao(v);
   return (
     <div className="mt-3 rounded-lg border border-border bg-muted/40 p-4">
       <div className="mb-3 text-base font-semibold">
@@ -188,17 +243,17 @@ function CaucaoPlanos({ v }: { v: Carro }) {
         <div className="rounded-md bg-muted/60 p-3">
           <div className="mb-1.5 font-semibold text-foreground">📋 Prestações Vianta</div>
           <div className="mb-2 text-xs text-muted-foreground">Sem juros, gerido internamente</div>
-          <div className="text-2xl font-bold text-primary">{meta}</div>
+          <div className="text-2xl font-bold text-primary">{primeira}€</div>
           <div className="text-xs text-muted-foreground">1.ª prestação (entrega)</div>
           <div className="mt-2 text-xs text-muted-foreground">
-            Depois: <strong>100€</strong> + <strong>100€</strong> {p3} (mensal)
+            Depois: <strong>{depois}</strong> (mensal)
           </div>
         </div>
         <div className="rounded-md bg-muted/60 p-3">
           <div className="mb-1.5 font-semibold text-foreground">🏦 Parcela Já</div>
           <div className="mb-2 text-xs text-muted-foreground">Crédito no terminal, débito automático</div>
           <div className="text-2xl font-bold text-primary">
-            6 × {(total / 6).toLocaleString('pt-PT', { maximumFractionDigits: 2 })}€
+            6 × {prestacao}€
           </div>
           <div className="mb-2 text-xs text-muted-foreground">Caução de {total}€ em 6 prestações, sem juros</div>
           <div className="mt-1 text-xs text-muted-foreground">
@@ -212,14 +267,64 @@ function CaucaoPlanos({ v }: { v: Carro }) {
   );
 }
 
-/** Garantia de fábrica por marca (fonte: Offer Document / Garantias Stand). */
-function garantiaFabrica(v: Carro): string | null {
+type Prazo = { anos: number; km: number | null };
+type RegraMarca = { nome: string; geral: Prazo; bateria?: Prazo };
+
+/** Garantias de fábrica por marca (fonte: Offer Document / Garantias Stand). */
+function regraMarca(v: Carro): RegraMarca | null {
   const m = normalizeText(v.marca_modelo || '');
-  if (m.includes('hyundai')) return 'Hyundai: 7 anos sem limite de km · bateria 8 anos/160.000 km';
-  if (/\bmg\b/.test(m)) return 'MG: 7 anos/150.000 km';
-  if (m.includes('opel')) return 'Opel: 1 ano sem limite + 3 anos/90.000 km · bateria 8 anos/160.000 km';
-  if (m.includes('tesla')) return 'Tesla: 4 anos/80.000 km · bateria/motor 8 anos (160-240.000 km consoante modelo)';
+  if (m.includes('hyundai'))
+    return { nome: 'Hyundai', geral: { anos: 7, km: null }, bateria: { anos: 8, km: 160000 } };
+  if (/\bmg\b/.test(m)) return { nome: 'MG', geral: { anos: 7, km: 150000 } };
+  if (m.includes('opel'))
+    return { nome: 'Opel', geral: { anos: 3, km: 90000 }, bateria: { anos: 8, km: 160000 } };
+  if (m.includes('tesla'))
+    return { nome: 'Tesla', geral: { anos: 4, km: 80000 }, bateria: { anos: 8, km: 160000 } };
   return null;
+}
+
+const textoPrazo = (p: Prazo) =>
+  `${p.anos} anos ${p.km == null ? 'sem limite de km' : `/ ${p.km.toLocaleString('pt-PT')} km`}`;
+
+/** Primeiro dia do mês/ano de matrícula (só o ano → 1 de janeiro, o mais conservador). */
+function inicioGarantia(v: Carro): Date | null {
+  const m = String(v.ano ?? '').match(/(?:(\d{1,2})\/)?(\d{4})/);
+  if (!m) return null;
+  return new Date(Number(m[2]), m[1] ? Number(m[1]) - 1 : 0, 1);
+}
+
+function kmsAtuais(v: Carro): number | null {
+  const n = parseInt(String(v.kms_atuais ?? '').split(',')[0].replace(/\D/g, ''), 10);
+  return Number.isFinite(n) ? n : null;
+}
+
+function prazoValido(v: Carro, p: Prazo): boolean {
+  const inicio = inicioGarantia(v);
+  if (!inicio) return false;
+  const fim = new Date(inicio);
+  fim.setFullYear(fim.getFullYear() + p.anos);
+  if (fim.getTime() < Date.now()) return false;
+  if (p.km == null) return true;
+  const k = kmsAtuais(v);
+  return k != null && k <= p.km;
+}
+
+/**
+ * Pontos da oferta de Venda. Se a viatura ainda tem garantia da marca, mostra-a
+ * no lugar da Garantia Standard Vianta; senão mantém a da Vianta.
+ */
+function itensOfertaVenda(v: Carro): string[] {
+  const regra = regraMarca(v);
+  const itens = [...ITENS_OFERTA_VENDA];
+  if (!regra) return itens;
+  const i = itens.findIndex((x) => x.startsWith('Garantia Standard Vianta'));
+  if (prazoValido(v, regra.geral) && i >= 0) {
+    itens[i] = `Garantia de fábrica ${regra.nome} ainda válida: ${textoPrazo(regra.geral)}`;
+  }
+  if (regra.bateria && prazoValido(v, regra.bateria)) {
+    itens.splice(i >= 0 ? i + 1 : itens.length, 0, `Garantia da bateria (${regra.nome}): ${textoPrazo(regra.bateria)}`);
+  }
+  return itens;
 }
 
 function PainelOferta({ titulo, itens }: { titulo: string; itens: string[] }) {
@@ -242,41 +347,13 @@ function OfertaAluguer() {
   return (
     <PainelOferta
       titulo="Oferta Aluguer TVDE"
-      itens={[
-        'Viatura pronta a trabalhar (dístico e seguro)',
-        'Manutenção a cargo da Vianta',
-        'Pagamentos semanais (segundas-feiras)',
-        'Viatura de substituição garantida',
-        'Saída com 15 dias de aviso, sem contrato longo',
-        'Suporte direto com o gestor de frota',
-        'App com histórico de despesas e ganhos',
-      ]}
+      itens={ITENS_OFERTA_ALUGUER}
     />
   );
 }
 
 function OfertaVenda({ v }: { v: Carro }) {
-  const fabrica = garantiaFabrica(v);
-  return (
-    <>
-      <PainelOferta
-        titulo="Oferta Venda TVDE"
-        itens={[
-          'Viatura pronta a operar (dístico, inspeção, extintor)',
-          'Mediação de financiamento e seguro',
-          'Garantia Standard Vianta: motor e caixa, 18 meses (extensível a 36, com custo adicional)',
-          'Acompanhamento pós-venda',
-          'Integração na frota Vianta com Slot',
-        ]}
-      />
-      {fabrica && (
-        <div className="rounded-lg bg-muted/40 px-3 py-2 text-xs text-foreground">
-          <span className="font-semibold">Garantia de fábrica · </span>
-          {fabrica}
-        </div>
-      )}
-    </>
-  );
+  return <PainelOferta titulo="Oferta Venda TVDE" itens={itensOfertaVenda(v)} />;
 }
 
 /** Linha só aparece se tiver valor — para o comercial não ler "—" em tudo. */
