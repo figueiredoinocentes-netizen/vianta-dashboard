@@ -223,16 +223,10 @@ function garantiaFabrica(v: Carro): string | null {
   return null;
 }
 
-function PainelOferta({ titulo, angulo, itens, naoE }: {
-  titulo: string;
-  angulo: string;
-  itens: string[];
-  naoE: string;
-}) {
+function PainelOferta({ titulo, itens }: { titulo: string; itens: string[] }) {
   return (
     <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
       <div className="text-[11px] font-semibold uppercase tracking-wider text-primary/80">{titulo}</div>
-      <div className="mt-0.5 text-sm font-semibold text-foreground">{angulo}</div>
       <ul className="mt-2 grid gap-x-6 gap-y-1 text-xs text-foreground sm:grid-cols-2">
         {itens.map((i) => (
           <li key={i} className="flex gap-1.5">
@@ -241,7 +235,6 @@ function PainelOferta({ titulo, angulo, itens, naoE }: {
           </li>
         ))}
       </ul>
-      <div className="mt-2 text-[11px] text-muted-foreground">Não é para: {naoE}</div>
     </div>
   );
 }
@@ -250,7 +243,6 @@ function OfertaAluguer() {
   return (
     <PainelOferta
       titulo="Oferta Aluguer TVDE"
-      angulo="Entra esta semana. O teu único trabalho é conduzir."
       itens={[
         'Viatura pronta a trabalhar (dístico e seguro)',
         'Manutenção a cargo da Vianta',
@@ -260,7 +252,6 @@ function OfertaAluguer() {
         'Suporte direto com o gestor de frota',
         'App com histórico de despesas e ganhos',
       ]}
-      naoE="quem já tem viatura própria (→ Slot) ou quer ser dono do carro (→ Venda)."
     />
   );
 }
@@ -271,7 +262,6 @@ function OfertaVenda({ v }: { v: Carro }) {
     <>
       <PainelOferta
         titulo="Oferta Venda TVDE"
-        angulo="O carro certo, o crédito tratado, pronto a operar em TVDE."
         itens={[
           'Viatura pronta a operar (dístico, inspeção, extintor)',
           'Mediação de financiamento e seguro',
@@ -279,7 +269,6 @@ function OfertaVenda({ v }: { v: Carro }) {
           'Acompanhamento pós-venda',
           'Integração na frota Vianta com Slot',
         ]}
-        naoE="quem não tem capital nem crédito aprovável (→ começar no Aluguer)."
       />
       {fabrica && (
         <div className="mt-2 rounded-lg bg-muted/40 px-3 py-2 text-xs text-foreground">
