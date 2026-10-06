@@ -409,7 +409,7 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
       </div>
 
       {/* Oferta + caução em largura total, por baixo da foto */}
-      <div className="mt-4 grid items-start gap-3 lg:grid-cols-2 [&>*]:mt-0">
+      <div className={cn('mt-4 grid items-start gap-3 [&>*]:mt-0', gestao !== 'Aluguer' && 'lg:grid-cols-2')}>
         {gestao === 'Aluguer' ? (
           <>
             <OfertaAluguer />
