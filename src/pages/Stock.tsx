@@ -286,17 +286,13 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
             </Button>
           </div>
 
-          <div className={cn('mt-3 grid gap-2', gestao === 'Aluguer' ? 'grid-cols-2' : 'grid-cols-3')}>
+          <div className={cn('mt-3 grid gap-2', gestao === 'Aluguer' ? 'grid-cols-2' : 'grid-cols-1')}>
             {(gestao === 'Aluguer'
               ? [
                   ['Aluguer / sem', eur(v.valor_aluguer_semanal)],
                   ['Caução', eur(v.caucao)],
                 ]
-              : [
-                  ['Preço venda', eur(v.preco_venda)],
-                  ['Aluguer / sem', eur(v.valor_aluguer_semanal)],
-                  ['Caução', eur(v.caucao)],
-                ]
+              : [['Preço venda', eur(v.preco_venda)]]
             ).map(([label, valor]) => (
               <div key={label} className="rounded-lg bg-muted/40 px-2.5 py-2">
                 <div className="text-[11px] text-muted-foreground">{label}</div>
