@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { toast } from 'sonner';
-import { Car, Copy, Search } from 'lucide-react';
+import { Car, ChevronLeft, ChevronRight, Copy, FileText, Search } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -51,8 +51,9 @@ function dataPt(v: string | null | undefined) {
 
 function fotosDe(v: Carro): string[] {
   const lista = Array.isArray(v.fotos) ? v.fotos.filter(Boolean) : [];
-  if (v.foto_url && !lista.includes(v.foto_url)) lista.unshift(v.foto_url);
-  return lista;
+  // a capa (estrela) vai sempre à frente
+  if (!v.foto_url) return lista;
+  return [v.foto_url, ...lista.filter((f) => f !== v.foto_url)];
 }
 
 function precoPrincipal(v: Carro, gestao: Gestao) {
@@ -91,6 +92,13 @@ function planosCaucao(v: Carro) {
   const depois = total === 600 ? '100€ + 100€ + 100€' : '100€ + 100€';
   const prestacao = (total / 6).toLocaleString('pt-PT', { maximumFractionDigits: 2 });
   return { total, primeira, depois, prestacao };
+}
+
+const URL_PROPOSTAS = 'https://propostas-vianta.netlify.app/';
+
+/** Abre o gerador de propostas já com esta viatura selecionada. */
+function urlProposta(v: Carro, gestao: Gestao) {
+  return `${URL_PROPOSTAS}?carro=${v.id}&tipo=${gestao === 'Aluguer' ? 'aluguer' : 'venda'}`;
 }
 
 function resumoWhatsApp(v: Carro, gestao: Gestao) {
@@ -365,6 +373,7 @@ function Dado({ label, valor }: { label: string; valor: string | null }) {
 function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
   const fotos = fotosDe(v);
   const [foto, setFoto] = useState(0);
+  const [aberta, setAberta] = useState(false);
   const disp = disponibilidade(v);
 
   useEffect(() => {
@@ -392,7 +401,12 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
             )}
           >
             {fotos[foto] ? (
-              <img src={fotos[foto]} alt="" className="h-full w-full object-contain" />
+              <img
+                src={fotos[foto]}
+                alt=""
+                onClick={() => setAberta(true)}
+                className="h-full w-full cursor-zoom-in object-contain"
+              />
             ) : (
               <Car className="h-10 w-10 text-muted-foreground/40" />
             )}
@@ -415,6 +429,35 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
             </div>
           )}
         </div>
+
+        <Dialog open={aberta} onOpenChange={setAberta}>
+          <DialogContent className="max-w-5xl border-0 bg-black/90 p-2">
+            <DialogTitle className="sr-only">Fotos da viatura</DialogTitle>
+            {fotos[foto] && (
+              <img src={fotos[foto]} alt="" className="max-h-[85vh] w-full object-contain" />
+            )}
+            {fotos.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  aria-label="Anterior"
+                  onClick={() => setFoto((foto - 1 + fotos.length) % fotos.length)}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Seguinte"
+                  onClick={() => setFoto((foto + 1) % fotos.length)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Identificação e valores à direita */}
         <div className="min-w-0 flex-1">
@@ -448,9 +491,16 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
                 )}
               </div>
             </div>
-            <Button variant="outline" size="sm" className="shrink-0" onClick={copiar}>
-              <Copy /> Copiar resumo
-            </Button>
+            <div className="flex shrink-0 flex-wrap justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={copiar}>
+                <Copy /> Copiar resumo
+              </Button>
+              <Button size="sm" asChild>
+                <a href={urlProposta(v, gestao)} target="_blank" rel="noopener noreferrer">
+                  <FileText /> Criar proposta
+                </a>
+              </Button>
+            </div>
           </div>
 
           <div className={cn('mt-3 grid gap-2', gestao === 'Aluguer' ? 'grid-cols-2' : 'grid-cols-1')}>
