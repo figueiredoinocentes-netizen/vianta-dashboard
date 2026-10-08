@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { toast } from 'sonner';
-import { Car, ChevronLeft, ChevronRight, Copy, FileText, Search } from 'lucide-react';
+import { Car, ChevronLeft, ChevronRight, Copy, FileText, Images, Search } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -54,6 +54,23 @@ function fotosDe(v: Carro): string[] {
   // a capa (estrela) vai sempre à frente
   if (!v.foto_url) return lista;
   return [v.foto_url, ...lista.filter((f) => f !== v.foto_url)];
+}
+
+const MAX_FOTOS_PARTILHA = 8;
+
+/** Descarrega a foto e converte-a para JPEG (webp/png partilhados no WhatsApp ficam como sticker/ficheiro). */
+async function fotoComoJpeg(url: string, nome: string): Promise<File> {
+  const blob = await (await fetch(url)).blob();
+  const bmp = await createImageBitmap(blob);
+  const canvas = document.createElement('canvas');
+  canvas.width = bmp.width;
+  canvas.height = bmp.height;
+  const ctx = canvas.getContext('2d')!;
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(bmp, 0, 0);
+  const jpeg = await new Promise<Blob>((res, rej) => canvas.toBlob((b) => (b ? res(b) : rej(new Error('jpeg'))), 'image/jpeg', 0.9));
+  return new File([jpeg], nome, { type: 'image/jpeg' });
 }
 
 function precoPrincipal(v: Carro, gestao: Gestao) {
@@ -389,6 +406,37 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
     }
   };
 
+  const [aPartilhar, setAPartilhar] = useState(false);
+  const partilharFotos = async () => {
+    const urls = fotos.slice(0, MAX_FOTOS_PARTILHA);
+    if (!urls.length) {
+      toast.error('Esta viatura não tem fotos');
+      return;
+    }
+    setAPartilhar(true);
+    try {
+      const base = String(v.marca_modelo || 'viatura').replace(/[^\w-]+/g, '-');
+      const files = await Promise.all(urls.map((u, i) => fotoComoJpeg(u, `${base}-${i + 1}.jpg`)));
+      if (navigator.canShare?.({ files })) {
+        await navigator.share({ files });
+        return;
+      }
+      const { default: JSZip } = await import('jszip');
+      const zip = new JSZip();
+      files.forEach((f) => zip.file(f.name, f));
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(await zip.generateAsync({ type: 'blob' }));
+      a.download = `${base}-fotos.zip`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      toast.success(`${files.length} fotos descarregadas (zip)`);
+    } catch (e) {
+      if ((e as Error)?.name !== 'AbortError') toast.error('Não foi possível preparar as fotos');
+    } finally {
+      setAPartilhar(false);
+    }
+  };
+
   return (
     <div className="min-w-0 rounded-xl border border-border bg-card p-4">
       <div className="flex flex-col gap-4 sm:flex-row">
@@ -494,6 +542,9 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
             <div className="flex shrink-0 flex-wrap justify-end gap-2">
               <Button variant="outline" size="sm" onClick={copiar}>
                 <Copy /> Copiar resumo
+              </Button>
+              <Button variant="outline" size="sm" onClick={partilharFotos} disabled={aPartilhar || !fotos.length}>
+                <Images /> {aPartilhar ? 'A preparar…' : 'Fotos'}
               </Button>
               <Button size="sm" asChild>
                 <a href={urlProposta(v, gestao)} target="_blank" rel="noopener noreferrer">
