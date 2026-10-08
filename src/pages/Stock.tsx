@@ -417,7 +417,9 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
     try {
       const base = String(v.marca_modelo || 'viatura').replace(/[^\w-]+/g, '-');
       const files = await Promise.all(urls.map((u, i) => fotoComoJpeg(u, `${base}-${i + 1}.jpg`)));
-      if (navigator.canShare?.({ files })) {
+      // folha de partilha só no telemóvel; no Windows abre a partilha da Microsoft, que não serve
+      const telemovel = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (telemovel && navigator.canShare?.({ files })) {
         await navigator.share({ files });
         return;
       }
