@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { updateCentralField } from '@/lib/operacoes/central';
 import { eur } from '@/lib/operacoes/custos';
-import { ePreparacao } from '@/lib/operacoes/trabalhos';
+import { ORIGEM_OCORR, TIPOS_TRABALHO, ePreparacao } from '@/lib/operacoes/trabalhos';
 import type { Carro, Sinistro } from '@/lib/operacoes/types';
 import {
   errorMessage,
@@ -33,7 +33,9 @@ export function SinistrosViatura({ carro }: { carro: Carro }) {
   const { data: todos = [], isLoading } = useSinistros();
   const { data: ocorrencias = [] } = useOcorrencias();
   const { create, remove } = useCentralWrites('sinistros');
+  const criarManut = useCentralWrites('ocorrencias').create;
   const refresh = useRefreshOperacoes();
+  const [novaManut, setNovaManut] = useState<{ sid: number; tipo: string; descricao: string } | null>(null);
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState({ data_inicio: hoje(), orcamento: '', descricao: '' });
 
@@ -83,6 +85,26 @@ export function SinistrosViatura({ carro }: { carro: Carro }) {
       refresh();
     } catch (e) {
       toast.error(`Erro ao ligar manutenção: ${errorMessage(e)}`);
+    }
+  }
+
+  async function criarManutencao() {
+    if (!novaManut) return;
+    try {
+      await criarManut.mutateAsync({
+        carro_id: carro.id,
+        sinistro_id: novaManut.sid,
+        origem: ORIGEM_OCORR,
+        tipo: novaManut.tipo,
+        descricao: novaManut.descricao.trim() || null,
+        gravidade: 'Média',
+        estado: 'Por fazer',
+        data: hoje(),
+      });
+      setNovaManut(null);
+      toast.success('Manutenção criada e ligada');
+    } catch (e) {
+      toast.error(`Erro ao criar manutenção: ${errorMessage(e)}`);
     }
   }
 
@@ -215,6 +237,49 @@ export function SinistrosViatura({ carro }: { carro: Carro }) {
                     </button>
                   </div>
                 ))}
+                {!ligadas.length && !livres.length && (
+                  <p className="text-xs text-muted-foreground">
+                    Esta viatura ainda não tem manutenções registadas. Cria uma abaixo.
+                  </p>
+                )}
+                {novaManut?.sid === s.id ? (
+                  <div className="grid grid-cols-1 gap-2 rounded-md border border-border p-2 sm:grid-cols-3">
+                    <NativeSelect
+                      value={novaManut.tipo}
+                      onChange={(e) => setNovaManut({ ...novaManut, tipo: e.target.value })}
+                    >
+                      {TIPOS_TRABALHO.map((t) => (
+                        <option key={t} value={t}>
+                          {t}
+                        </option>
+                      ))}
+                    </NativeSelect>
+                    <Input
+                      className="sm:col-span-2"
+                      placeholder="Descrição"
+                      value={novaManut.descricao}
+                      onChange={(e) => setNovaManut({ ...novaManut, descricao: e.target.value })}
+                    />
+                    <div className="flex justify-end gap-2 sm:col-span-3">
+                      <Button type="button" variant="outline" size="sm" onClick={() => setNovaManut(null)}>
+                        Cancelar
+                      </Button>
+                      <Button type="button" size="sm" disabled={criarManut.isPending} onClick={criarManutencao}>
+                        Criar e ligar
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="self-start"
+                    onClick={() => setNovaManut({ sid: s.id, tipo: 'Mecânica', descricao: '' })}
+                  >
+                    + Nova manutenção
+                  </Button>
+                )}
                 {!!livres.length && (
                   <NativeSelect
                     value=""
