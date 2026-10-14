@@ -12,7 +12,9 @@ export type CentralType =
   | 'clientes'
   | 'pagamentos'
   | 'financeiro'
-  | 'ocorrencias';
+  | 'ocorrencias'
+  | 'sinistros'
+  | 'estados_log';
 
 async function readJson(r: Response) {
   return r.json().catch(() => ({}));

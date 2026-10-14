@@ -31,6 +31,7 @@ import {
 } from '@/hooks/useOperacoes';
 import { ClienteDialog } from './ClienteDialog';
 import { TrabalhosViatura } from './TrabalhosViatura';
+import { SinistrosViatura } from './SinistrosViatura';
 import { FotosEditor } from './FotosEditor';
 import { DeleteConfirm, Field, NativeSelect } from './shared';
 
@@ -142,7 +143,7 @@ export function VehicleDetailDialog({
 }
 
 function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
-  const [tab, setTab] = useState<'carac' | 'ficha' | 'prep'>('carac');
+  const [tab, setTab] = useState<'carac' | 'ficha' | 'prep' | 'sinist'>('carac');
   const [form, setForm] = useState<Form>(() => formFromCarro(carro));
   const [saving, setSaving] = useState<'idle' | 'saving'>('idle');
   const [clienteOpen, setClienteOpen] = useState(false);
@@ -252,6 +253,7 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
             ['carac', 'Características'],
             ['ficha', 'Ficha comercial'],
             ['prep', 'Tarefas'],
+            ['sinist', 'Sinistros'],
           ] as const
         ).map(([id, label]) => (
           <button
@@ -516,6 +518,8 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
             <TrabalhosViatura carro={carro} />
           </div>
         )}
+
+        {tab === 'sinist' && <SinistrosViatura carro={carro} />}
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-2">
           <DeleteConfirm label="Eliminar Viatura" busy={remove.isPending} onConfirm={onDelete} />

@@ -5,6 +5,7 @@ import { useCarros } from '@/hooks/useOperacoes';
 import { useOps } from '@/components/operacoes/OpsContext';
 import { ErrorBox, OpsHeader } from '@/components/operacoes/shared';
 import { MargensFrota } from '@/components/operacoes/MargensFrota';
+import { ESTADOS_PARADOS, TempoParados } from '@/components/operacoes/TempoParados';
 
 function Kpi({
   icon,
@@ -66,10 +67,11 @@ export default function OpsVisao() {
             <Kpi
               icon="🔧"
               color="#fbbf24"
-              value={s.inativos + s.manutencao}
+              value={carros.filter((v) => (ESTADOS_PARADOS as readonly string[]).includes(v.estado || '')).length}
               label="Parados"
-              sub="Inativo + Manutenção"
+              sub="Preparação, aluguer, venda e manutenção"
             />
+            <TempoParados carros={carros} />
             <Kpi icon="💰" color="#9ca3af" value={s.vendidos} label="Vendidos" sub="Este ano" />
             <Kpi
               icon="📈"
