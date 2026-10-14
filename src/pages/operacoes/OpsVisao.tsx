@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getStats, parseEuros } from '@/lib/operacoes/constants';
 import { useCarros } from '@/hooks/useOperacoes';
@@ -6,38 +5,9 @@ import { useOps } from '@/components/operacoes/OpsContext';
 import { ErrorBox, OpsHeader } from '@/components/operacoes/shared';
 import { MargensFrota } from '@/components/operacoes/MargensFrota';
 import { ESTADOS_PARADOS, TempoParados } from '@/components/operacoes/TempoParados';
-
-function Kpi({
-  icon,
-  color,
-  value,
-  label,
-  sub,
-}: {
-  icon: string;
-  color: string;
-  value: ReactNode;
-  label: string;
-  sub: string;
-}) {
-  return (
-    <div className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 transition hover:-translate-y-px hover:border-border/80">
-      <div
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-lg"
-        style={{ background: `${color}26`, color }}
-      >
-        {icon}
-      </div>
-      <div className="min-w-0">
-        <div className="font-display text-2xl font-bold leading-tight" style={{ color }}>
-          {value}
-        </div>
-        <div className="mt-0.5 text-xs font-semibold text-foreground">{label}</div>
-        <div className="text-[11px] text-muted-foreground">{sub}</div>
-      </div>
-    </div>
-  );
-}
+import { CarList, MetricCard } from '@/components/operacoes/MetricCard';
+import { STATUSES } from '@/lib/operacoes/constants';
+import { eur } from '@/lib/operacoes/custos';
 
 export default function OpsVisao() {
   const { openNovaViatura } = useOps();
@@ -45,6 +15,17 @@ export default function OpsVisao() {
   const s = getStats(carros);
   const alugados = carros.filter((v) => v.estado === 'Alugado' && v.tipo_gestao !== 'Slot');
   const renda = alugados.reduce((sum, v) => sum + parseEuros(v.valor_aluguer_semanal) * 4.33, 0);
+  const parados = carros.filter((v) => (ESTADOS_PARADOS as readonly string[]).includes(v.estado || ''));
+
+  const vianta = carros.filter((v) => v.proprietario === 'VIANTA');
+  const investidores = carros.filter(
+    (v) => v.proprietario && v.proprietario !== 'VIANTA' && v.tipo_gestao !== 'Slot',
+  );
+  const slot = carros.filter((v) => v.tipo_gestao === 'Slot');
+  const lista = (cs: typeof carros) => ({
+    title: '',
+    render: (close: () => void) => <CarList items={cs.map((carro) => ({ carro }))} onPick={close} />,
+  });
 
   return (
     <>
@@ -62,41 +43,112 @@ export default function OpsVisao() {
       ) : (
         <div className="space-y-5">
           <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3">
-            <Kpi icon="🚗" color="#6ee7b7" value={alugados.length} label="Frota Ativa" sub="Alugados na rua" />
-            <Kpi icon="🏪" color="#93c5fd" value={s.stock} label="Em Stock" sub="Para venda / aluguer" />
-            <Kpi
+            <MetricCard
+              icon="🚗"
+              color="#6ee7b7"
+              value={alugados.length}
+              label="Frota Ativa"
+              sub="Alugados na rua"
+              to="/operacoes/frota"
+            />
+            <MetricCard
+              icon="🏪"
+              color="#93c5fd"
+              value={s.stock}
+              label="Em Stock"
+              sub="Para venda / aluguer"
+              to="/operacoes/stock"
+            />
+            <MetricCard
               icon="🔧"
               color="#fbbf24"
-              value={carros.filter((v) => (ESTADOS_PARADOS as readonly string[]).includes(v.estado || '')).length}
+              value={parados.length}
               label="Parados"
               sub="Preparação, aluguer, venda e manutenção"
+              to="/operacoes/stock"
             />
             <TempoParados carros={carros} />
-            <Kpi icon="💰" color="#9ca3af" value={s.vendidos} label="Vendidos" sub="Este ano" />
-            <Kpi
+            <MetricCard
+              icon="💰"
+              color="#9ca3af"
+              value={s.vendidos}
+              label="Vendidos"
+              sub="Este ano"
+              detail={{
+                title: `Vendidos (${s.vendidos})`,
+                render: (close) => (
+                  <CarList
+                    items={carros.filter((v) => v.estado === 'Vendido').map((carro) => ({ carro }))}
+                    onPick={close}
+                  />
+                ),
+              }}
+            />
+            <MetricCard
               icon="📈"
               color="#22c55e"
               value={`€${Math.round(renda).toLocaleString()}`}
               label="Receita Aluguer/mês"
               sub={`Estimada (${alugados.length} alugados)`}
+              detail={{
+                title: `Receita de aluguer/mês · ${eur(Math.round(renda))}`,
+                render: (close) => (
+                  <CarList
+                    items={[...alugados]
+                      .sort(
+                        (a, b) => parseEuros(b.valor_aluguer_semanal) - parseEuros(a.valor_aluguer_semanal),
+                      )
+                      .map((carro) => ({
+                        carro,
+                        extra: `${eur(Math.round(parseEuros(carro.valor_aluguer_semanal) * 4.33))}/mês`,
+                      }))}
+                    onPick={close}
+                  />
+                ),
+              }}
             />
-            <Kpi icon="🚘" color="#60a5fa" value={s.total} label="Total Frota" sub="Todas as viaturas" />
+            <MetricCard
+              icon="🚘"
+              color="#60a5fa"
+              value={s.total}
+              label="Total Frota"
+              sub="Todas as viaturas"
+              detail={{
+                title: `Total da frota (${s.total})`,
+                render: (close) => (
+                  <div className="flex flex-col gap-4">
+                    {STATUSES.map((estado) => {
+                      const cs = carros.filter((v) => v.estado === estado);
+                      if (!cs.length) return null;
+                      return (
+                        <div key={estado}>
+                          <div className="mb-1.5 text-xs font-medium text-muted-foreground">
+                            {estado} ({cs.length})
+                          </div>
+                          <CarList items={cs.map((carro) => ({ carro }))} onPick={close} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                ),
+              }}
+            />
           </div>
           <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-3">
-            {[
-              ['Proprietário VIANTA', carros.filter((v) => v.proprietario === 'VIANTA').length],
+            {(
               [
-                'Investidores',
-                carros.filter(
-                  (v) => v.proprietario && v.proprietario !== 'VIANTA' && v.tipo_gestao !== 'Slot',
-                ).length,
-              ],
-              ['Slot', carros.filter((v) => v.tipo_gestao === 'Slot').length],
-            ].map(([label, value]) => (
-              <div key={label} className="rounded-xl border border-border bg-card p-4">
-                <div className="mb-1 text-xs text-muted-foreground">{label}</div>
-                <div className="font-display text-2xl font-bold">{value}</div>
-              </div>
+                ['Proprietário VIANTA', vianta],
+                ['Investidores', investidores],
+                ['Slot', slot],
+              ] as const
+            ).map(([label, cs]) => (
+              <MetricCard
+                key={label}
+                compact
+                label={label}
+                value={cs.length}
+                detail={{ ...lista(cs), title: `${label} (${cs.length})` }}
+              />
             ))}
           </div>
           <MargensFrota carros={carros} />
