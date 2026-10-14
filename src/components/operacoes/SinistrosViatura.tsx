@@ -13,6 +13,7 @@ import {
   useRefreshOperacoes,
   useSinistros,
 } from '@/hooks/useOperacoes';
+import { CustosTrabalho } from './CustosTrabalho';
 import { DateField } from './DateField';
 import { DeleteConfirm, Field, NativeSelect } from './shared';
 
@@ -37,6 +38,7 @@ export function SinistrosViatura({ carro }: { carro: Carro }) {
   const refresh = useRefreshOperacoes();
   const [novaManut, setNovaManut] = useState<{ sid: number; tipo: string; descricao: string } | null>(null);
   const [adding, setAdding] = useState(false);
+  const [verCustos, setVerCustos] = useState<number | null>(null);
   const [form, setForm] = useState({ data_inicio: hoje(), orcamento: '', descricao: '' });
 
   const lista = useMemo(
@@ -221,20 +223,29 @@ export function SinistrosViatura({ carro }: { carro: Carro }) {
                   Manutenções ligadas ({ligadas.length})
                 </div>
                 {ligadas.map((o) => (
-                  <div
-                    key={o.id}
-                    className="flex items-center justify-between gap-2 rounded-md bg-muted/40 px-2 py-1.5 text-xs"
-                  >
-                    <span className="min-w-0 truncate">
-                      {fmtData(o.data)} · {o.tipo}: {o.descricao || 'sem descrição'} · {o.estado}
-                    </span>
-                    <button
-                      type="button"
-                      className="shrink-0 text-muted-foreground hover:text-foreground"
-                      onClick={() => ligar(o.id, null)}
-                    >
-                      Desligar
-                    </button>
+                  <div key={o.id} className="rounded-md bg-muted/40 px-2 py-1.5 text-xs">
+                    <div className="flex items-center justify-between gap-2">
+                      <button
+                        type="button"
+                        className="min-w-0 truncate text-left hover:text-primary"
+                        onClick={() => setVerCustos(verCustos === o.id ? null : o.id)}
+                      >
+                        {verCustos === o.id ? '▾' : '▸'} {fmtData(o.data)} · {o.tipo}:{' '}
+                        {o.descricao || 'sem descrição'} · {o.estado}
+                      </button>
+                      <button
+                        type="button"
+                        className="shrink-0 text-muted-foreground hover:text-foreground"
+                        onClick={() => ligar(o.id, null)}
+                      >
+                        Desligar
+                      </button>
+                    </div>
+                    {verCustos === o.id && (
+                      <div className="mt-2 border-t border-border pt-2">
+                        <CustosTrabalho ocorrenciaId={o.id} />
+                      </div>
+                    )}
                   </div>
                 ))}
                 {!ligadas.length && !livres.length && (

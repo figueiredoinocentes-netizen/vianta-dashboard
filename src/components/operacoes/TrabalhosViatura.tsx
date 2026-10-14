@@ -24,6 +24,7 @@ import {
   useOcorrencias,
   useRefreshOperacoes,
 } from '@/hooks/useOperacoes';
+import { CustosTrabalho } from './CustosTrabalho';
 import { NovoMovimento } from './NovoMovimento';
 import { Field, NativeSelect } from './shared';
 
@@ -41,6 +42,14 @@ export function TrabalhosViatura({ carro }: { carro: Carro }) {
   const refresh = useRefreshOperacoes();
   const [adding, setAdding] = useState(false);
   const [costFor, setCostFor] = useState<number | null>(null);
+  const [aberto, setAberto] = useState<Set<number>>(new Set());
+  const toggleAberto = (id: number) =>
+    setAberto((s) => {
+      const n = new Set(s);
+      if (n.has(id)) n.delete(id);
+      else n.add(id);
+      return n;
+    });
 
   const lista = useMemo(
     () =>
@@ -212,6 +221,13 @@ export function TrabalhosViatura({ carro }: { carro: Carro }) {
                   <button
                     type="button"
                     className="text-primary hover:underline"
+                    onClick={() => toggleAberto(o.id)}
+                  >
+                    {aberto.has(o.id) ? 'ocultar custos' : `ver custos (${c.n})`}
+                  </button>
+                  <button
+                    type="button"
+                    className="text-primary hover:underline"
                     onClick={() => setCostFor(costFor === o.id ? null : o.id)}
                   >
                     + custo
@@ -229,6 +245,12 @@ export function TrabalhosViatura({ carro }: { carro: Carro }) {
                   )}
                 </span>
               </div>
+
+              {aberto.has(o.id) && (
+                <div className="mt-2 rounded-md border border-border p-2">
+                  <CustosTrabalho ocorrenciaId={o.id} />
+                </div>
+              )}
 
               {costFor === o.id && (
                 <div className="mt-2">
