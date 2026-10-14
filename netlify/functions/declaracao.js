@@ -100,7 +100,7 @@ async function extrair(token, folderId, tipo) {
   const res = await fetch('https://openrouter.ai/api/v1/messages', {
     method: 'POST',
     headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-    body: JSON.stringify({ model: MODEL, max_tokens: 700, messages: [{ role: 'user', content }] }),
+    body: JSON.stringify({ model: MODEL, max_tokens: 4000, messages: [{ role: 'user', content }] }),
   });
   if (!res.ok) {
     console.error('OpenRouter error:', res.status, await res.text());
