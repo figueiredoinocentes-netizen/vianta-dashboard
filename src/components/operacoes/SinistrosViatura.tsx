@@ -3,17 +3,25 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { updateCentralField } from '@/lib/operacoes/central';
-import { eur } from '@/lib/operacoes/custos';
-import { ORIGEM_OCORR, TIPOS_TRABALHO, ePreparacao } from '@/lib/operacoes/trabalhos';
-import type { Carro, Sinistro } from '@/lib/operacoes/types';
+import { eur, semIva } from '@/lib/operacoes/custos';
+import {
+  ESTADOS_TRABALHO,
+  ORIGEM_OCORR,
+  TIPOS_TRABALHO,
+  categoriaDoTrabalho,
+  ePreparacao,
+} from '@/lib/operacoes/trabalhos';
+import type { Carro, Ocorrencia, Sinistro } from '@/lib/operacoes/types';
 import {
   errorMessage,
   useCentralWrites,
+  useFinanceiro,
   useOcorrencias,
   useRefreshOperacoes,
   useSinistros,
 } from '@/hooks/useOperacoes';
 import { CustosTrabalho } from './CustosTrabalho';
+import { NovoMovimento } from './NovoMovimento';
 import { DateField } from './DateField';
 import { DeleteConfirm, Field, NativeSelect } from './shared';
 
@@ -38,7 +46,6 @@ export function SinistrosViatura({ carro }: { carro: Carro }) {
   const refresh = useRefreshOperacoes();
   const [novaManut, setNovaManut] = useState<{ sid: number; tipo: string; descricao: string } | null>(null);
   const [adding, setAdding] = useState(false);
-  const [verCustos, setVerCustos] = useState<number | null>(null);
   const [form, setForm] = useState({ data_inicio: hoje(), orcamento: '', descricao: '' });
 
   const lista = useMemo(
@@ -223,30 +230,7 @@ export function SinistrosViatura({ carro }: { carro: Carro }) {
                   Manutenções ligadas ({ligadas.length})
                 </div>
                 {ligadas.map((o) => (
-                  <div key={o.id} className="rounded-md bg-muted/40 px-2 py-1.5 text-xs">
-                    <div className="flex items-center justify-between gap-2">
-                      <button
-                        type="button"
-                        className="min-w-0 truncate text-left hover:text-primary"
-                        onClick={() => setVerCustos(verCustos === o.id ? null : o.id)}
-                      >
-                        {verCustos === o.id ? '▾' : '▸'} {fmtData(o.data)} · {o.tipo}:{' '}
-                        {o.descricao || 'sem descrição'} · {o.estado}
-                      </button>
-                      <button
-                        type="button"
-                        className="shrink-0 text-muted-foreground hover:text-foreground"
-                        onClick={() => ligar(o.id, null)}
-                      >
-                        Desligar
-                      </button>
-                    </div>
-                    {verCustos === o.id && (
-                      <div className="mt-2 border-t border-border pt-2">
-                        <CustosTrabalho ocorrenciaId={o.id} />
-                      </div>
-                    )}
-                  </div>
+                  <TrabalhoLigado key={o.id} carro={carro} o={o} onDesligar={() => ligar(o.id, null)} />
                 ))}
                 {!ligadas.length && !livres.length && (
                   <p className="text-xs text-muted-foreground">
@@ -318,6 +302,105 @@ export function SinistrosViatura({ carro }: { carro: Carro }) {
             </div>
           );
         })
+      )}
+    </div>
+  );
+}
+
+/** Manutenção ligada a um sinistro: estado, custos (ver/adicionar) e desligar. */
+function TrabalhoLigado({
+  carro,
+  o,
+  onDesligar,
+}: {
+  carro: Carro;
+  o: Ocorrencia;
+  onDesligar: () => void;
+}) {
+  const { data: movs = [] } = useFinanceiro();
+  const createMov = useCentralWrites('financeiro').create;
+  const refresh = useRefreshOperacoes();
+  const [ver, setVer] = useState(false);
+  const [novoCusto, setNovoCusto] = useState(false);
+
+  const custos = movs.filter((m) => m.ocorrencia_id === o.id);
+  const total = -custos.reduce((a, m) => a + semIva(m), 0);
+
+  async function setEstado(estado: string) {
+    try {
+      await updateCentralField('ocorrencias', o.id, 'estado', estado);
+      await updateCentralField('ocorrencias', o.id, 'resolvido_em', estado === 'Feito' ? hoje() : null);
+      refresh();
+      if (estado === 'Feito' && !custos.length) setNovoCusto(true);
+    } catch (e) {
+      toast.error(`Erro ao guardar: ${errorMessage(e)}`);
+    }
+  }
+
+  return (
+    <div className="rounded-md bg-muted/40 px-2 py-2 text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="truncate font-medium">
+            {o.tipo}: {o.descricao || 'sem descrição'}
+          </div>
+          <div className="text-[11px] text-muted-foreground">
+            {fmtData(o.data)} · Custo: {custos.length ? eur(total) : '—'}
+          </div>
+        </div>
+        <NativeSelect
+          className="h-8 w-auto text-xs"
+          value={o.estado || 'Por fazer'}
+          onChange={(e) => setEstado(e.target.value)}
+        >
+          {ESTADOS_TRABALHO.map((s) => (
+            <option key={s} value={s}>
+              {s === 'Dispensado' ? 'Não se aplica' : s}
+            </option>
+          ))}
+        </NativeSelect>
+      </div>
+      <div className="mt-1.5 flex flex-wrap items-center gap-3">
+        <button type="button" className="text-primary hover:underline" onClick={() => setVer(!ver)}>
+          {ver ? 'ocultar custos' : `ver custos (${custos.length})`}
+        </button>
+        <button
+          type="button"
+          className="text-primary hover:underline"
+          onClick={() => setNovoCusto(!novoCusto)}
+        >
+          + custo
+        </button>
+        <button
+          type="button"
+          className="ml-auto text-muted-foreground hover:text-foreground"
+          onClick={onDesligar}
+        >
+          Desligar
+        </button>
+      </div>
+      {ver && (
+        <div className="mt-2 border-t border-border pt-2">
+          <CustosTrabalho ocorrenciaId={o.id} />
+        </div>
+      )}
+      {novoCusto && (
+        <div className="mt-2">
+          <NovoMovimento
+            carro={carro}
+            busy={createMov.isPending}
+            defaultCategoria={categoriaDoTrabalho(o.tipo, o.origem)}
+            defaultDescricao={o.descricao || o.tipo || ''}
+            extra={{ ocorrencia_id: o.id }}
+            onCancel={() => setNovoCusto(false)}
+            onSave={async (body) => {
+              await createMov.mutateAsync(body);
+              setNovoCusto(false);
+              setVer(true);
+              toast.success('Custo registado');
+            }}
+          />
+        </div>
       )}
     </div>
   );
