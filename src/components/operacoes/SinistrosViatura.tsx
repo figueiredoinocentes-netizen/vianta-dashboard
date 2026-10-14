@@ -13,6 +13,7 @@ import {
   useRefreshOperacoes,
   useSinistros,
 } from '@/hooks/useOperacoes';
+import { DateField } from './DateField';
 import { DeleteConfirm, Field, NativeSelect } from './shared';
 
 const hoje = () => new Date().toISOString().slice(0, 10);
@@ -101,10 +102,9 @@ export function SinistrosViatura({ carro }: { carro: Carro }) {
       {adding && (
         <div className="grid grid-cols-1 gap-3 rounded-lg border border-border p-3 sm:grid-cols-2">
           <Field label="Data de início (chegada ao gestor de frota)">
-            <Input
-              type="date"
+            <DateField
               value={form.data_inicio}
-              onChange={(e) => setForm((f) => ({ ...f, data_inicio: e.target.value }))}
+              onChange={(v) => setForm((f) => ({ ...f, data_inicio: v }))}
             />
           </Field>
           <Field label="Orçamento do seguro (€)">
@@ -169,24 +169,16 @@ export function SinistrosViatura({ carro }: { carro: Carro }) {
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <Field label="Início">
-                  <Input
-                    type="date"
-                    defaultValue={s.data_inicio || ''}
-                    onBlur={(e) =>
-                      e.target.value &&
-                      e.target.value !== (s.data_inicio || '') &&
-                      setField(s, 'data_inicio', e.target.value)
-                    }
+                  <DateField
+                    value={s.data_inicio || ''}
+                    onChange={(v) => v && v !== s.data_inicio && setField(s, 'data_inicio', v)}
                   />
                 </Field>
                 <Field label="Fim (resolvido)">
-                  <Input
-                    type="date"
-                    defaultValue={s.data_fim || ''}
-                    onBlur={(e) =>
-                      e.target.value !== (s.data_fim || '') &&
-                      setField(s, 'data_fim', e.target.value || null)
-                    }
+                  <DateField
+                    clearable
+                    value={s.data_fim || ''}
+                    onChange={(v) => setField(s, 'data_fim', v || null)}
                   />
                 </Field>
                 <Field label="Orçamento do seguro (€)">
