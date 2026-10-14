@@ -32,6 +32,9 @@ export function NovoMovimento({
   extra?: Record<string, unknown>;
 }) {
   const [tipo, setTipo] = useState<string>(defaultCategoria || TIPOS_CUSTO[0]);
+  // A categoria herdada da manutenção pode não estar na lista base de custos.
+  const categorias: string[] = [...TIPOS_CUSTO];
+  if (defaultCategoria && !categorias.includes(defaultCategoria)) categorias.unshift(defaultCategoria);
   const [data, setData] = useState(hoje());
   const [descricao, setDescricao] = useState(defaultDescricao);
   const [fornecedor, setFornecedor] = useState('');
@@ -101,7 +104,7 @@ export function NovoMovimento({
     >
       <Field label="Categoria">
         <NativeSelect value={tipo} onChange={(e) => setTipo(e.target.value)}>
-          {TIPOS_CUSTO.map((t) => (
+          {categorias.map((t) => (
             <option key={t}>{t}</option>
           ))}
         </NativeSelect>

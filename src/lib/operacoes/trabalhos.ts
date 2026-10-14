@@ -55,9 +55,12 @@ export function tipoDoItem(item: string): string {
   return 'Equipamento';
 }
 
-/** Categoria de custo (tabela `financeiro`) sugerida para um trabalho. */
+/**
+ * Categoria de custo (tabela `financeiro`) de um trabalho: nas manutenções/ocorrências é
+ * diretamente o tipo do trabalho (Mecânica, Pintura, Dano…); na preparação mantém "Preparação"
+ * (exceto itens de pneus, que seguem o tipo).
+ */
 export function categoriaDoTrabalho(tipo: string | null, origem: string | null): string {
-  if (tipo === 'Pneus' || tipo === 'Seguro' || tipo === 'IUC / IMT' || tipo === 'Multa' || tipo === 'Comissão') return tipo;
-  if (origem === ORIGEM_PREP && tipo !== 'Mecânica') return 'Preparação';
-  return 'Manutenção';
+  if (origem === ORIGEM_PREP) return tipo === 'Pneus' ? tipo : 'Preparação';
+  return tipo || 'Manutenção';
 }
