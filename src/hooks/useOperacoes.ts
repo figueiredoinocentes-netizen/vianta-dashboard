@@ -18,6 +18,7 @@ import type {
   Ocorrencia,
   Pagamento,
   Sinistro,
+  EstadoLog,
 } from '@/lib/operacoes/types';
 
 import { ORIGEM_PREP, itensPreparacao, tipoDoItem } from '@/lib/operacoes/trabalhos';
@@ -41,6 +42,7 @@ export const usePagamentos = () => useCentralList<Pagamento>('pagamentos');
 
 export const useOcorrencias = () => useCentralList<Ocorrencia>('ocorrencias');
 export const useSinistros = () => useCentralList<Sinistro>('sinistros');
+export const useEstadosLog = () => useCentralList<EstadoLog>('estados_log');
 export const useFinanceiro = () => useCentralList<Movimento>('financeiro');
 
 export function useRefreshOperacoes() {

@@ -5,6 +5,7 @@ import { useCarros } from '@/hooks/useOperacoes';
 import { useOps } from '@/components/operacoes/OpsContext';
 import { ErrorBox, OpsHeader } from '@/components/operacoes/shared';
 import { MargensFrota } from '@/components/operacoes/MargensFrota';
+import { TempoParados } from '@/components/operacoes/TempoParados';
 
 function Kpi({
   icon,
@@ -97,6 +98,7 @@ export default function OpsVisao() {
               </div>
             ))}
           </div>
+          <TempoParados carros={carros} />
           <MargensFrota carros={carros} />
         </div>
       )}

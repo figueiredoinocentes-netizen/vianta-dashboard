@@ -122,6 +122,15 @@ export interface Ocorrencia {
   sinistro_id: number | null;
 }
 
+/** Período de uma viatura num estado (tabela `carros_estados_log`); `ate` null = estado atual. */
+export interface EstadoLog {
+  id: number;
+  carro_id: number;
+  estado: string | null;
+  desde: string;
+  ate: string | null;
+}
+
 /** Sinistro de uma viatura (tabela `sinistros`); as manutenções ligam-se por `ocorrencias.sinistro_id`. */
 export interface Sinistro {
   id: number;
