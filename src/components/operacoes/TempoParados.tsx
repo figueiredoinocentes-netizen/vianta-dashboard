@@ -8,6 +8,7 @@ import {
 } from '@/lib/operacoes/parados';
 import type { Carro } from '@/lib/operacoes/types';
 import { cn } from '@/lib/utils';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useOps } from './OpsContext';
 
 export { ESTADOS_PARADOS };
@@ -25,6 +26,7 @@ export function TempoParados({ carros }: { carros: Carro[] }) {
   const { data: ocorrencias = [] } = useOcorrencias();
   const { openVehicle } = useOps();
   const [janela, setJanela] = useState<Janela>('agora');
+  const [open, setOpen] = useState(false);
 
   const dados = useMemo(() => {
     const todos = periodosParados(carros, log || [], sinistros, ocorrencias);
@@ -46,11 +48,16 @@ export function TempoParados({ carros }: { carros: Carro[] }) {
     };
   }, [log, carros, sinistros, ocorrencias, janela]);
 
+  const agoraMedia = useMemo(
+    () => media(periodosParados(carros, log || [], sinistros, ocorrencias).filter((p) => p.aberto)),
+    [log, carros, sinistros, ocorrencias],
+  );
+
   if (isLoading) return null;
   if (isError) {
     return (
-      <div className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
-        Tempo parado: o log de estados ainda não existe na base de dados (falta correr a migração).
+      <div className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
+        Tempo parado: o log de estados ainda não existe na base de dados.
       </div>
     );
   }
@@ -59,7 +66,33 @@ export function TempoParados({ carros }: { carros: Carro[] }) {
   const carroDe = (id: number) => carros.find((c) => c.id === id);
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 text-left transition hover:-translate-y-px hover:border-primary"
+      >
+        <div
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-lg"
+          style={{ background: '#fbbf2426', color: '#fbbf24' }}
+        >
+          ⏱️
+        </div>
+        <div className="min-w-0">
+          <div className="font-display text-2xl font-bold leading-tight" style={{ color: '#fbbf24' }}>
+            {agoraMedia === null ? '—' : `${agoraMedia} d`}
+          </div>
+          <div className="mt-0.5 text-xs font-semibold text-foreground">Tempo médio parado</div>
+          <div className="text-[11px] text-muted-foreground">Clique para ver o detalhe</div>
+        </div>
+      </button>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto" aria-describedby={undefined}>
+          <DialogHeader>
+            <DialogTitle>Tempo médio parado</DialogTitle>
+          </DialogHeader>
+          <div>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div>
           <div className="text-sm font-semibold">Tempo médio parado</div>
@@ -148,7 +181,10 @@ export function TempoParados({ carros }: { carros: Carro[] }) {
               <button
                 key={p.carroId}
                 type="button"
-                onClick={() => openVehicle(p.carroId)}
+                onClick={() => {
+                  setOpen(false);
+                  openVehicle(p.carroId);
+                }}
                 className="flex items-center justify-between gap-2 rounded-md border border-border px-2 py-1.5 text-left text-xs transition hover:border-primary"
               >
                 <span className="min-w-0 truncate">
@@ -165,6 +201,9 @@ export function TempoParados({ carros }: { carros: Carro[] }) {
         O log começou na data da migração; as viaturas já paradas nesse dia contam a partir daí (exceto
         sinistros, que contam desde a data de início do sinistro).
       </p>
-    </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

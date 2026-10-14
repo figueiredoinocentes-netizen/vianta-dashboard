@@ -71,6 +71,7 @@ export default function OpsVisao() {
               label="Parados"
               sub="Preparação, aluguer, venda e manutenção"
             />
+            <TempoParados carros={carros} />
             <Kpi icon="💰" color="#9ca3af" value={s.vendidos} label="Vendidos" sub="Este ano" />
             <Kpi
               icon="📈"
@@ -98,7 +99,6 @@ export default function OpsVisao() {
               </div>
             ))}
           </div>
-          <TempoParados carros={carros} />
           <MargensFrota carros={carros} />
         </div>
       )}
