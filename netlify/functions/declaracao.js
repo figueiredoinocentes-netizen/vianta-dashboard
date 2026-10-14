@@ -3,12 +3,12 @@
 //  POST {action:'cliente', folderId}     → lê os documentos do cliente e extrai nome, documento e morada
 //  POST {action:'carro', folderId}       → lê os documentos da viatura e extrai os dados do veículo
 //  POST {action:'criar', folderId, nome, dados} → cria o Google Doc na pasta da viatura
-// Auth Drive: service account (netlify/lib/drive-auth.js). Extração: API da Anthropic (ANTHROPIC_API_KEY).
+// Auth Drive: service account (netlify/lib/drive-auth.js). Extração: OpenRouter (modelo Anthropic) — OPENROUTER_API_KEY.
 import { DRIVE_WRITE_SCOPE, FOLDER_MIME, driveDownload, driveList, getAccessToken } from '../lib/drive-auth.js';
 
 const PROD_ORIGIN = 'https://vianta-dashboard.netlify.app';
 const PREVIEW_ORIGIN_RE = /^https:\/\/[a-z0-9-]+--vianta-dashboard\.netlify\.app$/;
-const MODEL = 'claude-sonnet-5-5';
+const MODEL = 'anthropic/claude-sonnet-5.5';
 const MAX_BYTES = 4_500_000;
 
 function resolveOrigin(event) {
@@ -71,9 +71,9 @@ const PROMPTS = {
 };
 
 async function extrair(token, folderId, tipo) {
-  const key = process.env.ANTHROPIC_API_KEY;
+  const key = process.env.OPENROUTER_API_KEY;
   if (!key) {
-    const e = new Error('ANTHROPIC_API_KEY não está configurada no Netlify');
+    const e = new Error('OPENROUTER_API_KEY não está configurada no Netlify');
     e.status = 501;
     throw e;
   }
@@ -97,13 +97,13 @@ async function extrair(token, folderId, tipo) {
   }
   content.push({ type: 'text', text: PROMPTS[tipo] });
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch('https://openrouter.ai/api/v1/messages', {
     method: 'POST',
     headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
     body: JSON.stringify({ model: MODEL, max_tokens: 700, messages: [{ role: 'user', content }] }),
   });
   if (!res.ok) {
-    console.error('Anthropic error:', res.status, await res.text());
+    console.error('OpenRouter error:', res.status, await res.text());
     throw new Error('Erro ao ler os documentos');
   }
   const out = await res.json();
