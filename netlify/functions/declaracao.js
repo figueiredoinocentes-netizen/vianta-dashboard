@@ -4,7 +4,7 @@
 //  POST {action:'carro', folderId}       → lê os documentos da viatura e extrai os dados do veículo
 //  POST {action:'criar', folderId, nome, dados} → cria o Google Doc na pasta da viatura
 // Auth Drive: service account (netlify/lib/drive-auth.js). Extração: OpenRouter (modelo Anthropic) — OPENROUTER_API_KEY.
-import { DRIVE_WRITE_SCOPE, FOLDER_MIME, driveDownload, driveList, getAccessToken } from '../lib/drive-auth.js';
+import { DRIVE_WRITE_SCOPE, FOLDER_MIME, driveDownload, driveList, getAccessToken, getUserAccessToken } from '../lib/drive-auth.js';
 
 const PROD_ORIGIN = 'https://vianta-dashboard.netlify.app';
 const PREVIEW_ORIGIN_RE = /^https:\/\/[a-z0-9-]+--vianta-dashboard\.netlify\.app$/;
@@ -172,7 +172,14 @@ ${linha('Chassis', d.chassis)}
 }
 
 async function criarDoc(folderId, nomeFicheiro, dados) {
-  const token = await getAccessToken(DRIVE_WRITE_SCOPE);
+  // A service account pode ter quota de armazenamento 0 → usa o OAuth de utilizador
+  // (Duarte/Francisco) para criar; se não estiver configurado, cai para a service account.
+  let token;
+  try {
+    token = await getUserAccessToken();
+  } catch {
+    token = await getAccessToken(DRIVE_WRITE_SCOPE);
+  }
   const boundary = `vianta-${Date.now()}`;
   const metadata = { name: nomeFicheiro, parents: [folderId], mimeType: 'application/vnd.google-apps.document' };
   const body = Buffer.concat([

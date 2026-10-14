@@ -1,5 +1,7 @@
 // Autenticação por service account (JWT bearer, sem dependências) e helpers da Drive,
 // partilhados pelas funções que leem a pasta CARROS.
+// Criação de ficheiros: a service account pode ter quota 0 — usa-se OAuth de utilizador
+// (GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET/GOOGLE_REFRESH_TOKEN) quando disponível (ver getUserAccessToken).
 import crypto from 'node:crypto';
 
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.readonly';
@@ -26,6 +28,30 @@ export async function getAccessToken(scope = DRIVE_SCOPE) {
     }),
   });
   if (!res.ok) throw new Error(`Google auth failed: ${res.status} ${await res.text()}`);
+  return (await res.json()).access_token;
+}
+
+/** Access token de utilizador (OAuth refresh). Usado para criar ficheiros quando a
+ *  service account não tem quota de armazenamento. Requer env vars GOOGLE_CLIENT_ID,
+ *  GOOGLE_CLIENT_SECRET e GOOGLE_REFRESH_TOKEN no Netlify. */
+export async function getUserAccessToken() {
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const refresh = process.env.GOOGLE_REFRESH_TOKEN;
+  if (!clientId || !clientSecret || !refresh) {
+    throw new Error('GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET/GOOGLE_REFRESH_TOKEN must be set');
+  }
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: clientId,
+      client_secret: clientSecret,
+      refresh_token: refresh,
+      grant_type: 'refresh_token',
+    }),
+  });
+  if (!res.ok) throw new Error(`Google OAuth refresh failed: ${res.status} ${await res.text()}`);
   return (await res.json()).access_token;
 }
 
