@@ -32,6 +32,7 @@ import {
 import { ClienteDialog } from './ClienteDialog';
 import { TrabalhosViatura } from './TrabalhosViatura';
 import { SinistrosViatura } from './SinistrosViatura';
+import { DeclaracaoCirculacao } from './DeclaracaoCirculacao';
 import { FotosEditor } from './FotosEditor';
 import { DeleteConfirm, Field, NativeSelect } from './shared';
 
@@ -654,6 +655,13 @@ function DocumentosEditor({ carro }: { carro: Carro }) {
             </div>
           );
         })}
+      </div>
+      <div className="mt-3">
+        <DeclaracaoCirculacao
+          carro={carro}
+          folderId={drive.data?.folder?.id}
+          onCreated={() => drive.refetch()}
+        />
       </div>
     </div>
   );

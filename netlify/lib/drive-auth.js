@@ -3,17 +3,18 @@
 import crypto from 'node:crypto';
 
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.readonly';
+export const DRIVE_WRITE_SCOPE = 'https://www.googleapis.com/auth/drive';
 export const FOLDER_MIME = 'application/vnd.google-apps.folder';
 
 const b64url = (input) => Buffer.from(input).toString('base64url');
 
-export async function getAccessToken() {
+export async function getAccessToken(scope = DRIVE_SCOPE) {
   const raw = process.env.GOOGLE_DRIVE_SERVICE_ACCOUNT;
   if (!raw) throw new Error('GOOGLE_DRIVE_SERVICE_ACCOUNT must be set');
   const sa = JSON.parse(raw);
   const now = Math.floor(Date.now() / 1000);
   const unsigned = `${b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }))}.${b64url(
-    JSON.stringify({ iss: sa.client_email, scope: DRIVE_SCOPE, aud: sa.token_uri, exp: now + 3600, iat: now }),
+    JSON.stringify({ iss: sa.client_email, scope, aud: sa.token_uri, exp: now + 3600, iat: now }),
   )}`;
   const signature = crypto.sign('RSA-SHA256', Buffer.from(unsigned), sa.private_key);
   const res = await fetch(sa.token_uri, {
@@ -60,4 +61,14 @@ export async function listCarFolders(token) {
   const root = rootRes.files && rootRes.files[0];
   if (!root) throw new Error('Pasta CARROS não encontrada (verificar partilha com a service account)');
   return driveListAll(token, `'${root.id}' in parents and mimeType='${FOLDER_MIME}' and trashed=false`, 'files(id,name)');
+}
+
+/** Conteúdo binário de um ficheiro da Drive (Buffer). */
+export async function driveDownload(token, fileId) {
+  const res = await fetch(
+    `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?alt=media&supportsAllDrives=true`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  if (!res.ok) throw new Error(`Drive download failed: ${res.status}`);
+  return Buffer.from(await res.arrayBuffer());
 }

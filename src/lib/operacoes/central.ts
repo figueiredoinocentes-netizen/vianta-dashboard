@@ -219,3 +219,56 @@ export async function importarFotosDaPasta(
 }
 
 export const driveFolderUrl = (id: string) => `https://drive.google.com/drive/folders/${id}`;
+
+// ── Declaração de circulação (Google Drive + leitura de documentos) ──
+
+export interface DeclaracaoDados {
+  nome: string;
+  tipo_documento: string;
+  numero_documento: string;
+  morada: string;
+  matricula: string;
+  categoria: string;
+  estado: string;
+  ano: string;
+  marca: string;
+  modelo: string;
+  combustivel: string;
+  cor: string;
+  cilindrada: string;
+  lotacao: string;
+  chassis: string;
+  data: string;
+}
+
+export interface ExtracaoResult {
+  dados: Partial<Record<string, string>>;
+  fontes: string[];
+  aviso?: string;
+}
+
+async function declaracaoPost(body: Record<string, unknown>) {
+  const r = await fetch(`${BASE}/declaracao`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const d = await readJson(r);
+  if (!r.ok) throw new Error((d as { error?: string }).error || 'Erro');
+  return d;
+}
+
+export async function listClientesFinanciamento(): Promise<{ id: string; name: string }[]> {
+  const r = await fetch(`${BASE}/declaracao`);
+  const d = await readJson(r);
+  if (!r.ok) throw new Error((d as { error?: string }).error || 'Erro ao ler a Drive');
+  return (d as { clientes: { id: string; name: string }[] }).clientes;
+}
+
+export const extrairDocumentos = (tipo: 'cliente' | 'carro', folderId: string) =>
+  declaracaoPost({ action: tipo, folderId }) as Promise<ExtracaoResult>;
+
+export const criarDeclaracao = (folderId: string, nome: string, dados: DeclaracaoDados) =>
+  declaracaoPost({ action: 'criar', folderId, nome, dados }) as Promise<{
+    file: { id: string; name: string; webViewLink: string };
+  }>;
