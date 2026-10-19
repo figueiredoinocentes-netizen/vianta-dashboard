@@ -47,9 +47,9 @@ export function gerarFichaComercialHTML(carro: Carro): string {
       ['48 meses (4 anos)', v.credito_48_meses],
     ].filter(([, x]) => !vazio(x));
     if (credLinhas.length) {
-      precoHtml += '<div class="credito">Crédito desde ' +
-        credLinhas.map(([l, x]) => `${fmtNum(x)}€/mês (${l})`).join(' · ') +
-        '</div>';
+      precoHtml += '<div class="credito">Crédito desde:<ul>' +
+        credLinhas.map(([l, x]) => `<li>${fmtNum(x)}€/mês (${l})</li>`).join('') +
+        '</ul></div>';
     }
   } else {
     precoHtml = `<div class="preco aluguer">${fmtNum(v.valor_aluguer_semanal)} € / semana</div>`;
@@ -126,6 +126,8 @@ export function gerarFichaComercialHTML(carro: Carro): string {
   .preco { font-family: 'Instrument Serif', Georgia, serif; font-size: 26pt; line-height: 1.1;
     color: var(--black); margin-bottom: 4pt; }
   .preco.aluguer { font-size: 22pt; }
+  .credito ul { margin: 2pt 0 0 14pt; }
+  .credito li { margin-bottom: 1pt; }
   .credito { font-size: 10pt; color: var(--gray-600); line-height: 1.6;
     border-left: 2px solid var(--accent); padding-left: 8pt; }
 
