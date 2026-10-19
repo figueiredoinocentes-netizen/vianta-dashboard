@@ -244,6 +244,13 @@ export const handler = async (event) => {
 
     if (event.httpMethod !== 'POST') return reply(origin, 405, { error: 'Method not allowed' });
     const b = JSON.parse(event.body || '{}');
+
+    // 'eliminar' só precisa do fileId, não do folderId.
+    if (b.action === 'eliminar') {
+      if (!b.fileId) return reply(origin, 400, { error: 'fileId required' });
+      await eliminarDoc(b.fileId);
+      return reply(origin, 200, { ok: true });
+    }
     if (!b.folderId) return reply(origin, 400, { error: 'folderId required' });
 
     if (b.action === 'cliente' || b.action === 'carro') {
@@ -254,11 +261,6 @@ export const handler = async (event) => {
       if (!b.dados || !b.dados.nome) return reply(origin, 400, { error: 'dados.nome required' });
       const file = await criarDoc(b.folderId, b.nome || 'Declaração de Circulação', b.dados);
       return reply(origin, 200, { file });
-    }
-    if (b.action === 'eliminar') {
-      if (!b.fileId) return reply(origin, 400, { error: 'fileId required' });
-      await eliminarDoc(b.fileId);
-      return reply(origin, 200, { ok: true });
     }
     return reply(origin, 400, { error: 'action inválida' });
   } catch (e) {
