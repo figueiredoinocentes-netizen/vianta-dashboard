@@ -272,3 +272,6 @@ export const criarDeclaracao = (folderId: string, nome: string, dados: Declaraca
   declaracaoPost({ action: 'criar', folderId, nome, dados }) as Promise<{
     file: { id: string; name: string; webViewLink: string };
   }>;
+
+export const eliminarDeclaracao = (fileId: string) =>
+  declaracaoPost({ action: 'eliminar', fileId }) as Promise<{ ok?: boolean }>;

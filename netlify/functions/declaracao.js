@@ -203,6 +203,25 @@ async function criarDoc(folderId, nomeFicheiro, dados) {
   return res.json();
 }
 
+async function eliminarDoc(fileId) {
+  // Elimina o documento criado. Mesma lógica de auth do criarDoc: OAuth de
+  // utilizador em primeiro lugar (a service account pode não ter permissões/escrita).
+  let token;
+  try {
+    token = await getUserAccessToken();
+  } catch {
+    token = await getAccessToken(DRIVE_WRITE_SCOPE);
+  }
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?supportsAllDrives=true`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    console.error('Drive delete doc error:', res.status, await res.text());
+    throw new Error('Erro ao eliminar o documento na Drive');
+  }
+}
+
 export const handler = async (event) => {
   const origin = resolveOrigin(event);
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: cors(origin), body: '' };
@@ -235,6 +254,11 @@ export const handler = async (event) => {
       if (!b.dados || !b.dados.nome) return reply(origin, 400, { error: 'dados.nome required' });
       const file = await criarDoc(b.folderId, b.nome || 'Declaração de Circulação', b.dados);
       return reply(origin, 200, { file });
+    }
+    if (b.action === 'eliminar') {
+      if (!b.fileId) return reply(origin, 400, { error: 'fileId required' });
+      await eliminarDoc(b.fileId);
+      return reply(origin, 200, { ok: true });
     }
     return reply(origin, 400, { error: 'action inválida' });
   } catch (e) {

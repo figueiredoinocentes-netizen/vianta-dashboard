@@ -5,11 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   criarDeclaracao,
+  eliminarDeclaracao,
   extrairDocumentos,
   listClientesFinanciamento,
   type DeclaracaoDados,
 } from '@/lib/operacoes/central';
-import type { Carro } from '@/lib/operacoes/types';
+import type { Carro, DriveFile } from '@/lib/operacoes/types';
 import { errorMessage } from '@/hooks/useOperacoes';
 import { Field, NativeSelect } from './shared';
 
@@ -83,10 +84,12 @@ const CAMPOS: [keyof DeclaracaoDados, string, boolean?][] = [
 export function DeclaracaoCirculacao({
   carro,
   folderId,
+  existente,
   onCreated,
 }: {
   carro: Carro;
   folderId: string | undefined;
+  existente?: DriveFile | null;
   onCreated?: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -153,6 +156,10 @@ export function DeclaracaoCirculacao({
     if (!dados.nome.trim()) return toast.error('Indique o nome do comprador.');
     setCriando(true);
     try {
+      // Se já existia uma declaração, elimina-a antes de criar a nova (evita duplicados).
+      if (existente) {
+        await eliminarDeclaracao(existente.id);
+      }
       const { file } = await criarDeclaracao(
         folderId,
         `Declaração de Circulação - ${dados.matricula || carro.matricula || ''}`.trim(),
@@ -168,7 +175,57 @@ export function DeclaracaoCirculacao({
     }
   }
 
+  async function eliminar() {
+    if (!existente) return;
+    setCriando(true);
+    try {
+      await eliminarDeclaracao(existente.id);
+      setLink(null);
+      toast.success('Declaração eliminada');
+      onCreated?.();
+    } catch (e) {
+      toast.error(`Erro ao eliminar: ${errorMessage(e)}`);
+    } finally {
+      setCriando(false);
+    }
+  }
+
+  /** Abre o formulário para criar uma declaração nova, eliminando a atual se existir. */
+  function criarOutro() {
+    if (existente) {
+      eliminar().then(() => {
+        setDados(dadosIniciais(carro));
+        setAvisos([]);
+        setFontes([]);
+        setOpen(true);
+      });
+      return;
+    }
+    setOpen(true);
+  }
+
   if (!open) {
+    if (existente) {
+      return (
+        <div className="flex flex-wrap items-center gap-2">
+          <a
+            href={existente.webViewLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-md border bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary hover:underline"
+            title={`${existente.name} — abrir na Drive`}
+          >
+            📄 Declaração de circulação
+          </a>
+          <Button type="button" variant="outline" size="sm" disabled={criando} onClick={eliminar}>
+            {criando ? 'A eliminar…' : '🗑️ Eliminar'}
+          </Button>
+          <Button type="button" variant="outline" size="sm" onClick={criarOutro}>
+            ✍️ Criar outro
+          </Button>
+        </div>
+      );
+    }
     return (
       <Button type="button" variant="outline" size="sm" onClick={() => setOpen(true)}>
         📄 Declaração de circulação
