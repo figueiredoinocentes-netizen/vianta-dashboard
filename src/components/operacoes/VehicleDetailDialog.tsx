@@ -660,6 +660,7 @@ function DocumentosEditor({ carro }: { carro: Carro }) {
         <DeclaracaoCirculacao
           carro={carro}
           folderId={drive.data?.folder?.id}
+          existente={matchFileForItem('Declaração de Circulação', drive.data?.files)}
           onCreated={() => drive.refetch()}
         />
       </div>
