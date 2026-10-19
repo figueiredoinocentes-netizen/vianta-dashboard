@@ -55,16 +55,16 @@ export function FotosEditor({ carro }: { carro: Carro }) {
       const r = await importarFotosDaPasta(pasta, fotos, (i, n) => setBusy(`A importar ${i}/${n}…`));
       if (r.semFotos) {
         toast.error('Esta pasta não tem subpasta "fotos".');
-        return;
-      }
-      if (r.erro) toast.error(`Erro ao importar: ${r.erro}`);
-      if (!r.urls.length && !r.erro) {
-        toast.success(r.totalNaPasta ? 'Sem fotos novas para importar.' : 'A pasta "fotos" está vazia.');
-      }
-      if (r.urls.length) {
-        const ok = await update(carro, 'fotos', [...fotos, ...r.urls]);
-        if (ok && !carro.foto_url) await update(carro, 'foto_url', r.urls[0]);
-        if (ok) toast.success(`${r.urls.length} foto(s) importada(s).`);
+      } else {
+        if (r.erro) toast.error(`Erro ao importar: ${r.erro}`);
+        if (!r.urls.length && !r.erro) {
+          toast.success(r.totalNaPasta ? 'Sem fotos novas para importar.' : 'A pasta "fotos" está vazia.');
+        }
+        if (r.urls.length) {
+          const ok = await update(carro, 'fotos', [...fotos, ...r.urls]);
+          if (ok && !carro.foto_url) await update(carro, 'foto_url', r.urls[0]);
+          if (ok) toast.success(`${r.urls.length} foto(s) importada(s).`);
+        }
       }
       if (driveFolderUrl(pasta) !== carro.fotos_link) await update(carro, 'fotos_link', driveFolderUrl(pasta));
 
