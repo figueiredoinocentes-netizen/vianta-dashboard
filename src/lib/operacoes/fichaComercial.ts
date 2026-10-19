@@ -92,49 +92,57 @@ export function gerarFichaComercialHTML(carro: Carro): string {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <title>Ficha Comercial — ${title}</title>
 <style>
+  :root { --black: #0D0D0D; --white: #FAFAF8; --accent: #C8A96E; --accent-light: #F7F1E4;
+    --gray-200: #E5E2DA; --gray-400: #9A968B; --gray-600: #5A574F; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  @page { size: A4; margin: 10mm 12mm; }
+  @page { size: A4; margin: 0; }
   body {
-    font-family: 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif;
-    font-size: 11pt; color: #1a1a1a; background: #fff; line-height: 1.5;
+    font-family: 'DM Sans', 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif;
+    font-size: 11pt; color: var(--black); background: var(--white); line-height: 1.5;
   }
-  .pagina { max-width: 190mm; margin: 0 auto; }
+  .pagina { max-width: 210mm; margin: 0 auto; }
 
   .topo { display: flex; justify-content: space-between; align-items: center;
-    border-bottom: 2px solid #1a4f8a; padding-bottom: 4pt; margin-bottom: 8pt; }
+    background: var(--black); padding: 8mm 12mm; border-bottom: 2px solid var(--accent); }
   .topo .marca img { height: 36px; display: block; }
-  .topo .meta { font-size: 8pt; color: #888; }
+  .topo .meta { font-size: 8pt; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
 
-  h1 { font-size: 14pt; color: #1a4f8a; margin-bottom: 2pt; }
-  .subtitulo { font-size: 9pt; color: #666; margin-bottom: 6pt; }
+  .conteudo { padding: 8mm 12mm 6mm; }
 
-  .cabecalho-viatura { display: flex; gap: 6pt; margin-bottom: 8pt; align-items: flex-start; }
-  .foto { width: 65mm; height: 65mm; object-fit: cover; border: 1px solid #ddd;
-    border-radius: 4px; flex-shrink: 0; }
+  h1 { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 22pt;
+    line-height: 1.1; color: var(--black); margin-bottom: 2pt; }
+  .subtitulo { font-size: 9pt; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gray-400); margin-bottom: 8pt; }
+
+  .cabecalho-viatura { display: flex; gap: 8pt; margin-bottom: 10pt; align-items: flex-start; }
+  .foto { width: 65mm; height: 65mm; object-fit: cover; border: 1px solid var(--gray-200);
+    border-radius: 6px; flex-shrink: 0; }
   .sem-foto { width: 65mm; height: 65mm; display: flex; align-items: center;
-    justify-content: center; background: #f5f5f5; border: 1px solid #ddd;
-    border-radius: 4px; color: #999; font-size: 10pt; flex-shrink: 0; }
+    justify-content: center; background: var(--accent-light); border: 1px solid var(--gray-200);
+    border-radius: 6px; color: var(--gray-400); font-size: 10pt; flex-shrink: 0; }
   .info-preco { flex: 1; min-width: 0; }
-  .preco { font-size: 16pt; font-weight: 700; color: #c0392b; margin-bottom: 3pt; }
-  .preco.aluguer { font-size: 14pt; color: #1a4f8a; }
-  .credito { font-size: 10pt; color: #555; line-height: 1.6; }
+  .preco { font-family: 'Instrument Serif', Georgia, serif; font-size: 26pt; line-height: 1.1;
+    color: var(--black); margin-bottom: 4pt; }
+  .preco.aluguer { font-size: 22pt; }
+  .credito { font-size: 10pt; color: var(--gray-600); line-height: 1.6;
+    border-left: 2px solid var(--accent); padding-left: 8pt; }
 
-  .secao { margin-bottom: 5pt; break-inside: avoid; }
-  .secao-titulo { font-size: 10pt; font-weight: 700; text-transform: uppercase;
-    color: #1a4f8a; border-bottom: 1px solid #ccc; padding-bottom: 2pt;
+  .secao { margin-bottom: 8pt; break-inside: avoid; }
+  .secao-titulo { font-size: 9pt; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--accent); border-bottom: 1px solid var(--accent); padding-bottom: 2pt;
     margin-bottom: 2pt; }
   .tabela { width: 100%; border-collapse: collapse; }
-  .tabela td { padding: 2pt 8pt 2pt 2pt; font-size: 10pt; border-bottom: 1px solid #eee; }
-  td.rotulo { font-weight: 600; color: #555; width: 40%; font-size: 9pt; }
-  td.valor { font-weight: 600; color: #1a1a1a; }
+  .tabela td { padding: 2.5pt 8pt 2.5pt 2pt; font-size: 10pt; border-bottom: 1px solid var(--gray-200); }
+  td.rotulo { font-weight: 400; color: var(--gray-600); width: 40%; font-size: 9pt; }
+  td.valor { font-weight: 500; color: var(--black); }
 
-  .obs { margin-top: 4pt; padding: 4pt 6pt; background: #f9f9f9;
-    border-radius: 4px; font-size: 10pt; color: #555; }
+  .obs { margin-top: 6pt; padding: 6pt 8pt; background: var(--accent-light);
+    border-left: 2px solid var(--accent); border-radius: 4px; font-size: 10pt; color: var(--gray-600); }
 
-  .rodape { margin-top: 10pt; text-align: center; font-size: 8pt; color: #aaa;
-    border-top: 1px solid #eee; padding-top: 4pt; }
+  .rodape { margin-top: 12pt; text-align: center; font-size: 8pt; letter-spacing: 0.06em; color: var(--accent);
+    background: var(--black); padding: 6pt 12mm; }
 
   @media print {
     body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -149,6 +157,7 @@ export function gerarFichaComercialHTML(carro: Carro): string {
     <span class="meta">Ficha Comercial · ${timestamp}</span>
   </div>
 
+  <div class="conteudo">
   <h1>${title}</h1>
   <div class="subtitulo">${subtitulo}</div>
 
@@ -161,6 +170,7 @@ export function gerarFichaComercialHTML(carro: Carro): string {
   ${(v.categorias_tvde || v.fim_elegibilidade_tvde) ? secao('TVDE', tvde) : ''}
 
   ${obsHtml}
+  </div>
 
   <div class="rodape">
     Vianta — Dos Inocentes, Lda · Ficha Comercial · ${timestamp}
