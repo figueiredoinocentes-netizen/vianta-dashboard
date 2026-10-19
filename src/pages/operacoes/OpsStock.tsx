@@ -1,4 +1,5 @@
 import { Skeleton } from '@/components/ui/skeleton';
+import { imprimirFichaComercial } from '@/lib/operacoes/fichaComercial';
 import {
   Table,
   TableBody,
@@ -53,6 +54,7 @@ export default function OpsStock() {
                 <TableHead>Preço Venda</TableHead>
                 <TableHead>Aluguer/Sem</TableHead>
                 <TableHead>Estado</TableHead>
+                <TableHead className="w-10"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -80,6 +82,16 @@ export default function OpsStock() {
                     </TableCell>
                     <TableCell>
                       <StatusSelect carro={v} />
+                    </TableCell>
+                    <TableCell>
+                      <button
+                        type="button"
+                        title="Imprimir ficha comercial"
+                        className="flex h-7 w-7 items-center justify-center rounded-md text-xs text-muted-foreground transition hover:bg-primary/10 hover:text-primary"
+                        onClick={(e) => { e.stopPropagation(); imprimirFichaComercial(v); }}
+                      >
+                        🖨️
+                      </button>
                     </TableCell>
                   </TableRow>
                 );

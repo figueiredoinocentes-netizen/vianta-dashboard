@@ -19,6 +19,7 @@ import {
 } from '@/lib/operacoes/constants';
 import { listDriveFiles, uploadDriveDoc } from '@/lib/operacoes/central';
 import type { Carro, DriveFile } from '@/lib/operacoes/types';
+import { imprimirFichaComercial } from '@/lib/operacoes/fichaComercial';
 import {
   useCarros,
   useCentralWrites,
@@ -272,6 +273,19 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
       </div>
 
       <form onSubmit={onSubmit}>
+        {tab === 'ficha' && (
+          <div className="mb-3 flex justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-7 gap-1.5 text-xs"
+              onClick={() => imprimirFichaComercial(carro)}
+            >
+              🖨️ Imprimir Ficha Comercial
+            </Button>
+          </div>
+        )}
         {tab === 'carac' && (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="flex flex-col items-stretch gap-4 sm:col-span-2 sm:flex-row sm:items-start">
