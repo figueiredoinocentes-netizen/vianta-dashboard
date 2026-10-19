@@ -268,6 +268,23 @@ export async function listClientesFinanciamento(): Promise<{ id: string; name: s
 export const extrairDocumentos = (tipo: 'cliente' | 'carro', folderId: string) =>
   declaracaoPost({ action: tipo, folderId }) as Promise<ExtracaoResult>;
 
+/**
+ * Campos da tabela `carros` que a extração de documentos (DUA/livrete) consegue
+ * preencher, com o formato que a BD espera. Campos sem coluna na BD
+ * (cilindrada, lotação, chassis, categoria) ficam de fora.
+ */
+export function camposCarroDeExtracao(dados: Partial<Record<string, string>>): { field: string; value: string }[] {
+  const out: { field: string; value: string }[] = [];
+  if (dados.ano) out.push({ field: 'ano', value: dados.ano });
+  if (dados.combustivel) out.push({ field: 'combustivel', value: dados.combustivel });
+  if (dados.cor) out.push({ field: 'cor', value: dados.cor });
+  const marca = String(dados.marca || '').trim();
+  const modelo = String(dados.modelo || '').trim();
+  if (marca || modelo) out.push({ field: 'marca_modelo', value: `${marca} ${modelo}`.trim() });
+  if (dados.matricula) out.push({ field: 'matricula', value: dados.matricula });
+  return out;
+}
+
 export const criarDeclaracao = (folderId: string, nome: string, dados: DeclaracaoDados) =>
   declaracaoPost({ action: 'criar', folderId, nome, dados }) as Promise<{
     file: { id: string; name: string; webViewLink: string };

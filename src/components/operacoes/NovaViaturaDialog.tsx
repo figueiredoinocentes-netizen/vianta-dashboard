@@ -12,7 +12,9 @@ import {
 } from '@/components/ui/dialog';
 import { COMBUSTIVEIS, STATUSES, normalizeText } from '@/lib/operacoes/constants';
 import {
+  camposCarroDeExtracao,
   driveFolderUrl,
+  extrairDocumentos,
   importarFotosDaPasta,
   listDriveCarFolders,
   updateCentralField,
@@ -108,6 +110,21 @@ export function NovaViaturaDialog({
           }
         }
         await updateCentralField('carros', novoId, 'fotos_link', driveFolderUrl(pasta));
+
+        // Lê os dados do DUA/livrete da pasta e preenche os campos ainda vazios (ex: cor).
+        try {
+          const ext = await extrairDocumentos('carro', pasta);
+          const preencher = camposCarroDeExtracao(ext.dados).filter(({ field }) => {
+            const valor = (form as Record<string, unknown>)[
+              field === 'marca_modelo' ? 'modelo' : field === 'matricula' ? 'matricula' : field
+            ];
+            return !valor || String(valor).trim() === '';
+          });
+          for (const { field, value } of preencher) await updateCentralField('carros', novoId, field, value);
+          if (preencher.length) toast.success(`Dados lidos dos documentos: ${preencher.map((p) => p.field).join(', ')}.`);
+        } catch {
+          // Falhou a leitura dos documentos — a viatura fica criada na mesma, sem os campos extra.
+        }
         await qc.invalidateQueries({ queryKey: ['central', 'carros'] });
       }
       setForm(EMPTY);

@@ -5,7 +5,9 @@ import { RefreshCw, Star, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
+  camposCarroDeExtracao,
   driveFolderUrl,
+  extrairDocumentos,
   importarFotosDaPasta,
   listDriveCarFolders,
 } from '@/lib/operacoes/central';
@@ -65,6 +67,42 @@ export function FotosEditor({ carro }: { carro: Carro }) {
         if (ok) toast.success(`${r.urls.length} foto(s) importada(s).`);
       }
       if (driveFolderUrl(pasta) !== carro.fotos_link) await update(carro, 'fotos_link', driveFolderUrl(pasta));
+
+      // Lê os dados do DUA/livrete da pasta e preenche os campos da viatura que ainda estão vazios.
+      setBusy('A ler dados dos documentos…');
+      try {
+        const ext = await extrairDocumentos('carro', pasta);
+        const atual: Record<string, unknown> = {
+          ano: carro.ano,
+          combustivel: carro.combustivel,
+          cor: carro.cor,
+          marca_modelo: carro.marca_modelo,
+          matricula: carro.matricula,
+        };
+        const preencher = camposCarroDeExtracao(ext.dados).filter(({ field, value }) => {
+          const atualValue = atual[field];
+          return !atualValue || String(atualValue).trim() === '' || String(atualValue) === '-';
+        });
+        if (preencher.length) {
+          let ok = true;
+          for (const { field, value } of preencher) ok = (await update(carro, field, value)) && ok;
+          if (ok) {
+            const nomes: Record<string, string> = {
+              ano: 'Ano',
+              combustivel: 'Combustível',
+              cor: 'Cor',
+              marca_modelo: 'Marca/Modelo',
+              matricula: 'Matrícula',
+            };
+            toast.success(`Dados lidos dos documentos: ${preencher.map((p) => nomes[p.field]).join(', ')}.`);
+          }
+        } else {
+          toast.success('Sem campos novos para preencher dos documentos.');
+        }
+        if (ext.aviso) toast.info(ext.aviso);
+      } catch (err) {
+        toast.error(`Erro ao ler documentos: ${errorMessage(err)}`);
+      }
     } catch (err) {
       toast.error(`Erro ao ler a Drive: ${errorMessage(err)}`);
     } finally {
