@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-23T12:59:36+00:00",
+ "generated_at": "2026-10-23T13:35:57+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -56,7 +56,7 @@
      "schedule": "every 3m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-23T12:57:47.154795+00:00",
+     "last_run_at": "2026-10-23T13:34:58.422980+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "ghl_monitor_isabel.py",
@@ -66,7 +66,7 @@
      ],
      "monitor_script": "ghl_monitor_isabel.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-23T13:00:47.154795+00:00",
+     "next_run_at": "2026-10-23T13:37:58.422980+00:00",
      "paused_at": null
     },
     {
@@ -110,8 +110,8 @@
      "name": "Sync Frota360 → Supabase",
      "owner": "francisco",
      "schedule": "every day at 06:00",
-     "state": "scheduled",
-     "enabled": true,
+     "state": "paused",
+     "enabled": false,
      "last_run_at": "2026-10-23T06:01:28.279214+00:00",
      "last_status": "ok",
      "last_error": "",
@@ -121,7 +121,7 @@
      "monitor_script": null,
      "failure_streak": 0,
      "next_run_at": "2026-10-24T06:00:00+00:00",
-     "paused_at": null
+     "paused_at": "2026-10-23T13:12:04.000000+00:00"
     },
     {
      "id": "17a439250be6",
@@ -130,7 +130,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-23T12:58:47.518024+00:00",
+     "last_run_at": "2026-10-23T13:34:58.868484+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -141,7 +141,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-23T12:59:47.518024+00:00",
+     "next_run_at": "2026-10-23T13:35:58.868484+00:00",
      "paused_at": null
     },
     {
@@ -171,7 +171,7 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-23T12:32:33.261530+00:00",
+     "last_run_at": "2026-10-23T13:35:58.834818+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -182,7 +182,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-23T13:02:33.261530+00:00",
+     "next_run_at": "2026-10-23T14:05:58.834818+00:00",
      "paused_at": null
     },
     {
@@ -192,7 +192,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-23T12:51:48.694295+00:00",
+     "last_run_at": "2026-10-23T13:24:57.595085+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -200,7 +200,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-23T13:01:48.694295+00:00",
+     "next_run_at": "2026-10-23T13:45:57.572004+00:00",
      "paused_at": null
     },
     {
