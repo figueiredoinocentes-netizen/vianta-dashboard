@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { RefreshCw, Cpu, Database, Zap } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { RefreshCw, Cpu, Database, Zap, Mic, Square, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
@@ -9,6 +9,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
  * /aios-live/aios-state.json (regenerado pelo cron de 10 min).
  */
 const STATE_URL = '/aios-live/aios-state.json';
+const VOICE_URL = 'https://thomas-requires-congress-hunter.trycloudflare.com/voice';
 
 interface Cron {
   id?: string;
@@ -129,6 +130,122 @@ function AgentCard({ p, kind }: { p: Profile; kind: 'ceo' | 'bot' | 'team' }) {
         {!p.crons?.length && <div className="flex items-center gap-2 px-2 py-1 text-[11px] text-muted-foreground"><Dot kind="off" />sem crons próprios</div>}
       </div>
     </div>
+  );
+}
+
+function VoiceAssistant() {
+  const [listening, setListening] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [text, setText] = useState('');
+  const [reply, setReply] = useState('');
+  const [error, setError] = useState('');
+  const recRef = useRef<{ stop: () => void } | null>(null);
+
+  const speak = (t: string) => {
+    try {
+      const u = new SpeechSynthesisUtterance(t);
+      u.lang = 'pt-PT';
+      u.rate = 1.05;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+    } catch {
+      /* tts indisponível no browser */
+    }
+  };
+
+  const toggleMic = () => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) { setError('O reconhecimento de voz não é suportado neste browser. Usa o Chrome.'); return; }
+    if (listening) { recRef.current?.stop(); setListening(false); return; }
+    const rec = new SR();
+    rec.lang = 'pt-PT';
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+    rec.onresult = (e: any) => {
+      const t = e.results?.[0]?.[0]?.transcript || '';
+      setText(t);
+      setListening(false);
+    };
+    rec.onend = () => setListening(false);
+    rec.onerror = () => setListening(false);
+    recRef.current = rec;
+    setError('');
+    setListening(true);
+    rec.start();
+  };
+
+  const send = async () => {
+    const t = text.trim();
+    if (!t || busy) return;
+    setBusy(true); setError(''); setReply('');
+    try {
+      const r = await fetch(VOICE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: t }),
+      });
+      const d = await r.json();
+      if (d.ok) { setReply(d.response); speak(d.response); }
+      else setError(d.error || 'Sem resposta');
+    } catch (e) {
+      setError('Não consegui chegar ao Jarvis. O servidor de voz estará desligado?');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="rounded-xl border border-border bg-card p-5">
+      <h2 className="mb-4 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-cyan-500">
+        <Mic className="h-3.5 w-3.5" /> Assistente de Voz — fala com o Jarvis
+      </h2>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          onClick={toggleMic}
+          className={cn(
+            'flex h-14 w-14 items-center justify-center rounded-full border transition-all',
+            listening
+              ? 'border-rose-400 bg-rose-400/20 text-rose-400 animate-pulse'
+              : 'border-cyan-500/50 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20',
+          )}
+          title={listening ? 'Parar gravação' : 'Falar com o Jarvis'}
+        >
+          {listening ? <Square className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+        </button>
+        <div className="min-w-[240px] flex-1 space-y-1.5">
+          <input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="O que disseste aparece aqui… (ou escreve à mão)"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-cyan-500/50"
+          />
+          <div className="flex items-center gap-2">
+            <button
+              onClick={send}
+              disabled={busy || !text.trim()}
+              className="rounded-lg bg-cyan-500/15 border border-cyan-500/40 px-3 py-1.5 text-xs font-medium text-cyan-400 hover:bg-cyan-500/25 disabled:opacity-40"
+            >
+              {busy ? 'A perguntar ao Jarvis…' : 'Enviar'}
+            </button>
+            {reply && (
+              <button
+                onClick={() => speak(reply)}
+                className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+              >
+                <Volume2 className="h-3.5 w-3.5" /> Repetir resposta
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+      {busy && <div className="mt-3 text-xs text-muted-foreground">O Jarvis está a pensar…</div>}
+      {reply && (
+        <div className="mt-3 rounded-lg border border-emerald-400/25 bg-emerald-950/20 p-3 text-sm text-emerald-300">
+          {reply}
+        </div>
+      )}
+      {error && <div className="mt-3 rounded-lg border border-rose-400/40 bg-rose-400/10 p-3 text-xs text-rose-400">{error}</div>}
+    </section>
   );
 }
 
@@ -314,6 +431,9 @@ const AiosPage = () => {
           ))}
         </div>
       </section>
+
+      {/* Voz */}
+      <VoiceAssistant />
 
       <footer className="pb-4 text-center text-[10px] text-muted-foreground/60">
         snapshot gerado por aios_snapshot.py (cron 10 min) · atualização automática
