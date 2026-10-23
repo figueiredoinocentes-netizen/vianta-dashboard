@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-23T15:14:28+00:00",
+ "generated_at": "2026-10-23T15:47:37+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -38,7 +38,7 @@
      "schedule": "every 3m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-23T15:13:29.030088+00:00",
+     "last_run_at": "2026-10-23T15:47:38.347263+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "ghl_monitor_isabel.py",
@@ -48,7 +48,7 @@
      ],
      "monitor_script": "ghl_monitor_isabel.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-23T15:16:29.030088+00:00",
+     "next_run_at": "2026-10-23T15:50:38.347263+00:00",
      "paused_at": null
     },
     {
@@ -94,7 +94,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-23T15:13:29.345729+00:00",
+     "last_run_at": "2026-10-23T15:47:38.827336+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -105,7 +105,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-23T15:14:29.345729+00:00",
+     "next_run_at": "2026-10-23T15:48:38.827336+00:00",
      "paused_at": null
     },
     {
@@ -135,7 +135,7 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-23T14:43:52.949541+00:00",
+     "last_run_at": "2026-10-23T15:18:06.225870+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -146,7 +146,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-23T15:44:28.393386+00:00",
+     "next_run_at": "2026-10-23T15:48:06.225870+00:00",
      "paused_at": null
     },
     {
@@ -156,7 +156,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-23T15:03:29.965155+00:00",
+     "last_run_at": "2026-10-23T15:36:39.723097+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -164,7 +164,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-23T15:24:28.404156+00:00",
+     "next_run_at": "2026-10-23T15:57:37.135902+00:00",
      "paused_at": null
     },
     {
@@ -266,6 +266,10 @@
    "up": false,
    "pid": null
   },
+  "agente-conteudo": {
+   "up": false,
+   "pid": null
+  },
   "duarte": {
    "up": false,
    "pid": null
@@ -326,6 +330,11 @@
   {
    "name": "vianta-dns-workspace",
    "description": "DNS, Google Workspace, email — domains and forwarding.",
+   "tags": []
+  },
+  {
+   "name": "vianta-edicao-video",
+   "description": "Edit video: sync audio, cut pauses, add captions, export.",
    "tags": []
   },
   {
