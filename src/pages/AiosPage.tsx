@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { Bot, RefreshCw, Cpu, Database, Zap } from 'lucide-react';
+import { RefreshCw, Cpu, Database, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 
 /**
  * AI OS — Live: o mesmo visualizador do estado do sistema (agentes, crons,
@@ -159,16 +160,18 @@ const AiosPage = () => {
 
   if (failed) {
     return (
-      <div className="p-6">
-        <div className="rounded-xl border border-rose-400/40 bg-rose-400/10 p-4 text-sm text-rose-400">
-          Não consegui ler o estado do AI OS. Verifica se o snapshot está publicado
-          (<code className="font-mono">/aios-live/aios-state.json</code>) ou clica em “Atualizar”.
+      <DashboardLayout>
+        <div className="p-6">
+          <div className="rounded-xl border border-rose-400/40 bg-rose-400/10 p-4 text-sm text-rose-400">
+            Não consegui ler o estado do AI OS. Verifica se o snapshot está publicado
+            (<code className="font-mono">/aios-live/aios-state.json</code>) ou clica em “Atualizar”.
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
   if (!state) {
-    return <div className="p-6 text-sm text-muted-foreground">A carregar estado do AI OS…</div>;
+    return <DashboardLayout><div className="p-6 text-sm text-muted-foreground">A carregar estado do AI OS…</div></DashboardLayout>;
   }
 
   const nOk = crons.filter((c) => c.last_status === 'ok').length;
@@ -180,6 +183,7 @@ const AiosPage = () => {
   const find = (n: string) => (state.profiles || []).find((p) => p.name === n);
 
   return (
+    <DashboardLayout>
     <div className="space-y-4 p-6">
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2">
@@ -315,6 +319,7 @@ const AiosPage = () => {
         snapshot gerado por aios_snapshot.py (cron 10 min) · atualização automática
       </footer>
     </div>
+    </DashboardLayout>
   );
 };
 
