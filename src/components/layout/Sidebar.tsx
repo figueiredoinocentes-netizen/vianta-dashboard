@@ -15,6 +15,7 @@ import {
   Wallet,
   Package,
   Handshake,
+  Bot,
 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
@@ -41,6 +42,7 @@ const operacoesItems = [
 ];
 
 const settingsItem = { to: '/configuracoes', label: 'Configurações', icon: Settings };
+const aiosItem = { to: '/aios', label: 'AI OS', icon: Bot };
 
 const linkClass = (isActive: boolean) =>
   cn(
@@ -140,6 +142,10 @@ const Sidebar = ({ aberto = false, onFechar }: SidebarProps) => {
 
       {/* Footer */}
       <div className="px-3 py-4 border-t border-border space-y-1">
+        <NavLink to={aiosItem.to} className={({ isActive }) => linkClass(isActive)}>
+          <aiosItem.icon className="h-4 w-4" />
+          {aiosItem.label}
+        </NavLink>
         <NavLink to={settingsItem.to} className={({ isActive }) => linkClass(isActive)}>
           <settingsItem.icon className="h-4 w-4" />
           {settingsItem.label}
