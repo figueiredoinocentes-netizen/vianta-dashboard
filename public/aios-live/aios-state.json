@@ -1,0 +1,481 @@
+{
+ "generated_at": "2026-10-23T12:51:43+00:00",
+ "profiles": [
+  {
+   "name": "jarvis",
+   "role": "CEO / Orquestrador",
+   "desc": "gateway Telegram \"Vianta Jarvis\" · delegate_task para bots",
+   "gateway": {
+    "up": true,
+    "pid": "6448"
+   },
+   "crons": [
+    {
+     "id": "b70dfcd3e02a",
+     "name": "Agente Comercial — Draft (2 min)",
+     "owner": "francisco",
+     "schedule": "every 2m",
+     "state": "paused",
+     "enabled": false,
+     "last_run_at": "2026-10-08T10:03:28.266726+00:00",
+     "last_status": "ok",
+     "last_error": "",
+     "script": null,
+     "no_agent": false,
+     "skills": [
+      "vianta-agente-mestre",
+      "vianta-resposta-interessados"
+     ],
+     "monitor_script": "ghl_inbound_monitor.py",
+     "failure_streak": 0,
+     "next_run_at": "2026-10-08T10:05:28.266726+00:00",
+     "paused_at": "2026-10-08T10:14:11.826226+00:00"
+    },
+    {
+     "id": "3291bf48c4b8",
+     "name": "Refresh Google token",
+     "owner": "jarvis",
+     "schedule": "every 120m",
+     "state": "paused",
+     "enabled": false,
+     "last_run_at": "2026-10-23T07:51:16.548181+00:00",
+     "last_status": "error",
+     "last_error": "Script exited with code 1\nstdout:\nREFRESH_FAILED 400: {\n  \"error\": \"invalid_grant\",\n  \"error_description\": \"Token has been expired or revoked.\"\n}",
+     "script": "refresh_google_token.py",
+     "no_agent": true,
+     "skills": [],
+     "monitor_script": null,
+     "failure_streak": 44,
+     "next_run_at": "2026-10-23T09:51:16.548181+00:00",
+     "paused_at": "2026-10-23T09:22:16.559260+00:00"
+    },
+    {
+     "id": "9347a667f103",
+     "name": "Isabel Teixeira — reply monitor",
+     "owner": "francisco",
+     "schedule": "every 3m",
+     "state": "scheduled",
+     "enabled": true,
+     "last_run_at": "2026-10-23T12:50:44.538316+00:00",
+     "last_status": "ok",
+     "last_error": "",
+     "script": "ghl_monitor_isabel.py",
+     "no_agent": false,
+     "skills": [
+      "vianta-resposta-interessados"
+     ],
+     "monitor_script": "ghl_monitor_isabel.py",
+     "failure_streak": 0,
+     "next_run_at": "2026-10-23T12:53:44.538316+00:00",
+     "paused_at": null
+    },
+    {
+     "id": "82c50da40d01",
+     "name": "Auto-responder FB/IG (3 min)",
+     "owner": "jarvis",
+     "schedule": "every 3m",
+     "state": "paused",
+     "enabled": false,
+     "last_run_at": "2026-10-12T09:19:28.030842+00:00",
+     "last_status": "ok",
+     "last_error": "",
+     "script": "ghl_auto_responder.py",
+     "no_agent": true,
+     "skills": [],
+     "monitor_script": null,
+     "failure_streak": 0,
+     "next_run_at": "2026-10-12T09:22:28.030842+00:00",
+     "paused_at": "2026-10-12T09:20:17.446683+00:00"
+    },
+    {
+     "id": "2bec7cf09741",
+     "name": "GHL daily report (10h)",
+     "owner": "jarvis",
+     "schedule": "every day at 10:00",
+     "state": "scheduled",
+     "enabled": true,
+     "last_run_at": "2026-10-23T10:00:57.803775+00:00",
+     "last_status": "ok",
+     "last_error": "",
+     "script": "ghl_daily_report.py",
+     "no_agent": true,
+     "skills": [],
+     "monitor_script": null,
+     "failure_streak": 0,
+     "next_run_at": "2026-10-24T10:00:00+00:00",
+     "paused_at": null
+    },
+    {
+     "id": "be3999797bff",
+     "name": "Sync Frota360 → Supabase",
+     "owner": "francisco",
+     "schedule": "every day at 06:00",
+     "state": "scheduled",
+     "enabled": true,
+     "last_run_at": "2026-10-23T06:01:28.279214+00:00",
+     "last_status": "ok",
+     "last_error": "",
+     "script": "sync_frota360_to_supabase.py",
+     "no_agent": true,
+     "skills": [],
+     "monitor_script": null,
+     "failure_streak": 0,
+     "next_run_at": "2026-10-24T06:00:00+00:00",
+     "paused_at": null
+    },
+    {
+     "id": "17a439250be6",
+     "name": "Agente Comercial — Resposta direta (1 min)",
+     "owner": "agente-comercial",
+     "schedule": "every 1m",
+     "state": "scheduled",
+     "enabled": true,
+     "last_run_at": "2026-10-23T12:50:45.050157+00:00",
+     "last_status": "ok",
+     "last_error": "",
+     "script": null,
+     "no_agent": false,
+     "skills": [
+      "vianta-agente-mestre",
+      "vianta-resposta-interessados"
+     ],
+     "monitor_script": "ghl_inbound_monitor.py",
+     "failure_streak": 0,
+     "next_run_at": "2026-10-23T12:51:45.050157+00:00",
+     "paused_at": null
+    },
+    {
+     "id": "b4298f73046c",
+     "name": "Monitor Stock Venda — Novos Carros",
+     "owner": "jarvis",
+     "schedule": "every monday at 11:00",
+     "state": "scheduled",
+     "enabled": true,
+     "last_run_at": "2026-10-19T11:01:27.294660+00:00",
+     "last_status": "ok",
+     "last_error": "",
+     "script": null,
+     "no_agent": false,
+     "skills": [
+      "vianta-email-marketing"
+     ],
+     "monitor_script": null,
+     "failure_streak": 0,
+     "next_run_at": "2026-10-26T11:00:00+00:00",
+     "paused_at": null
+    },
+    {
+     "id": "a0c963ecf74a",
+     "name": "[bot:turismo-frota] ChoiceCar sync check",
+     "owner": "turismo-frota",
+     "schedule": "every 30m",
+     "state": "scheduled",
+     "enabled": true,
+     "last_run_at": "2026-10-23T12:32:33.261530+00:00",
+     "last_status": "ok",
+     "last_error": "",
+     "script": null,
+     "no_agent": false,
+     "skills": [
+      "vianta-base-dados",
+      "vianta-choicecar-planeamento"
+     ],
+     "monitor_script": null,
+     "failure_streak": 0,
+     "next_run_at": "2026-10-23T13:02:33.261530+00:00",
+     "paused_at": null
+    },
+    {
+     "id": "260e945eb436",
+     "name": "[AI OS] Snapshot live (10 min)",
+     "owner": "jarvis",
+     "schedule": "every 10m",
+     "state": "scheduled",
+     "enabled": true,
+     "last_run_at": "2026-10-23T12:40:44.228311+00:00",
+     "last_status": "ok",
+     "last_error": "",
+     "script": "aios_snapshot.py",
+     "no_agent": true,
+     "skills": [],
+     "monitor_script": null,
+     "failure_streak": 0,
+     "next_run_at": "2026-10-23T13:01:43.815075+00:00",
+     "paused_at": null
+    },
+    {
+     "id": "30fd037edcff",
+     "name": "[vianta] choicecar-driver-composio",
+     "owner": "jarvis",
+     "schedule": "every 120m",
+     "state": "scheduled",
+     "enabled": true,
+     "last_run_at": "2026-10-23T11:41:15.282913+00:00",
+     "last_status": "ok",
+     "last_error": "",
+     "script": null,
+     "no_agent": false,
+     "skills": [],
+     "monitor_script": null,
+     "failure_streak": 0,
+     "next_run_at": "2026-10-23T13:41:15.282913+00:00",
+     "paused_at": null
+    }
+   ]
+  },
+  {
+   "name": "agente-comercial",
+   "role": "Bot Comercial TVDE",
+   "desc": "leads TVDE · GHL Messenger/IG · cron 1 min",
+   "gateway": {
+    "up": false,
+    "pid": null
+   },
+   "crons": []
+  },
+  {
+   "name": "turismo-frota",
+   "role": "Bot Turismo / ChoiceCar",
+   "desc": "transfers · email ChoiceCar · cron 30 min",
+   "gateway": {
+    "up": false,
+    "pid": null
+   },
+   "crons": []
+  },
+  {
+   "name": "francisco",
+   "role": "Humano — Francisco",
+   "desc": "workspace fundador",
+   "gateway": {
+    "up": false,
+    "pid": null
+   },
+   "crons": []
+  },
+  {
+   "name": "duarte",
+   "role": "Humano — Duarte",
+   "desc": "frota / turismo",
+   "gateway": {
+    "up": false,
+    "pid": null
+   },
+   "crons": []
+  },
+  {
+   "name": "vianta",
+   "role": "Humano — Equipa",
+   "desc": "workspace equipa",
+   "gateway": {
+    "up": false,
+    "pid": null
+   },
+   "crons": [
+    {
+     "id": "92832b2e108d",
+     "name": "choicecar-driver-vianta",
+     "owner": "jarvis",
+     "schedule": "every 120m",
+     "state": "paused",
+     "enabled": false,
+     "last_run_at": "2026-10-22T11:08:04.300666+00:00",
+     "last_status": "error",
+     "last_error": "Script exited with code 1\nstdout:\nToken refresh failed: {\n  \"error\": \"invalid_grant\",\n  \"error_description\": \"Token has been expired or revoked.\"\n}",
+     "script": "preencher_choicecar_driver_vianta.py",
+     "no_agent": true,
+     "skills": [],
+     "monitor_script": null,
+     "failure_streak": 1,
+     "next_run_at": "2026-10-22T13:08:04.300666+00:00",
+     "paused_at": null
+    }
+   ]
+  }
+ ],
+ "gateways": {
+  "default": {
+   "up": true,
+   "pid": null
+  },
+  "agente-comercial": {
+   "up": false,
+   "pid": null
+  },
+  "duarte": {
+   "up": false,
+   "pid": null
+  },
+  "francisco": {
+   "up": false,
+   "pid": null
+  },
+  "jarvis": {
+   "up": true,
+   "pid": "6448"
+  },
+  "turismo-frota": {
+   "up": false,
+   "pid": null
+  },
+  "vianta": {
+   "up": false,
+   "pid": null
+  }
+ },
+ "skills": [
+  {
+   "name": "vianta-agente-mestre",
+   "description": "System prompt do Agente Comercial Vianta TVDE. Processa leads, consulta stock Supabase, responde diretamente via GHL. Canal-independente.",
+   "tags": []
+  },
+  {
+   "name": "vianta-aios-live",
+   "description": "Use for the AI OS live dashboard: snapshot, serve, or fix.",
+   "tags": []
+  },
+  {
+   "name": "vianta-base-dados",
+   "description": "Use for Vianta database creation, maintenance, AND financial/business modeling from multiple data sources.",
+   "tags": []
+  },
+  {
+   "name": "vianta-choicecar-planeamento",
+   "description": "Use for ChoiceCar planning: parse emails and assign drivers.",
+   "tags": []
+  },
+  {
+   "name": "vianta-comercial",
+   "description": "Use for Vianta commercial hub — ICP, offers, positioning.",
+   "tags": []
+  },
+  {
+   "name": "vianta-composio",
+   "description": "Use for Vianta Composio/MCP integrations and migrations.",
+   "tags": []
+  },
+  {
+   "name": "vianta-descricao",
+   "description": "Use for Vianta organic captions. Uses brand tone.",
+   "tags": []
+  },
+  {
+   "name": "vianta-dns-workspace",
+   "description": "Use for Vianta DNS changes and Google Workspace email setup.",
+   "tags": []
+  },
+  {
+   "name": "vianta-dominios-email",
+   "description": "Use for Vianta DNS, registo.pt, Netlify, Google Workspace.",
+   "tags": []
+  },
+  {
+   "name": "vianta-email-marketing",
+   "description": "Stock emails to fleet drivers. Preview then send.",
+   "tags": []
+  },
+  {
+   "name": "vianta-ghl-lead-automation",
+   "description": "Use for Vianta GHL auto-response: cron, monitors, scripts.",
+   "tags": []
+  },
+  {
+   "name": "vianta-onboarding-motorista",
+   "description": "Use for Vianta driver onboarding: docs, handover, CRM.",
+   "tags": []
+  },
+  {
+   "name": "vianta-operacoes",
+   "description": "Dashboard operações: secções, sidebar, estado, inventário.",
+   "tags": []
+  },
+  {
+   "name": "vianta-orquestracao",
+   "description": "Use to create/manage bot profiles and CEO delegation.",
+   "tags": []
+  },
+  {
+   "name": "vianta-programa-referenciacao",
+   "description": "Vianta referral: Publio-style direct script for contacts.",
+   "tags": []
+  },
+  {
+   "name": "vianta-propostas-venda",
+   "description": "Use when creating/sending a Vianta TVDE sale proposal.",
+   "tags": []
+  },
+  {
+   "name": "vianta-report-aquisicao",
+   "description": "Use when creating Vianta TVDE acquisition reports.",
+   "tags": []
+  },
+  {
+   "name": "vianta-resposta-interessados",
+   "description": "Use for Vianta TVDE lead DMs. Uses real sheet data.",
+   "tags": []
+  },
+  {
+   "name": "vianta-retoma",
+   "description": "Trade-in: pesquisa de mercado + apresentar valor. Escalar só em contraproposta.",
+   "tags": []
+  },
+  {
+   "name": "vianta-thumbnail",
+   "description": "Vianta thumbnails: brand frame + ChatGPT prompt.",
+   "tags": []
+  },
+  {
+   "name": "vianta-turismo-propostas",
+   "description": "Use for Vianta Turismo partner proposals. Style: Tivoli.",
+   "tags": []
+  },
+  {
+   "name": "vianta-web-dev",
+   "description": "",
+   "tags": []
+  }
+ ],
+ "mcp": [
+  {
+   "name": "composio",
+   "url": "https://connect.composio.dev/mcp"
+  }
+ ],
+ "supabase": {
+  "carros": 151,
+  "transfers": 167,
+  "cc_services": 87,
+  "cc_offers": 87
+ },
+ "ghl": {
+  "ok": true,
+  "status": 200
+ },
+ "integrations": {
+  "sheets": {
+   "ok": true,
+   "note": "DB Transfers · Drivers Transfers · propostas"
+  },
+  "gmail": {
+   "ok": true,
+   "note": "geral@vianta.pt via Composio (duarte.inocentes@vianta.pt)"
+  },
+  "frota360": {
+   "ok": null,
+   "note": "sync diário → Supabase (ver cron)"
+  },
+  "meta_ads": {
+   "ok": false,
+   "note": "sem token API (conta 293842623)"
+  },
+  "drive": {
+   "ok": true,
+   "note": "docs fonte autoritativa"
+  },
+  "netlify": {
+   "ok": true,
+   "note": "app transfers · gerador propostas · sandbox"
+  }
+ },
+ "alerts": []
+}

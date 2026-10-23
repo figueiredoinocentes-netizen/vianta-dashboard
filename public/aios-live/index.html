@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vianta AI OS — Live</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'JetBrains Mono',monospace; background:#020617; min-height:100vh; color:white; }
+.container { max-width:1250px; margin:0 auto; padding:2rem; }
+header { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:0.5rem; }
+.pulse { width:12px; height:12px; background:#22d3ee; border-radius:50%; animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+h1 { font-size:1.4rem; font-weight:700; letter-spacing:-.02em; }
+.sub { color:#94a3b8; font-size:.8rem; }
+.badges { display:flex; gap:.5rem; margin:1rem 0 .25rem; flex-wrap:wrap; }
+.badge { background:rgba(15,23,42,.6); border:1px solid #1e293b; border-radius:999px; padding:.25rem .7rem; font-size:.7rem; color:#94a3b8; }
+.badge b { color:white; }
+.badge.ok b { color:#34d399; } .badge.err b { color:#fb7185; } .badge.warn b { color:#fbbf24; }
+section { background:rgba(15,23,42,.5); border:1px solid #1e293b; border-radius:1rem; padding:1.25rem; margin-top:1.5rem; }
+h2 { font-size:.85rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; margin-bottom:1rem; color:#38bdf8; }
+.alerts { background:rgba(244,63,94,.08); border:1px solid rgba(251,113,133,.4); border-radius:.75rem; padding:.75rem 1rem; margin-top:1rem; font-size:.75rem; color:#fb7185; }
+.alerts:empty { display:none; }
+/* --- agent tree --- */
+.tree { display:flex; flex-direction:column; align-items:center; gap:.6rem; }
+.channels { display:flex; gap:.6rem; flex-wrap:wrap; justify-content:center; }
+.channel { background:rgba(8,51,68,.35); border:1px solid #155e75; border-radius:.5rem; padding:.35rem .8rem; font-size:.72rem; color:#67e8f9; }
+.arrow { color:#475569; font-size:1.1rem; line-height:1; }
+.bots { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; width:100%; }
+.agent-card { background:rgba(15,23,42,.65); border:1px solid #1e293b; border-radius:.75rem; padding:1rem; min-width:260px; flex:1; max-width:380px; }
+.agent-card.ceo { border-color:#22d3ee; }
+.agent-card.bot { border-color:#fbbf24; }
+.agent-card.team { border-color:#475569; opacity:.85; }
+.agent-head { display:flex; align-items:center; gap:.5rem; margin-bottom:.4rem; }
+.agent-head b { font-size:.95rem; }
+.agent-head code { background:#0f172a; border:1px solid #1e293b; border-radius:.3rem; padding:.1rem .4rem; font-size:.7rem; color:#94a3b8; }
+.role { font-size:.7rem; color:#94a3b8; display:block; margin-bottom:.35rem; }
+.gw { font-size:.7rem; color:#64748b; margin-bottom:.6rem; }
+.dot { width:9px; height:9px; border-radius:50%; display:inline-block; flex-shrink:0; }
+.dot.ok { background:#34d399; box-shadow:0 0 6px #34d399; }
+.dot.err { background:#fb7185; box-shadow:0 0 6px #fb7185; }
+.dot.warn { background:#fbbf24; box-shadow:0 0 6px #fbbf24; }
+.dot.off { background:#475569; }
+.slim-crons { display:flex; flex-direction:column; gap:.25rem; }
+.slim-cron { display:flex; align-items:center; gap:.45rem; font-size:.68rem; color:#cbd5e1; background:rgba(2,6,23,.4); border-radius:.35rem; padding:.25rem .5rem; }
+.slim-cron .schedule { margin-left:auto; color:#64748b; font-size:.62rem; }
+/* --- crons table --- */
+table { width:100%; border-collapse:collapse; font-size:.72rem; }
+th { text-align:left; color:#64748b; font-weight:500; padding:.4rem .5rem; border-bottom:1px solid #1e293b; font-size:.65rem; text-transform:uppercase; letter-spacing:.03em; }
+td { padding:.45rem .5rem; border-bottom:1px solid rgba(30,41,59,.5); }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:rgba(30,41,59,.25); }
+td.name .sched { color:#64748b; font-size:.62rem; display:block; }
+.err-msg { color:#fb7185; font-size:.65rem; max-width:340px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.pill { display:inline-block; border-radius:999px; padding:.1rem .5rem; font-size:.62rem; border:1px solid; }
+.pill.ok { color:#34d399; border-color:rgba(52,211,153,.4); background:rgba(52,211,153,.08); }
+.pill.err { color:#fb7185; border-color:rgba(251,113,133,.4); background:rgba(251,113,133,.08); }
+.pill.warn { color:#fbbf24; border-color:rgba(251,191,36,.4); background:rgba(251,191,36,.08); }
+.pill.off { color:#64748b; border-color:#334155; }
+.pill.ok2 { color:#22d3ee; border-color:rgba(34,211,238,.4); background:rgba(34,211,238,.08); }
+/* --- integrations --- */
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:.8rem; }
+.integ { background:rgba(2,6,23,.4); border:1px solid #1e293b; border-radius:.6rem; padding:.8rem; }
+.integ .ihead { display:flex; align-items:center; gap:.5rem; font-size:.8rem; font-weight:600; margin-bottom:.3rem; }
+.integ .note { font-size:.66rem; color:#94a3b8; }
+.integ .meta { font-size:.66rem; color:#64748b; margin-top:.35rem; }
+/* --- skills --- */
+.chips { display:flex; flex-wrap:wrap; gap:.45rem; }
+.chip { background:rgba(6,78,59,.25); border:1px solid rgba(52,211,153,.3); border-radius:.4rem; padding:.3rem .6rem; font-size:.68rem; color:#a7f3d0; }
+.chip .d { display:block; color:#64748b; font-size:.6rem; margin-top:.1rem; }
+footer { text-align:center; margin-top:1.5rem; color:#475569; font-size:.7rem; }
+.btn { background:#0f172a; border:1px solid #334155; color:#94a3b8; border-radius:.45rem; padding:.3rem .7rem; font-size:.68rem; cursor:pointer; font-family:inherit; }
+.btn:hover { color:white; border-color:#64748b; }
+#age { color:#38bdf8; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="pulse"></div>
+    <h1>Vianta AI OS — Live</h1>
+    <button class="btn" onclick="load()">↻ Atualizar</button>
+    <span class="sub">snapshot <span id="age">—</span> · auto-refresh 60s</span>
+  </header>
+
+  <div class="badges" id="badges"></div>
+  <div class="alerts" id="alerts"></div>
+
+  <section>
+    <h2>Hierarquia de Agentes</h2>
+    <div class="tree">
+      <div class="channels" id="channels"></div>
+      <div class="arrow">▼</div>
+      <div id="ceo"></div>
+      <div class="arrow" id="deleg-arrow" style="display:none">▼ delegate_task / cron ▼</div>
+      <div class="bots" id="bots"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Crons & Routines</h2>
+    <table id="cron-table">
+      <thead><tr><th>Owner</th><th>Job</th><th>Schedule</th><th>Estado</th><th>Última execução</th><th>Detalhe</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Integrações & Bases de Dados</h2>
+    <div class="grid" id="integrations"></div>
+  </section>
+
+  <section>
+    <h2>Skills Vianta (<span id="skill-count">0</span>)</h2>
+    <div class="chips" id="skills"></div>
+  </section>
+
+  <footer>Vianta AI OS · snapshot gerado por aios_snapshot.py (cron 10min) · atualização automática</footer>
+</div>
+
+<script>
+let state = null;
+const $ = (id) => document.getElementById(id);
+
+async function load() {
+  try {
+    const r = await fetch('aios-state.json?t=' + Date.now());
+    if (!r.ok) throw new Error(r.status);
+    state = await r.json();
+    render();
+  } catch (e) {
+    const el = $('alerts');
+    el.textContent = 'Abre esta página por HTTP, não como ficheiro: http://127.0.0.1:8090/aios-live.html  (se estiveres noutra máquina, pede ao Jarvis o novo URL).';
+  }
+}
+
+function rel(iso) {
+  if (!iso) return '—';
+  const s = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (s < 0) return 'agora';
+  if (s < 60) return Math.floor(s) + 's';
+  if (s < 3600) return Math.floor(s / 60) + 'min';
+  if (s < 86400) return Math.floor(s / 3600) + 'h';
+  return Math.floor(s / 86400) + 'd';
+}
+
+function dotColor(status) {
+  if (status === 'error') return 'err';
+  if (status === 'paused' || status === 'draft') return 'warn';
+  return 'ok';
+}
+function pill(status) {
+  const map = { ok: 'ok', error: 'err', paused: 'warn', scheduled: 'ok2' };
+  return `<span class="pill ${map[status] || 'off'}">${status}</span>`;
+}
+
+function allCrons() {
+  const out = [];
+  (state.profiles || []).forEach(p => (p.crons || []).forEach(c => out.push({ ...c, profile: p.name, profileRole: p.role })));
+  return out;
+}
+
+function render() {
+  if (!state) return;
+  const age = rel(state.generated_at);
+  $('age').textContent = 'há ' + age;
+  const crons = allCrons();
+  const nOk = crons.filter(c => c.last_status === 'ok').length;
+  const nErr = crons.filter(c => c.last_status === 'error' && c.state !== 'paused').length;
+  const nPaused = crons.filter(c => c.state === 'paused').length;
+  const gwUp = Object.values(state.gateways || {}).filter(g => g.up).length;
+  const sb = state.supabase || {};
+
+  $('badges').innerHTML = `
+    <span class="badge">Crons <b>${crons.length}</b> <span class="ok">· ${nOk} ok</span> <span class="err">${nErr > 0 ? '· ' + nErr + ' erro' : ''}</span> <span class="warn">${nPaused > 0 ? '· ' + nPaused + ' pausados' : ''}</span></span>
+    <span class="badge">Gateways <b>${gwUp}/${Object.keys(state.gateways || {}).length}</b> up</span>
+    <span class="badge">Skills <b>${(state.skills || []).length}</b></span>
+    <span class="badge">MCP <b>${(state.mcp || []).length}</b> ${(state.mcp || []).map(m => m.name).join(', ')}</span>
+    <span class="badge">GHL <b class="${state.ghl && state.ghl.ok ? '' : 'err'}">${state.ghl && state.ghl.ok ? 'OK' : 'DOWN'}</b></span>`;
+
+  $('alerts').textContent = (state.alerts || []).join('\n');
+
+  renderChannels();
+  renderCeoAndBots(crons);
+  renderCrons(crons);
+  renderIntegrations(sb);
+  renderSkills();
+}
+
+function renderChannels() {
+  const channels = [
+    ['Telegram', 'Vianta Jarvis'], ['Desktop', 'Hermes app'], ['Facebook / Instagram', 'via GHL'], ['Email', 'geral@vianta.pt']];
+  $('channels').innerHTML = channels.map(c => `<div class="channel">${c[0]}<br><span style="color:#64748b;font-size:.62rem">${c[1]}</span></div>`).join('');
+}
+
+function cronChips(crons, owner) {
+  const mine = crons.filter(c => c.owner === owner);
+  if (!mine.length) return `<div class="slim-cron"><span class="dot off"></span>sem crons próprios</div>`;
+  return mine.map(c => `
+    <div class="slim-cron" title="${(c.last_error || c.name || '').replace(/"/g, '&quot;')}">
+      <span class="dot ${dotColor(c.last_status)}"></span>${c.name}
+      <span class="schedule">${c.schedule || ''}</span>
+    </div>`).join('');
+}
+
+function renderCeoAndBots(crons) {
+  const profiles = state.profiles || [];
+  const find = n => profiles.find(p => p.name === n);
+  const makeCard = (p, cls) => {
+    if (!p) return '';
+    const gw = p.gateway;
+    const gwTxt = gw ? `<div class="gw">gateway <b style="color:${gw.up ? '#34d399' : '#fb7185'}">${gw.up ? 'up' : 'down'}</b>${gw.pid ? ' · PID ' + gw.pid : ''}</div>` : '<div class="gw">gateway —</div>';
+    return `<div class="agent-card ${cls}">
+      <div class="agent-head"><span class="dot ${gw ? (gw.up ? 'ok' : 'err') : 'off'}"></span><b>${p.name}</b><code>bot</code></div>
+      <span class="role">${p.role}</span>${gwTxt}
+      <div class="slim-crons">${cronChips(crons, p.name)}</div>
+    </div>`;
+  };
+  const jarvis = find('jarvis');
+  $('ceo').innerHTML = makeCard(jarvis, 'ceo').replace('bot</code>', 'CEO</code>');
+  const bots = ['turismo-frota', 'agente-comercial'].map(n => makeCard(find(n), 'bot')).join('');
+  const team = ['francisco', 'duarte', 'vianta'].map(n => makeCard(find(n), 'team')).join('');
+  $('deleg-arrow').style.display = bots ? 'block' : 'none';
+  $('bots').innerHTML = `<div style="display:flex;flex-direction:column;gap:1rem;width:100%">
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center">${bots}</div>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center">${team}</div>
+  </div>`;
+}
+
+function renderCrons(crons) {
+  const rows = crons.map(c => `
+    <tr>
+      <td><span class="pill ok2">${c.owner}</span></td>
+      <td class="name">${c.name}<span class="sched">${(c.no_agent ? 'script · ' : 'agent') + (c.skills && c.skills.length ? ' · ' + c.skills.join(', ') : '')}</span></td>
+      <td>${c.schedule || '—'}</td>
+      <td>${pill(c.state === 'paused' ? 'paused' : c.last_status === 'error' ? 'error' : 'ok')}</td>
+      <td>${rel(c.last_run_at)}</td>
+      <td>${c.last_status === 'error' ? `<span class="err-msg" title="${(c.last_error || '').replace(/"/g, '&quot;').slice(0, 500)}">${(c.last_error || 'erro').slice(0, 120)}</span>` : (c.last_run_at ? `next ${rel(c.next_run_at)}` : '—')}</td>
+    </tr>`).join('');
+  $('cron-table').querySelector('tbody').innerHTML = rows;
+}
+
+function renderIntegrations(sb) {
+  const card = (name, ok, note, meta) => `
+    <div class="integ">
+      <div class="ihead"><span class="dot ${ok === true ? 'ok' : ok === false ? 'err' : 'warn'}"></span>${name}</div>
+      <div class="note">${note}</div>
+      ${meta ? `<div class="meta">${meta}</div>` : ''}
+    </div>`;
+  const ghlOk = state.ghl && state.ghl.ok;
+  const frotaOk = (state.profiles || []).flatMap(p => p.crons).find(c => /frota360/i.test(c.name));
+  const gmailOk = (state.profiles || []).flatMap(p => p.crons).find(c => /refresh google token/i.test(c.name));
+
+  $('integrations').innerHTML = [
+    card('GHL CRM', ghlOk, state.integrations ? 'contacts · pipelines Aluguer + Venda · Messenger/IG' : '', ghlOk !== null ? (ghlOk ? 'health OK (200)' : 'health DOWN') : 'sem health'),
+    card(`Supabase`, true, 'fonte de verdade · stock carros · transfers · cc_*', (
+      (sb.carros != null ? `carros ${sb.carros} · ` : '') + (sb.transfers != null ? `transfers ${sb.transfers} · ` : '') +
+      (sb.cc_services != null ? `cc_services ${sb.cc_services} · ` : '') + (sb.cc_offers != null ? `cc_offers ${sb.cc_offers}` : ''))),
+    card('Google Sheets', true, 'DB Transfers · Drivers Transfers · propostas'),
+    card('Gmail', gmailOk ? gmailOk.last_status !== 'error' : true, 'geral@vianta.pt (ChoiceCar)',
+      gmailOk ? `último cron: ${gmailOk.last_status}` : ''),
+    card('Frota360', frotaOk ? frotaOk.last_status !== 'error' : null, 'sync diário → Supabase',
+      frotaOk ? `último cron: ${frotaOk.last_status}` : ''),
+    card('Meta Ads API', false, 'conta 293842623 · sem token', 'bloqueado'),
+    card('Google Drive', true, 'docs fonte autoritativa'),
+    card('Netlify', true, 'app transfers · gerador propostas · sandbox ChoiceCar'),
+  ].join('');
+}
+
+function renderSkills() {
+  const skills = state.skills || [];
+  $('skill-count').textContent = skills.length;
+  $('skills').innerHTML = skills.map(s =>
+    `<div class="chip">${s.name}<span class="d">${s.description || ''}</span></div>`).join('');
+}
+
+load();
+setInterval(load, 60000);
+setInterval(() => { if (state) $('age').textContent = 'há ' + rel(state.generated_at); }, 5000);
+</script>
+</body>
+</html>
