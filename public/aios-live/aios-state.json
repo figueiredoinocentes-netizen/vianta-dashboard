@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-27T12:10:25+00:00",
+ "generated_at": "2026-10-27T12:43:33+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -38,7 +38,7 @@
      "schedule": "every 3m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T12:10:25.796330+00:00",
+     "last_run_at": "2026-10-27T12:41:33.323893+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "ghl_monitor_isabel.py",
@@ -48,7 +48,7 @@
      ],
      "monitor_script": "ghl_monitor_isabel.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T12:13:25.796330+00:00",
+     "next_run_at": "2026-10-27T12:44:33.323893+00:00",
      "paused_at": null
     },
     {
@@ -94,7 +94,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T12:09:25.889742+00:00",
+     "last_run_at": "2026-10-27T12:43:34.685731+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -105,7 +105,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T12:10:25.889742+00:00",
+     "next_run_at": "2026-10-27T12:44:34.685731+00:00",
      "paused_at": null
     },
     {
@@ -135,9 +135,9 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T11:58:52.255069+00:00",
-     "last_status": "error",
-     "last_error": "Gateway shutdown (post-interrupt) killed the job's tool subprocess before the run finished.",
+     "last_run_at": "2026-10-27T12:37:56.201672+00:00",
+     "last_status": "ok",
+     "last_error": "",
      "script": null,
      "no_agent": false,
      "skills": [
@@ -145,8 +145,8 @@
       "vianta-choicecar-planeamento"
      ],
      "monitor_script": null,
-     "failure_streak": 1,
-     "next_run_at": "2026-10-27T12:28:52.255069+00:00",
+     "failure_streak": 0,
+     "next_run_at": "2026-10-27T13:07:56.201672+00:00",
      "paused_at": null
     },
     {
@@ -156,7 +156,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T11:59:25.182342+00:00",
+     "last_run_at": "2026-10-27T12:32:33.219801+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -164,7 +164,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T12:20:24.881765+00:00",
+     "next_run_at": "2026-10-27T12:53:33.141426+00:00",
      "paused_at": null
     },
     {
@@ -183,6 +183,24 @@
      "monitor_script": null,
      "failure_streak": 0,
      "next_run_at": "2026-10-27T13:41:08.440665+00:00",
+     "paused_at": null
+    },
+    {
+     "id": "17d27753e112",
+     "name": "Newsletter replies — encaminhar p/ comercial",
+     "owner": "jarvis",
+     "schedule": "every 30m",
+     "state": "scheduled",
+     "enabled": true,
+     "last_run_at": null,
+     "last_status": null,
+     "last_error": "",
+     "script": null,
+     "no_agent": false,
+     "skills": [],
+     "monitor_script": "monitor_newsletter_replies.py",
+     "failure_streak": 0,
+     "next_run_at": "2026-10-27T12:47:48.122717+00:00",
      "paused_at": null
     }
    ]
@@ -353,6 +371,11 @@
    "tags": []
   },
   {
+   "name": "vianta-legendas-instagram",
+   "description": "Use for IG-style subtitles on non-Vianta videos.",
+   "tags": []
+  },
+  {
    "name": "vianta-onboarding-motorista",
    "description": "Use for Vianta driver onboarding: docs, handover, CRM.",
    "tags": []
@@ -450,7 +473,5 @@
    "note": "app transfers · gerador propostas · sandbox"
   }
  },
- "alerts": [
-  "[jarvis] [bot:turismo-frota] ChoiceCar sync check: Gateway shutdown (post-interrupt) killed the job's tool subprocess before the run finished."
- ]
+ "alerts": []
 }
