@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-27T17:40:04+00:00",
+ "generated_at": "2026-10-27T18:13:13+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -38,7 +38,7 @@
      "schedule": "every 3m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T17:39:04.543061+00:00",
+     "last_run_at": "2026-10-27T18:10:13.745851+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "ghl_monitor_isabel.py",
@@ -48,7 +48,7 @@
      ],
      "monitor_script": "ghl_monitor_isabel.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T17:42:04.543061+00:00",
+     "next_run_at": "2026-10-27T18:13:13.745851+00:00",
      "paused_at": null
     },
     {
@@ -94,7 +94,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T17:40:06.252890+00:00",
+     "last_run_at": "2026-10-27T18:12:14.149471+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -105,7 +105,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T17:41:06.252890+00:00",
+     "next_run_at": "2026-10-27T18:13:14.149471+00:00",
      "paused_at": null
     },
     {
@@ -135,7 +135,7 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T17:24:10.366486+00:00",
+     "last_run_at": "2026-10-27T18:09:59.196595+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -146,7 +146,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T17:54:10.366486+00:00",
+     "next_run_at": "2026-10-27T18:39:59.196595+00:00",
      "paused_at": null
     },
     {
@@ -156,7 +156,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T17:29:04.732410+00:00",
+     "last_run_at": "2026-10-27T18:02:14.763237+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -164,7 +164,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T17:50:04.430132+00:00",
+     "next_run_at": "2026-10-27T18:23:13.695888+00:00",
      "paused_at": null
     },
     {
@@ -174,7 +174,7 @@
      "schedule": "every 120m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T15:50:31.186557+00:00",
+     "last_run_at": "2026-10-27T17:55:50.400503+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -182,7 +182,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T17:50:31.186557+00:00",
+     "next_run_at": "2026-10-27T19:55:50.400503+00:00",
      "paused_at": null
     },
     {
@@ -192,15 +192,15 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T17:18:57.986174+00:00",
+     "last_run_at": "2026-10-27T17:49:07.564933+00:00",
      "last_status": "error",
      "last_error": "Script not found: /opt/data/profiles/jarvis/scripts/monitor_newsletter_replies.py",
      "script": null,
      "no_agent": false,
      "skills": [],
      "monitor_script": "monitor_newsletter_replies.py",
-     "failure_streak": 10,
-     "next_run_at": "2026-10-27T17:48:57.986174+00:00",
+     "failure_streak": 11,
+     "next_run_at": "2026-10-27T18:19:07.564933+00:00",
      "paused_at": null
     },
     {
@@ -237,6 +237,27 @@
      "monitor_script": null,
      "failure_streak": 0,
      "next_run_at": null,
+     "paused_at": null
+    },
+    {
+     "id": "35a6e0fec9d7",
+     "name": "[bot:agente-turismo] ChoiceCar auto-planeamento",
+     "owner": "agente-turismo",
+     "schedule": "every 15m",
+     "state": "scheduled",
+     "enabled": true,
+     "last_run_at": null,
+     "last_status": null,
+     "last_error": "",
+     "script": null,
+     "no_agent": false,
+     "skills": [
+      "vianta-choicecar-planeamento",
+      "vianta-choicecar-atualizacao"
+     ],
+     "monitor_script": null,
+     "failure_streak": 0,
+     "next_run_at": "2026-10-27T18:14:38.543235+00:00",
      "paused_at": null
     }
    ]
