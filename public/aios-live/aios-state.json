@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-27T14:55:40+00:00",
+ "generated_at": "2026-10-27T15:28:41+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -38,7 +38,7 @@
      "schedule": "every 3m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T14:53:41.057738+00:00",
+     "last_run_at": "2026-10-27T15:25:42.226203+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "ghl_monitor_isabel.py",
@@ -48,7 +48,7 @@
      ],
      "monitor_script": "ghl_monitor_isabel.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T14:56:41.057738+00:00",
+     "next_run_at": "2026-10-27T15:28:42.226203+00:00",
      "paused_at": null
     },
     {
@@ -94,7 +94,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T14:55:42.220842+00:00",
+     "last_run_at": "2026-10-27T15:27:42.569818+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -105,7 +105,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T14:56:42.220842+00:00",
+     "next_run_at": "2026-10-27T15:28:42.569818+00:00",
      "paused_at": null
     },
     {
@@ -130,12 +130,12 @@
     },
     {
      "id": "a0c963ecf74a",
-     "name": "[bot:turismo-frota] ChoiceCar sync check",
-     "owner": "turismo-frota",
+     "name": "[bot:agente-turismo] ChoiceCar sync check",
+     "owner": "agente-turismo",
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T14:24:46.439729+00:00",
+     "last_run_at": "2026-10-27T14:59:25.256353+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -146,7 +146,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T15:25:40.321374+00:00",
+     "next_run_at": "2026-10-27T15:29:25.256353+00:00",
      "paused_at": null
     },
     {
@@ -156,7 +156,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T14:44:43.026873+00:00",
+     "last_run_at": "2026-10-27T15:17:46.533903+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -164,7 +164,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T15:05:40.335673+00:00",
+     "next_run_at": "2026-10-27T15:38:41.363329+00:00",
      "paused_at": null
     },
     {
@@ -192,15 +192,15 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T14:48:40.200140+00:00",
+     "last_run_at": "2026-10-27T15:18:41.161772+00:00",
      "last_status": "error",
      "last_error": "Script not found: /opt/data/profiles/jarvis/scripts/monitor_newsletter_replies.py",
      "script": null,
      "no_agent": false,
      "skills": [],
      "monitor_script": "monitor_newsletter_replies.py",
-     "failure_streak": 5,
-     "next_run_at": "2026-10-27T15:18:40.200140+00:00",
+     "failure_streak": 6,
+     "next_run_at": "2026-10-27T15:48:41.161772+00:00",
      "paused_at": null
     }
    ]
@@ -209,16 +209,6 @@
    "name": "agente-comercial",
    "role": "Bot Comercial TVDE",
    "desc": "leads TVDE · GHL Messenger/IG · cron 1 min",
-   "gateway": {
-    "up": false,
-    "pid": null
-   },
-   "crons": []
-  },
-  {
-   "name": "turismo-frota",
-   "role": "Bot Turismo / ChoiceCar",
-   "desc": "transfers · email ChoiceCar · cron 30 min",
    "gateway": {
     "up": false,
     "pid": null
@@ -304,21 +294,12 @@
    "up": true,
    "pid": "184780"
   },
-  "turismo-frota": {
-   "up": false,
-   "pid": null
-  },
   "vianta": {
    "up": false,
    "pid": null
   }
  },
  "skills": [
-  {
-   "name": "vianta-agente-mestre",
-   "description": "System prompt do Agente Comercial Vianta TVDE. Processa leads, consulta stock Supabase, responde diretamente via GHL. Canal-independente.",
-   "tags": []
-  },
   {
    "name": "vianta-aios-live",
    "description": "Use for the AI OS live dashboard: snapshot, serve, or fix.",
@@ -332,11 +313,6 @@
   {
    "name": "vianta-base-dados",
    "description": "Use for Vianta database creation, maintenance, AND financial/business modeling from multiple data sources.",
-   "tags": []
-  },
-  {
-   "name": "vianta-choicecar-planeamento",
-   "description": "Use for ChoiceCar planeamento: criar sheet do dia, destacar células, atribuir motoristas com tipo de veículo, notificar Pedro.",
    "tags": []
   },
   {
@@ -370,18 +346,8 @@
    "tags": []
   },
   {
-   "name": "vianta-ghl-lead-automation",
-   "description": "Use for Vianta GHL auto-response: cron, monitors, scripts.",
-   "tags": []
-  },
-  {
    "name": "vianta-legendas-instagram",
    "description": "Use for IG-style subtitles on non-Vianta videos.",
-   "tags": []
-  },
-  {
-   "name": "vianta-onboarding-motorista",
-   "description": "Use for Vianta driver onboarding: docs, handover, CRM.",
    "tags": []
   },
   {
@@ -395,26 +361,6 @@
    "tags": []
   },
   {
-   "name": "vianta-programa-referenciacao",
-   "description": "Vianta referral: Publio-style direct script for contacts.",
-   "tags": []
-  },
-  {
-   "name": "vianta-propostas-venda",
-   "description": "Use when creating/sending a Vianta TVDE sale proposal.",
-   "tags": []
-  },
-  {
-   "name": "vianta-report-aquisicao",
-   "description": "Use when creating Vianta TVDE acquisition reports.",
-   "tags": []
-  },
-  {
-   "name": "vianta-resposta-interessados",
-   "description": "Use for Vianta TVDE lead DMs. Uses real sheet data.",
-   "tags": []
-  },
-  {
    "name": "vianta-retoma",
    "description": "Trade-in: pesquisa de mercado + apresentar valor. Escalar só em contraproposta.",
    "tags": []
@@ -422,11 +368,6 @@
   {
    "name": "vianta-thumbnail",
    "description": "Vianta thumbnails: brand frame + ChatGPT prompt.",
-   "tags": []
-  },
-  {
-   "name": "vianta-turismo-propostas",
-   "description": "Use for Vianta Turismo partner proposals. Style: Tivoli.",
    "tags": []
   },
   {
