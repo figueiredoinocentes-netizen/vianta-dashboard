@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-27T15:28:41+00:00",
+ "generated_at": "2026-10-27T16:01:42+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -38,7 +38,7 @@
      "schedule": "every 3m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T15:25:42.226203+00:00",
+     "last_run_at": "2026-10-27T16:01:44.284043+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "ghl_monitor_isabel.py",
@@ -48,7 +48,7 @@
      ],
      "monitor_script": "ghl_monitor_isabel.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T15:28:42.226203+00:00",
+     "next_run_at": "2026-10-27T16:04:44.284043+00:00",
      "paused_at": null
     },
     {
@@ -94,7 +94,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T15:27:42.569818+00:00",
+     "last_run_at": "2026-10-27T15:59:43.706627+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -105,7 +105,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T15:28:42.569818+00:00",
+     "next_run_at": "2026-10-27T16:02:42.570988+00:00",
      "paused_at": null
     },
     {
@@ -135,7 +135,7 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T14:59:25.256353+00:00",
+     "last_run_at": "2026-10-27T15:34:03.084183+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -146,7 +146,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T15:29:25.256353+00:00",
+     "next_run_at": "2026-10-27T16:04:03.084183+00:00",
      "paused_at": null
     },
     {
@@ -156,7 +156,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T15:17:46.533903+00:00",
+     "last_run_at": "2026-10-27T15:50:45.761704+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -164,7 +164,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T15:38:41.363329+00:00",
+     "next_run_at": "2026-10-27T16:11:42.583220+00:00",
      "paused_at": null
     },
     {
@@ -174,15 +174,15 @@
      "schedule": "every 120m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T13:42:25.073094+00:00",
-     "last_status": "error",
-     "last_error": "RuntimeError: Response truncated due to output length limit",
+     "last_run_at": "2026-10-27T15:50:31.186557+00:00",
+     "last_status": "ok",
+     "last_error": "",
      "script": null,
      "no_agent": false,
      "skills": [],
      "monitor_script": null,
-     "failure_streak": 1,
-     "next_run_at": "2026-10-27T15:42:25.073094+00:00",
+     "failure_streak": 0,
+     "next_run_at": "2026-10-27T17:50:31.186557+00:00",
      "paused_at": null
     },
     {
@@ -192,15 +192,15 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T15:18:41.161772+00:00",
+     "last_run_at": "2026-10-27T15:48:42.254470+00:00",
      "last_status": "error",
      "last_error": "Script not found: /opt/data/profiles/jarvis/scripts/monitor_newsletter_replies.py",
      "script": null,
      "no_agent": false,
      "skills": [],
      "monitor_script": "monitor_newsletter_replies.py",
-     "failure_streak": 6,
-     "next_run_at": "2026-10-27T15:48:41.161772+00:00",
+     "failure_streak": 7,
+     "next_run_at": "2026-10-27T16:18:42.254470+00:00",
      "paused_at": null
     }
    ]
@@ -419,7 +419,6 @@
   }
  },
  "alerts": [
-  "[jarvis] [vianta] choicecar-driver-composio: RuntimeError: Response truncated due to output length limit",
   "[jarvis] Newsletter replies — encaminhar p/ comercial: Script not found: /opt/data/profiles/jarvis/scripts/monitor_newsletter_replies.py"
  ]
 }
