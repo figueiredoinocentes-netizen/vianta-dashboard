@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode, useCallback } from 'react';
-import { RefreshCw, Cpu, Database, Zap, Mic, Square, Volume2, MicOff, MessageSquareText } from 'lucide-react';
+import { RefreshCw, Cpu, Database, Zap, Mic, Square, Volume2, MicOff, MessageSquareText, Map as MapIcon, LayoutList } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
@@ -389,10 +389,41 @@ function VoiceAssistant() {
   );
 }
 
+type AiosView = 'mundo' | 'painel';
+const VIEW_KEY = 'aios-view';
+
+function ViewSwitch({ view, onChange }: { view: AiosView; onChange: (v: AiosView) => void }) {
+  const btn = (v: AiosView, label: string, icon: ReactNode) => (
+    <button
+      type="button"
+      onClick={() => onChange(v)}
+      className={cn(
+        'flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors',
+        view === v ? 'border-cyan-500/60 bg-cyan-500/15 text-cyan-400' : 'border-border bg-card text-muted-foreground hover:text-foreground',
+      )}
+    >
+      {icon}{label}
+    </button>
+  );
+  return (
+    <div className="flex items-center gap-2">
+      {btn('mundo', 'Mundo', <MapIcon className="h-3.5 w-3.5" />)}
+      {btn('painel', 'Painel', <LayoutList className="h-3.5 w-3.5" />)}
+    </div>
+  );
+}
+
 const AiosPage = () => {
   const [state, setState] = useState<AiosState | null>(null);
   const [failed, setFailed] = useState(false);
   const [now, setNow] = useState(Date.now());
+  const [view, setViewState] = useState<AiosView>(() => {
+    try { return localStorage.getItem(VIEW_KEY) === 'painel' ? 'painel' : 'mundo'; } catch { return 'mundo'; }
+  });
+  const setView = (v: AiosView) => {
+    setViewState(v);
+    try { localStorage.setItem(VIEW_KEY, v); } catch { /* ignora */ }
+  };
 
   const load = async () => {
     try {
@@ -414,6 +445,22 @@ const AiosPage = () => {
   }, []);
 
   const crons = useMemo(() => (state?.profiles || []).flatMap((p) => (p.crons || []).map((c) => ({ ...c, owner: c.owner || p.name }))), [state]);
+
+  if (view === 'mundo') {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center gap-3 border-b border-border px-4 py-2">
+          <h1 className="font-display text-sm font-bold text-foreground">AI OS</h1>
+          <ViewSwitch view={view} onChange={setView} />
+        </div>
+        <iframe
+          title="AI OS — Mundo Vianta"
+          src="/aios-live/mundo.html"
+          className="block h-[calc(100dvh-100px)] w-full border-0 lg:h-[calc(100dvh-49px)]"
+        />
+      </DashboardLayout>
+    );
+  }
 
   if (failed) {
     return (
@@ -454,6 +501,7 @@ const AiosPage = () => {
           <RefreshCw className="h-3.5 w-3.5" /> Atualizar
         </button>
         <span className="text-xs text-muted-foreground">snapshot há {rel(state.generated_at)} · auto-refresh 60s</span>
+        <div className="ml-auto"><ViewSwitch view={view} onChange={setView} /></div>
       </div>
 
       <div className="flex flex-wrap gap-2 text-xs">
