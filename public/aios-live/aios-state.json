@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-27T11:37:30+00:00",
+ "generated_at": "2026-10-27T12:10:25+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -7,7 +7,7 @@
    "desc": "gateway Telegram \"Vianta Jarvis\" · delegate_task para bots",
    "gateway": {
     "up": true,
-    "pid": "6448"
+    "pid": "184780"
    },
    "crons": [
     {
@@ -38,7 +38,7 @@
      "schedule": "every 3m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T11:35:30.279976+00:00",
+     "last_run_at": "2026-10-27T12:10:25.796330+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "ghl_monitor_isabel.py",
@@ -48,7 +48,7 @@
      ],
      "monitor_script": "ghl_monitor_isabel.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T11:38:30.279976+00:00",
+     "next_run_at": "2026-10-27T12:13:25.796330+00:00",
      "paused_at": null
     },
     {
@@ -94,7 +94,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T11:36:31.224499+00:00",
+     "last_run_at": "2026-10-27T12:09:25.889742+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -105,7 +105,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T11:37:31.224499+00:00",
+     "next_run_at": "2026-10-27T12:10:25.889742+00:00",
      "paused_at": null
     },
     {
@@ -135,9 +135,9 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T11:19:27.843223+00:00",
-     "last_status": "ok",
-     "last_error": "",
+     "last_run_at": "2026-10-27T11:58:52.255069+00:00",
+     "last_status": "error",
+     "last_error": "Gateway shutdown (post-interrupt) killed the job's tool subprocess before the run finished.",
      "script": null,
      "no_agent": false,
      "skills": [
@@ -145,8 +145,8 @@
       "vianta-choicecar-planeamento"
      ],
      "monitor_script": null,
-     "failure_streak": 0,
-     "next_run_at": "2026-10-27T11:49:27.843223+00:00",
+     "failure_streak": 1,
+     "next_run_at": "2026-10-27T12:28:52.255069+00:00",
      "paused_at": null
     },
     {
@@ -156,7 +156,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T11:27:30.163834+00:00",
+     "last_run_at": "2026-10-27T11:59:25.182342+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -164,7 +164,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T11:47:30.399353+00:00",
+     "next_run_at": "2026-10-27T12:20:24.881765+00:00",
      "paused_at": null
     },
     {
@@ -174,7 +174,7 @@
      "schedule": "every 120m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T09:33:26.358021+00:00",
+     "last_run_at": "2026-10-27T11:41:08.440665+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -182,7 +182,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T13:33:29.033461+00:00",
+     "next_run_at": "2026-10-27T13:41:08.440665+00:00",
      "paused_at": null
     }
    ]
@@ -280,7 +280,7 @@
   },
   "jarvis": {
    "up": true,
-   "pid": "6448"
+   "pid": "184780"
   },
   "turismo-frota": {
    "up": false,
@@ -450,5 +450,7 @@
    "note": "app transfers · gerador propostas · sandbox"
   }
  },
- "alerts": []
+ "alerts": [
+  "[jarvis] [bot:turismo-frota] ChoiceCar sync check: Gateway shutdown (post-interrupt) killed the job's tool subprocess before the run finished."
+ ]
 }
