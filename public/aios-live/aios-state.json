@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-27T06:11:34+00:00",
+ "generated_at": "2026-10-27T06:42:50+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -38,7 +38,7 @@
      "schedule": "every 3m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T06:10:35.274726+00:00",
+     "last_run_at": "2026-10-27T06:40:50.778597+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "ghl_monitor_isabel.py",
@@ -48,7 +48,7 @@
      ],
      "monitor_script": "ghl_monitor_isabel.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T06:13:35.274726+00:00",
+     "next_run_at": "2026-10-27T06:43:50.778597+00:00",
      "paused_at": null
     },
     {
@@ -94,7 +94,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T06:10:35.857373+00:00",
+     "last_run_at": "2026-10-27T06:41:52.111017+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -105,7 +105,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T06:11:35.857373+00:00",
+     "next_run_at": "2026-10-27T06:42:52.111017+00:00",
      "paused_at": null
     },
     {
@@ -135,7 +135,7 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T05:58:25.278162+00:00",
+     "last_run_at": "2026-10-27T06:29:59.330896+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -146,7 +146,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T06:28:25.278162+00:00",
+     "next_run_at": "2026-10-27T06:59:59.330896+00:00",
      "paused_at": null
     },
     {
@@ -156,7 +156,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T06:00:34.598583+00:00",
+     "last_run_at": "2026-10-27T06:32:47.534838+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -164,7 +164,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T06:21:34.779485+00:00",
+     "next_run_at": "2026-10-27T06:52:50.879948+00:00",
      "paused_at": null
     },
     {
