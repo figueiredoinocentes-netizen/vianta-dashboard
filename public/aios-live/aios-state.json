@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-27T14:22:39+00:00",
+ "generated_at": "2026-10-27T14:55:40+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -38,7 +38,7 @@
      "schedule": "every 3m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T14:21:40.303062+00:00",
+     "last_run_at": "2026-10-27T14:53:41.057738+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "ghl_monitor_isabel.py",
@@ -48,7 +48,7 @@
      ],
      "monitor_script": "ghl_monitor_isabel.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T14:24:40.303062+00:00",
+     "next_run_at": "2026-10-27T14:56:41.057738+00:00",
      "paused_at": null
     },
     {
@@ -94,7 +94,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T14:21:40.949454+00:00",
+     "last_run_at": "2026-10-27T14:55:42.220842+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -105,7 +105,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T14:22:40.949454+00:00",
+     "next_run_at": "2026-10-27T14:56:42.220842+00:00",
      "paused_at": null
     },
     {
@@ -135,7 +135,7 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T13:49:44.568722+00:00",
+     "last_run_at": "2026-10-27T14:24:46.439729+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -146,7 +146,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T14:50:39.375585+00:00",
+     "next_run_at": "2026-10-27T15:25:40.321374+00:00",
      "paused_at": null
     },
     {
@@ -156,7 +156,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T14:11:42.664935+00:00",
+     "last_run_at": "2026-10-27T14:44:43.026873+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -164,7 +164,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T14:32:39.448809+00:00",
+     "next_run_at": "2026-10-27T15:05:40.335673+00:00",
      "paused_at": null
     },
     {
@@ -192,15 +192,15 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T14:18:39.394016+00:00",
+     "last_run_at": "2026-10-27T14:48:40.200140+00:00",
      "last_status": "error",
      "last_error": "Script not found: /opt/data/profiles/jarvis/scripts/monitor_newsletter_replies.py",
      "script": null,
      "no_agent": false,
      "skills": [],
      "monitor_script": "monitor_newsletter_replies.py",
-     "failure_streak": 4,
-     "next_run_at": "2026-10-27T14:48:39.394016+00:00",
+     "failure_streak": 5,
+     "next_run_at": "2026-10-27T15:18:40.200140+00:00",
      "paused_at": null
     }
    ]
@@ -288,6 +288,10 @@
    "up": false,
    "pid": null
   },
+  "agente-turismo": {
+   "up": false,
+   "pid": null
+  },
   "duarte": {
    "up": false,
    "pid": null
@@ -332,7 +336,7 @@
   },
   {
    "name": "vianta-choicecar-planeamento",
-   "description": "Use for ChoiceCar planning: parse emails and assign drivers.",
+   "description": "Use for ChoiceCar planeamento: criar sheet do dia, destacar células, atribuir motoristas com tipo de veículo, notificar Pedro.",
    "tags": []
   },
   {
