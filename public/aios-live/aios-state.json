@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-27T17:06:55+00:00",
+ "generated_at": "2026-10-27T17:40:04+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -38,7 +38,7 @@
      "schedule": "every 3m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T17:04:56.096123+00:00",
+     "last_run_at": "2026-10-27T17:39:04.543061+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "ghl_monitor_isabel.py",
@@ -48,7 +48,7 @@
      ],
      "monitor_script": "ghl_monitor_isabel.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T17:07:56.096123+00:00",
+     "next_run_at": "2026-10-27T17:42:04.543061+00:00",
      "paused_at": null
     },
     {
@@ -94,7 +94,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T17:06:57.212987+00:00",
+     "last_run_at": "2026-10-27T17:40:06.252890+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -105,7 +105,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T17:07:57.212987+00:00",
+     "next_run_at": "2026-10-27T17:41:06.252890+00:00",
      "paused_at": null
     },
     {
@@ -135,7 +135,7 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T16:44:45.558003+00:00",
+     "last_run_at": "2026-10-27T17:24:10.366486+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -146,7 +146,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T17:14:45.558003+00:00",
+     "next_run_at": "2026-10-27T17:54:10.366486+00:00",
      "paused_at": null
     },
     {
@@ -156,7 +156,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T16:55:55.904363+00:00",
+     "last_run_at": "2026-10-27T17:29:04.732410+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -164,7 +164,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-27T17:16:55.832956+00:00",
+     "next_run_at": "2026-10-27T17:50:04.430132+00:00",
      "paused_at": null
     },
     {
@@ -192,15 +192,15 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-27T16:48:50.209805+00:00",
+     "last_run_at": "2026-10-27T17:18:57.986174+00:00",
      "last_status": "error",
      "last_error": "Script not found: /opt/data/profiles/jarvis/scripts/monitor_newsletter_replies.py",
      "script": null,
      "no_agent": false,
      "skills": [],
      "monitor_script": "monitor_newsletter_replies.py",
-     "failure_streak": 9,
-     "next_run_at": "2026-10-27T17:18:50.209805+00:00",
+     "failure_streak": 10,
+     "next_run_at": "2026-10-27T17:48:57.986174+00:00",
      "paused_at": null
     },
     {
@@ -211,6 +211,24 @@
      "state": "completed",
      "enabled": false,
      "last_run_at": "2026-10-27T16:03:46.753774+00:00",
+     "last_status": "ok",
+     "last_error": "",
+     "script": null,
+     "no_agent": false,
+     "skills": [],
+     "monitor_script": null,
+     "failure_streak": 0,
+     "next_run_at": null,
+     "paused_at": null
+    },
+    {
+     "id": "803dcb8c35d5",
+     "name": "[test] Decision Log 28.10",
+     "owner": "jarvis",
+     "schedule": "once in 1m",
+     "state": "completed",
+     "enabled": false,
+     "last_run_at": "2026-10-27T17:15:25.457607+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -319,6 +337,11 @@
  },
  "skills": [
   {
+   "name": "vianta-agente-mestre",
+   "description": "System prompt do Agente Comercial Vianta TVDE. Processa leads, consulta stock Supabase, responde diretamente via GHL. Canal-independente.",
+   "tags": []
+  },
+  {
    "name": "vianta-aios-live",
    "description": "Use for the AI OS live dashboard: snapshot, serve, or fix.",
    "tags": []
@@ -376,6 +399,11 @@
   {
    "name": "vianta-orquestracao",
    "description": "Use to create/manage bot profiles and CEO delegation.",
+   "tags": []
+  },
+  {
+   "name": "vianta-resposta-interessados",
+   "description": "Use for Vianta TVDE lead DMs. Uses real sheet data.",
    "tags": []
   },
   {
