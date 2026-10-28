@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-28T12:25:25+00:00",
+ "generated_at": "2026-10-28T12:57:30+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -11,34 +11,13 @@
    },
    "crons": [
     {
-     "id": "b70dfcd3e02a",
-     "name": "Agente Comercial — Draft (2 min)",
-     "owner": "francisco",
-     "schedule": "every 2m",
-     "state": "paused",
-     "enabled": false,
-     "last_run_at": "2026-10-08T10:03:28.266726+00:00",
-     "last_status": "ok",
-     "last_error": "",
-     "script": null,
-     "no_agent": false,
-     "skills": [
-      "vianta-agente-mestre",
-      "vianta-resposta-interessados"
-     ],
-     "monitor_script": "ghl_inbound_monitor.py",
-     "failure_streak": 0,
-     "next_run_at": "2026-10-08T10:05:28.266726+00:00",
-     "paused_at": "2026-10-08T10:14:11.826226+00:00"
-    },
-    {
      "id": "9347a667f103",
      "name": "Isabel Teixeira — reply monitor",
-     "owner": "francisco",
+     "owner": "jarvis",
      "schedule": "every 3m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-28T12:22:26.409405+00:00",
+     "last_run_at": "2026-10-28T12:56:30.970345+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "ghl_monitor_isabel.py",
@@ -48,26 +27,8 @@
      ],
      "monitor_script": "ghl_monitor_isabel.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-28T12:25:26.409405+00:00",
+     "next_run_at": "2026-10-28T12:59:30.970345+00:00",
      "paused_at": null
-    },
-    {
-     "id": "82c50da40d01",
-     "name": "Auto-responder FB/IG (3 min)",
-     "owner": "jarvis",
-     "schedule": "every 3m",
-     "state": "paused",
-     "enabled": false,
-     "last_run_at": "2026-10-12T09:19:28.030842+00:00",
-     "last_status": "ok",
-     "last_error": "",
-     "script": "ghl_auto_responder.py",
-     "no_agent": true,
-     "skills": [],
-     "monitor_script": null,
-     "failure_streak": 0,
-     "next_run_at": "2026-10-12T09:22:28.030842+00:00",
-     "paused_at": "2026-10-12T09:20:17.446683+00:00"
     },
     {
      "id": "2bec7cf09741",
@@ -94,18 +55,17 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-28T12:24:26.885940+00:00",
+     "last_run_at": "2026-10-28T12:56:31.505903+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
      "no_agent": false,
      "skills": [
-      "vianta-agente-mestre",
       "vianta-resposta-interessados"
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-28T12:25:26.885940+00:00",
+     "next_run_at": "2026-10-28T12:57:31.505903+00:00",
      "paused_at": null
     },
     {
@@ -135,7 +95,7 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-28T12:01:07.410845+00:00",
+     "last_run_at": "2026-10-28T12:33:38.189135+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -146,7 +106,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-28T12:31:07.410845+00:00",
+     "next_run_at": "2026-10-28T13:03:38.189135+00:00",
      "paused_at": null
     },
     {
@@ -156,7 +116,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-28T12:14:29.271482+00:00",
+     "last_run_at": "2026-10-28T12:47:30.384004+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -164,7 +124,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-28T12:35:25.604930+00:00",
+     "next_run_at": "2026-10-28T13:07:30.543889+00:00",
      "paused_at": null
     },
     {
@@ -192,15 +152,15 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-28T12:22:25.694352+00:00",
+     "last_run_at": "2026-10-28T12:52:29.469203+00:00",
      "last_status": "error",
      "last_error": "Script not found: /opt/data/profiles/jarvis/scripts/monitor_newsletter_replies.py",
      "script": null,
      "no_agent": false,
      "skills": [],
      "monitor_script": "monitor_newsletter_replies.py",
-     "failure_streak": 48,
-     "next_run_at": "2026-10-28T12:52:25.694352+00:00",
+     "failure_streak": 49,
+     "next_run_at": "2026-10-28T13:22:29.469203+00:00",
      "paused_at": null
     },
     {
@@ -246,7 +206,7 @@
      "schedule": "every 15m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-28T12:21:06.480813+00:00",
+     "last_run_at": "2026-10-28T12:54:26.058751+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -257,7 +217,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-28T12:36:06.480813+00:00",
+     "next_run_at": "2026-10-28T13:09:26.058751+00:00",
      "paused_at": null
     },
     {
@@ -267,15 +227,15 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-28T12:03:25.267883+00:00",
+     "last_run_at": "2026-10-28T12:33:26.151064+00:00",
      "last_status": "error",
      "last_error": "Script not found: /opt/data/profiles/jarvis/scripts/check_choicecar_new_emails.py",
      "script": null,
      "no_agent": false,
      "skills": [],
      "monitor_script": "check_choicecar_new_emails.py",
-     "failure_streak": 6,
-     "next_run_at": "2026-10-28T12:33:25.267883+00:00",
+     "failure_streak": 7,
+     "next_run_at": "2026-10-28T13:03:26.151064+00:00",
      "paused_at": null
     }
    ]
@@ -289,55 +249,6 @@
     "pid": null
    },
    "crons": []
-  },
-  {
-   "name": "francisco",
-   "role": "Humano — Francisco",
-   "desc": "workspace fundador",
-   "gateway": {
-    "up": false,
-    "pid": null
-   },
-   "crons": []
-  },
-  {
-   "name": "duarte",
-   "role": "Humano — Duarte",
-   "desc": "frota / turismo",
-   "gateway": {
-    "up": false,
-    "pid": null
-   },
-   "crons": []
-  },
-  {
-   "name": "vianta",
-   "role": "Humano — Equipa",
-   "desc": "workspace equipa",
-   "gateway": {
-    "up": false,
-    "pid": null
-   },
-   "crons": [
-    {
-     "id": "92832b2e108d",
-     "name": "choicecar-driver-vianta",
-     "owner": "jarvis",
-     "schedule": "every 120m",
-     "state": "paused",
-     "enabled": false,
-     "last_run_at": "2026-10-22T11:08:04.300666+00:00",
-     "last_status": "error",
-     "last_error": "Script exited with code 1\nstdout:\nToken refresh failed: {\n  \"error\": \"invalid_grant\",\n  \"error_description\": \"Token has been expired or revoked.\"\n}",
-     "script": "preencher_choicecar_driver_vianta.py",
-     "no_agent": true,
-     "skills": [],
-     "monitor_script": null,
-     "failure_streak": 1,
-     "next_run_at": "2026-10-22T13:08:04.300666+00:00",
-     "paused_at": null
-    }
-   ]
   }
  ],
  "gateways": {
@@ -357,32 +268,15 @@
    "up": false,
    "pid": null
   },
-  "duarte": {
-   "up": false,
-   "pid": null
-  },
-  "francisco": {
-   "up": false,
-   "pid": null
-  },
   "jarvis": {
    "up": true,
    "pid": "184780"
-  },
-  "vianta": {
-   "up": false,
-   "pid": null
   }
  },
  "skills": [
   {
    "name": "email-inbox-monitor",
    "description": "Use when monitoring inbox for planning email arrival.",
-   "tags": []
-  },
-  {
-   "name": "vianta-agente-mestre",
-   "description": "System prompt do Agente Comercial Vianta TVDE. Processa leads, consulta stock Supabase, responde diretamente via GHL. Canal-independente.",
    "tags": []
   },
   {
@@ -474,7 +368,7 @@
  ],
  "supabase": {
   "carros": 153,
-  "transfers": 168,
+  "transfers": 169,
   "cc_services": 162,
   "cc_offers": 158
  },
