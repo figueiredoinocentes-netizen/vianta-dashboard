@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-29T19:12:28+00:00",
+ "generated_at": "2026-10-29T19:45:29+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-29T19:11:29.302572+00:00",
+     "last_run_at": "2026-10-29T19:44:30.417101+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-29T19:12:29.302572+00:00",
+     "next_run_at": "2026-10-29T19:45:30.417101+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-29T19:01:32.226121+00:00",
+     "last_run_at": "2026-10-29T19:34:32.951175+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-29T19:22:28.563394+00:00",
+     "next_run_at": "2026-10-29T19:55:29.454063+00:00",
      "paused_at": null
     },
     {
@@ -132,15 +132,15 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-29T18:57:28.297660+00:00",
+     "last_run_at": "2026-10-29T19:27:28.989892+00:00",
      "last_status": "error",
      "last_error": "Script not found: /opt/data/profiles/jarvis/scripts/monitor_newsletter_replies.py",
      "script": null,
      "no_agent": false,
      "skills": [],
      "monitor_script": "monitor_newsletter_replies.py",
-     "failure_streak": 109,
-     "next_run_at": "2026-10-29T19:27:28.297660+00:00",
+     "failure_streak": 110,
+     "next_run_at": "2026-10-29T19:57:28.989892+00:00",
      "paused_at": null
     },
     {
@@ -197,7 +197,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-29T19:27:24.142539+00:00",
+     "next_run_at": "2026-10-29T19:57:29.290088+00:00",
      "paused_at": null
     },
     {
