@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-29T15:54:11+00:00",
+ "generated_at": "2026-10-29T16:27:19+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-29T15:53:19.867176+00:00",
+     "last_run_at": "2026-10-29T16:27:20.235330+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-29T15:54:19.867176+00:00",
+     "next_run_at": "2026-10-29T16:28:20.235330+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-29T15:43:11.569015+00:00",
+     "last_run_at": "2026-10-29T16:16:19.122499+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-29T16:04:11.221924+00:00",
+     "next_run_at": "2026-10-29T16:37:19.116723+00:00",
      "paused_at": null
     },
     {
@@ -113,8 +113,8 @@
      "owner": "jarvis",
      "schedule": "every 120m",
      "state": "scheduled",
-     "enabled": true,
-     "last_run_at": "2026-10-29T14:02:43.277076+00:00",
+     "enabled": false,
+     "last_run_at": "2026-10-29T16:11:41.858347+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -122,8 +122,8 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-29T16:02:43.277076+00:00",
-     "paused_at": null
+     "next_run_at": "2026-10-29T18:11:41.858347+00:00",
+     "paused_at": "2026-10-29T16:20:00+00:00"
     },
     {
      "id": "17d27753e112",
@@ -132,15 +132,15 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-29T15:27:04.325255+00:00",
+     "last_run_at": "2026-10-29T16:27:19.267756+00:00",
      "last_status": "error",
      "last_error": "Script not found: /opt/data/profiles/jarvis/scripts/monitor_newsletter_replies.py",
      "script": null,
      "no_agent": false,
      "skills": [],
      "monitor_script": "monitor_newsletter_replies.py",
-     "failure_streak": 102,
-     "next_run_at": "2026-10-29T15:57:04.325255+00:00",
+     "failure_streak": 104,
+     "next_run_at": "2026-10-29T16:57:19.267756+00:00",
      "paused_at": null
     },
     {
@@ -186,7 +186,7 @@
      "schedule": "every 15m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-29T15:41:49.882229+00:00",
+     "last_run_at": "2026-10-29T16:26:34.516129+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -197,7 +197,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-29T15:56:49.882229+00:00",
+     "next_run_at": "2026-10-29T16:41:34.516129+00:00",
      "paused_at": null
     },
     {
