@@ -12,6 +12,7 @@ import Planeamento from "./pages/Planeamento";
 import Stock from "./pages/Stock";
 import NotFound from "./pages/NotFound";
 import OperacoesLayout from "./pages/operacoes/OperacoesLayout";
+import AiosPage from "./pages/AiosPage";
 import OpsVisao from "./pages/operacoes/OpsVisao";
 import OpsFrota from "./pages/operacoes/OpsFrota";
 import OpsStock from "./pages/operacoes/OpsStock";
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/stock" element={<Stock />} />
           <Route path="/assistente" element={<Assistant />} />
           <Route path="/configuracoes" element={<Configuracoes />} />
+          <Route path="/aios" element={<AiosPage />} />
           <Route path="/operacoes" element={<OperacoesLayout />}>
             <Route index element={<OpsVisao />} />
             <Route path="frota" element={<OpsFrota />} />
