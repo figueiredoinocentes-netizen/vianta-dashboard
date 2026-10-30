@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-30T06:40:44+00:00",
+ "generated_at": "2026-10-30T07:13:54+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-30T06:40:45.636925+00:00",
+     "last_run_at": "2026-10-30T07:12:54.676738+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-30T06:41:45.636925+00:00",
+     "next_run_at": "2026-10-30T07:13:54.676738+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-30T06:29:44.573010+00:00",
+     "last_run_at": "2026-10-30T07:02:54.018702+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-30T06:50:44.581542+00:00",
+     "next_run_at": "2026-10-30T07:23:54.319872+00:00",
      "paused_at": null
     },
     {
@@ -132,15 +132,15 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-30T06:28:41.497794+00:00",
+     "last_run_at": "2026-10-30T06:58:49.908185+00:00",
      "last_status": "error",
      "last_error": "Script not found: /opt/data/profiles/jarvis/scripts/monitor_newsletter_replies.py",
      "script": null,
      "no_agent": false,
      "skills": [],
      "monitor_script": "monitor_newsletter_replies.py",
-     "failure_streak": 132,
-     "next_run_at": "2026-10-30T06:58:41.497794+00:00",
+     "failure_streak": 133,
+     "next_run_at": "2026-10-30T07:28:49.908185+00:00",
      "paused_at": null
     },
     {
@@ -186,7 +186,7 @@
      "schedule": "every 15m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-30T06:32:51.370424+00:00",
+     "last_run_at": "2026-10-30T07:08:08.472579+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -197,7 +197,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-30T06:47:51.370424+00:00",
+     "next_run_at": "2026-10-30T07:23:08.472579+00:00",
      "paused_at": null
     },
     {
