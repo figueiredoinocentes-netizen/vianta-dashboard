@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-02T11:44:56+00:00",
+ "generated_at": "2026-11-02T12:18:04+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-02T11:43:17.868354+00:00",
+     "last_run_at": "2026-11-02T12:18:05.815807+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-02T11:45:56.708869+00:00",
+     "next_run_at": "2026-11-02T12:19:05.815807+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-02T11:33:57.229103+00:00",
+     "last_run_at": "2026-11-02T12:07:07.469289+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-02T11:54:56.724285+00:00",
+     "next_run_at": "2026-11-02T12:28:04.219745+00:00",
      "paused_at": null
     },
     {
@@ -132,15 +132,15 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-02T11:39:55.508344+00:00",
+     "last_run_at": "2026-11-02T12:10:03.977091+00:00",
      "last_status": "error",
      "last_error": "Script not found: /opt/data/profiles/jarvis/scripts/monitor_newsletter_replies.py",
      "script": null,
      "no_agent": false,
      "skills": [],
      "monitor_script": "monitor_newsletter_replies.py",
-     "failure_streak": 286,
-     "next_run_at": "2026-11-02T12:09:55.508344+00:00",
+     "failure_streak": 287,
+     "next_run_at": "2026-11-02T12:40:03.977091+00:00",
      "paused_at": null
     },
     {
@@ -186,7 +186,7 @@
      "schedule": "every 15m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-02T11:28:20.411129+00:00",
+     "last_run_at": "2026-11-02T12:04:19.490084+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -197,7 +197,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-02T11:58:56.387943+00:00",
+     "next_run_at": "2026-11-02T12:19:19.490084+00:00",
      "paused_at": null
     },
     {
@@ -246,15 +246,33 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-02T11:21:50.045099+00:00",
+     "last_run_at": "2026-11-02T11:51:59.658418+00:00",
      "last_status": "error",
      "last_error": "Script not found: /opt/data/profiles/jarvis/scripts/check_choicecar_escala.py",
      "script": null,
      "no_agent": false,
      "skills": [],
      "monitor_script": "check_choicecar_escala.py",
-     "failure_streak": 23,
-     "next_run_at": "2026-11-02T11:51:50.045099+00:00",
+     "failure_streak": 24,
+     "next_run_at": "2026-11-02T12:21:59.658418+00:00",
+     "paused_at": null
+    },
+    {
+     "id": "631e732d6c9f",
+     "name": "Auditoria Agente Comercial (10h)",
+     "owner": "agente-comercial",
+     "schedule": "every day at 10:00",
+     "state": "scheduled",
+     "enabled": true,
+     "last_run_at": "2026-11-02T12:05:35.635520+00:00",
+     "last_status": "ok",
+     "last_error": "",
+     "script": null,
+     "no_agent": false,
+     "skills": [],
+     "monitor_script": null,
+     "failure_streak": 0,
+     "next_run_at": "2026-11-03T10:00:00+00:00",
      "paused_at": null
     }
    ]
