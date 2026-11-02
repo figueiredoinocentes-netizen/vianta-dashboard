@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-02T15:36:13+00:00",
+ "generated_at": "2026-11-02T16:09:15+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-02T15:36:15.360330+00:00",
+     "last_run_at": "2026-11-02T16:08:16.462675+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-02T15:37:15.360330+00:00",
+     "next_run_at": "2026-11-02T16:09:16.462675+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-02T15:25:14.243768+00:00",
+     "last_run_at": "2026-11-02T15:58:18.158906+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-02T15:46:13.403626+00:00",
+     "next_run_at": "2026-11-02T16:19:14.964244+00:00",
      "paused_at": null
     },
     {
@@ -132,15 +132,15 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-02T15:10:10.865079+00:00",
+     "last_run_at": "2026-11-02T15:40:13.951081+00:00",
      "last_status": "error",
      "last_error": "Script not found: /opt/data/profiles/jarvis/scripts/monitor_newsletter_replies.py",
      "script": null,
      "no_agent": false,
      "skills": [],
      "monitor_script": "monitor_newsletter_replies.py",
-     "failure_streak": 293,
-     "next_run_at": "2026-11-02T15:40:10.865079+00:00",
+     "failure_streak": 294,
+     "next_run_at": "2026-11-02T16:10:13.951081+00:00",
      "paused_at": null
     },
     {
@@ -186,7 +186,7 @@
      "schedule": "every 15m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-02T15:31:27.420441+00:00",
+     "last_run_at": "2026-11-02T16:06:32.196683+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -197,7 +197,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-02T15:46:27.420441+00:00",
+     "next_run_at": "2026-11-02T16:21:32.196683+00:00",
      "paused_at": null
     },
     {
@@ -246,15 +246,15 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-02T15:22:11.356414+00:00",
+     "last_run_at": "2026-11-02T15:52:14.510856+00:00",
      "last_status": "error",
      "last_error": "Script not found: /opt/data/profiles/jarvis/scripts/check_choicecar_escala.py",
      "script": null,
      "no_agent": false,
      "skills": [],
      "monitor_script": "check_choicecar_escala.py",
-     "failure_streak": 31,
-     "next_run_at": "2026-11-02T15:52:11.356414+00:00",
+     "failure_streak": 32,
+     "next_run_at": "2026-11-02T16:22:14.510856+00:00",
      "paused_at": null
     },
     {
