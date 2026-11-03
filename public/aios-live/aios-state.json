@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-03T17:20:38+00:00",
+ "generated_at": "2026-11-03T17:52:16+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-03T17:19:39.273236+00:00",
+     "last_run_at": "2026-11-03T17:43:40.073902+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-03T17:20:39.273236+00:00",
+     "next_run_at": "2026-11-03T17:53:05.497559+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-03T17:09:42.625216+00:00",
+     "last_run_at": "2026-11-03T17:42:42.063520+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-03T17:30:37.988758+00:00",
+     "next_run_at": "2026-11-03T17:52:42.063520+00:00",
      "paused_at": null
     },
     {
@@ -150,7 +150,7 @@
      "schedule": "every 15m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-03T17:10:30.015961+00:00",
+     "last_run_at": "2026-11-03T17:42:16.134793+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -161,7 +161,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-03T17:25:30.015961+00:00",
+     "next_run_at": "2026-11-03T17:57:16.134793+00:00",
      "paused_at": null
     },
     {
@@ -210,7 +210,7 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-03T17:12:59.435763+00:00",
+     "last_run_at": "2026-11-03T17:49:41.205534+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -218,7 +218,7 @@
      "skills": [],
      "monitor_script": "check_choicecar_escala.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-03T17:42:59.435763+00:00",
+     "next_run_at": "2026-11-03T18:19:41.205534+00:00",
      "paused_at": null
     },
     {
@@ -264,8 +264,8 @@
      "name": "[Meta] Spend diário → meta_spend_daily",
      "owner": "jarvis",
      "schedule": "every day at 7:30am",
-     "state": "paused",
-     "enabled": false,
+     "state": "scheduled",
+     "enabled": true,
      "last_run_at": null,
      "last_status": null,
      "last_error": "",
@@ -275,7 +275,7 @@
      "monitor_script": null,
      "failure_streak": 0,
      "next_run_at": "2026-11-04T07:30:00+00:00",
-     "paused_at": "2026-11-03T17:12:59.542459+00:00"
+     "paused_at": null
     }
    ]
   },
@@ -470,8 +470,8 @@
    "note": "sync diário → Supabase (ver cron)"
   },
   "meta_ads": {
-   "ok": false,
-   "note": "sem token API (conta 293842623)"
+   "ok": true,
+   "note": "conta 293842623 via Composio; spend diário → meta_spend_daily (cron 07:30)"
   },
   "drive": {
    "ok": true,
@@ -479,7 +479,11 @@
   },
   "netlify": {
    "ok": true,
-   "note": "app transfers · gerador propostas · sandbox"
+   "note": "dashboard (vendas-data) · transfers · propostas"
+  },
+  "supabase_vendas": {
+   "ok": true,
+   "note": "vendas/meta_spend_daily/campanha_oferta (11/2026) — KPIs comerciais"
   }
  },
  "alerts": []
