@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-03T16:47:37+00:00",
+ "generated_at": "2026-11-03T17:20:38+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-03T16:47:38.732026+00:00",
+     "last_run_at": "2026-11-03T17:19:39.273236+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-03T16:48:38.732026+00:00",
+     "next_run_at": "2026-11-03T17:20:39.273236+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-03T16:36:39.876846+00:00",
+     "last_run_at": "2026-11-03T17:09:42.625216+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-03T16:57:37.108963+00:00",
+     "next_run_at": "2026-11-03T17:30:37.988758+00:00",
      "paused_at": null
     },
     {
@@ -144,31 +144,13 @@
      "paused_at": "2026-11-03T07:58:46.343217+00:00"
     },
     {
-     "id": "803dcb8c35d5",
-     "name": "[test] Decision Log 28.10",
-     "owner": "jarvis",
-     "schedule": "once in 1m",
-     "state": "completed",
-     "enabled": false,
-     "last_run_at": "2026-10-27T17:15:25.457607+00:00",
-     "last_status": "ok",
-     "last_error": "",
-     "script": null,
-     "no_agent": false,
-     "skills": [],
-     "monitor_script": null,
-     "failure_streak": 0,
-     "next_run_at": null,
-     "paused_at": null
-    },
-    {
      "id": "35a6e0fec9d7",
      "name": "[bot:agente-turismo] ChoiceCar auto-planeamento",
      "owner": "agente-turismo",
      "schedule": "every 15m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-03T16:38:26.955080+00:00",
+     "last_run_at": "2026-11-03T17:10:30.015961+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -179,7 +161,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-03T16:53:26.955080+00:00",
+     "next_run_at": "2026-11-03T17:25:30.015961+00:00",
      "paused_at": null
     },
     {
@@ -228,7 +210,7 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-03T16:39:40.769714+00:00",
+     "last_run_at": "2026-11-03T17:12:59.435763+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -236,7 +218,7 @@
      "skills": [],
      "monitor_script": "check_choicecar_escala.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-03T17:09:40.769714+00:00",
+     "next_run_at": "2026-11-03T17:42:59.435763+00:00",
      "paused_at": null
     },
     {
@@ -276,6 +258,24 @@
      "failure_streak": 0,
      "next_run_at": "2026-11-04T08:00:00+00:00",
      "paused_at": null
+    },
+    {
+     "id": "34ba5170866f",
+     "name": "[Meta] Spend diário → meta_spend_daily",
+     "owner": "jarvis",
+     "schedule": "every day at 7:30am",
+     "state": "paused",
+     "enabled": false,
+     "last_run_at": null,
+     "last_status": null,
+     "last_error": "",
+     "script": null,
+     "no_agent": false,
+     "skills": [],
+     "monitor_script": null,
+     "failure_streak": 0,
+     "next_run_at": "2026-11-04T07:30:00+00:00",
+     "paused_at": "2026-11-03T17:12:59.542459+00:00"
     }
    ]
   },
