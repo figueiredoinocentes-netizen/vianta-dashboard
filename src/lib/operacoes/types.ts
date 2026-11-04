@@ -103,6 +103,10 @@ export interface Movimento {
   comprovativo: string | null;
   obs: string | null;
   ocorrencia_id?: number | null;
+  /** Nº da fatura / documento do fornecedor (área Financeiro). */
+  n_documento?: string | null;
+  /** TVDE | Stand | Turismo | Geral (área Financeiro). A natureza do custo é `categoria`. */
+  centro_custo?: string | null;
 }
 
 /** Dano, avaria ou aviso numa viatura, com fotos (tabela `ocorrencias`). */

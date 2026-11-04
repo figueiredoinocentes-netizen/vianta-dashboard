@@ -6,6 +6,7 @@ import {
   BarChart2,
   RefreshCw,
   Layers,
+  Receipt,
   Settings,
   Gauge,
   Car,
@@ -41,6 +42,10 @@ const operacoesItems = [
   { to: '/operacoes/investidores', label: 'Investidores', icon: Handshake },
 ];
 
+const financeiroItems = [
+  { to: '/financeiro', label: 'Faturas de Custos', icon: Receipt, end: true },
+];
+
 const settingsItem = { to: '/configuracoes', label: 'Configurações', icon: Settings };
 const aiosItem = { to: '/aios', label: 'AI OS', icon: Bot };
 
@@ -64,7 +69,8 @@ const Sidebar = ({ aberto = false, onFechar }: SidebarProps) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const emOperacoes = location.pathname.startsWith('/operacoes');
-  const items = emOperacoes ? operacoesItems : aquisicaoItems;
+  const emFinanceiro = location.pathname.startsWith('/financeiro');
+  const items = emOperacoes ? operacoesItems : emFinanceiro ? financeiroItems : aquisicaoItems;
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -97,7 +103,7 @@ const Sidebar = ({ aberto = false, onFechar }: SidebarProps) => {
         <div>
           <h1 className="font-display font-bold text-sm text-foreground">Vianta</h1>
           <p className="text-[10px] text-muted-foreground">
-            {emOperacoes ? 'Central · Gestão de Frota' : 'Marketing & Comercial'}
+            {emOperacoes ? 'Central · Gestão de Frota' : emFinanceiro ? 'Financeiro · Custos' : 'Marketing & Comercial'}
           </p>
         </div>
       </div>
@@ -106,8 +112,9 @@ const Sidebar = ({ aberto = false, onFechar }: SidebarProps) => {
       <div className="px-3 pt-3">
         <div className="flex gap-1 rounded-lg bg-white/5 p-1">
           {[
-            { to: '/', label: 'Vendas', active: !emOperacoes },
+            { to: '/', label: 'Vendas', active: !emOperacoes && !emFinanceiro },
             { to: '/operacoes', label: 'Operações', active: emOperacoes },
+            { to: '/financeiro', label: 'Financeiro', active: emFinanceiro },
           ].map((tab) => (
             <NavLink
               key={tab.to}
