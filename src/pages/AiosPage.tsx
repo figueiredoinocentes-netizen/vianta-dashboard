@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode, useCallback } from 'react';
-import { RefreshCw, Cpu, Database, Zap, Mic, Square, Volume2, MicOff, MessageSquareText, Map as MapIcon, LayoutList } from 'lucide-react';
+import { RefreshCw, Cpu, Database, Zap, Mic, Square, Volume2, MicOff, MessageSquareText, Network, LayoutList } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
@@ -389,7 +389,7 @@ function VoiceAssistant() {
   );
 }
 
-type AiosView = 'mundo' | 'painel';
+type AiosView = 'organigrama' | 'painel';
 const VIEW_KEY = 'aios-view';
 
 function ViewSwitch({ view, onChange }: { view: AiosView; onChange: (v: AiosView) => void }) {
@@ -407,8 +407,98 @@ function ViewSwitch({ view, onChange }: { view: AiosView; onChange: (v: AiosView
   );
   return (
     <div className="flex items-center gap-2">
-      {btn('mundo', 'Mundo', <MapIcon className="h-3.5 w-3.5" />)}
+      {btn('organigrama', 'Organigrama', <Network className="h-3.5 w-3.5" />)}
       {btn('painel', 'Painel', <LayoutList className="h-3.5 w-3.5" />)}
+    </div>
+  );
+}
+
+function Branch({ children }: { children: ReactNode[] }) {
+  return (
+    <div className="flex flex-wrap justify-center">
+      {children.map((c, i) => (
+        <div
+          key={i}
+          className="relative flex flex-col items-center px-3 pt-6 before:absolute before:left-0 before:top-0 before:h-6 before:w-1/2 before:border-r before:border-t before:border-slate-600 first:before:border-t-0 after:absolute after:right-0 after:top-0 after:h-6 after:w-1/2 after:border-t after:border-slate-600 last:after:border-t-0"
+        >
+          {c}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const Stem = () => <div className="mx-auto h-6 w-px bg-slate-600" />;
+
+function OrgNode({ p, kind, tag }: { p: Profile; kind: 'ceo' | 'bot' | 'team'; tag: string }) {
+  const gw = p.gateway;
+  const border = kind === 'ceo' ? 'border-cyan-500/60' : kind === 'bot' ? 'border-amber-500/50' : 'border-border';
+  const crons = p.crons || [];
+  const live = crons.filter((c) => c.state !== 'paused');
+  return (
+    <div className={cn('w-[270px] rounded-xl border bg-card p-3', border)}>
+      <div className="flex items-center gap-2">
+        <Dot kind={gw ? (gw.up ? 'ok' : 'err') : 'off'} />
+        <span className="text-sm font-semibold text-foreground">{p.name}</span>
+        <code className="ml-auto rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">{tag}</code>
+      </div>
+      <div className="mt-1 text-[11px] text-muted-foreground">{p.role}</div>
+      {gw && <div className={cn('mt-1 text-[11px]', gw.up ? 'text-emerald-400' : 'text-rose-400')}>gateway {gw.up ? 'up' : 'down'}</div>}
+      {crons.length > 0 && (
+        <details className="mt-2" open={kind === 'ceo'}>
+          <summary className="cursor-pointer text-[11px] text-cyan-400">
+            {crons.length} tarefas agendadas · {live.length} ativas
+          </summary>
+          <div className="mt-1 space-y-1">
+            {crons.map((c) => (
+              <div key={c.id} title={c.last_error || c.name} className="flex items-center gap-2 rounded bg-background/60 px-2 py-1 text-[11px]">
+                <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', dotClass(c.state === 'paused' ? 'paused' : c.last_status))} />
+                <span className={cn('truncate', c.state === 'paused' && 'text-muted-foreground line-through')}>{c.name}</span>
+                <span className="ml-auto shrink-0 text-[10px] text-muted-foreground">{c.schedule || ''}</span>
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
+    </div>
+  );
+}
+
+function OrgChart({ state }: { state: AiosState }) {
+  const find = (n: string) => (state.profiles || []).find((x) => x.name === n);
+  const humans = ['francisco', 'duarte', 'vianta'].map(find).filter(Boolean) as Profile[];
+  const bots = ['turismo-frota', 'agente-comercial'].map(find).filter(Boolean) as Profile[];
+  const jarvis = find('jarvis');
+  const sb = state.supabase || {};
+  const tools: [string, string][] = [
+    ['Skills', String(state.skills?.length || 0)],
+    ['MCP', (state.mcp || []).map((m) => m.name).join(', ') || '—'],
+    ['GHL', state.ghl?.ok ? 'ok' : 'sem resposta'],
+    ['Carros', String(sb.carros ?? '—')],
+    ['Transfers', String(sb.transfers ?? '—')],
+    ...Object.entries(state.integrations || {}).map(([k, v]) => [k, v.ok === true ? 'ok' : v.ok === false ? 'falha' : '—'] as [string, string]),
+  ];
+  return (
+    <div className="overflow-x-auto p-6">
+      <div className="mx-auto flex w-max min-w-full flex-col items-center">
+        <div className="mb-1 text-[10px] uppercase tracking-wider text-muted-foreground">Pessoas</div>
+        <div className="flex gap-3">{humans.map((h) => <OrgNode key={h.name} p={h} kind="team" tag="humano" />)}</div>
+        <Stem />
+        {jarvis && <OrgNode p={jarvis} kind="ceo" tag="CEO" />}
+        <Stem />
+        <Branch>{bots.map((b) => <OrgNode key={b.name} p={b} kind="bot" tag="bot" />)}</Branch>
+        <Stem />
+        <div className="max-w-3xl rounded-xl border border-border bg-card p-3">
+          <div className="mb-2 text-[10px] uppercase tracking-wider text-muted-foreground">Ferramentas e dados</div>
+          <div className="flex flex-wrap justify-center gap-2">
+            {tools.map(([k, v]) => (
+              <span key={k} className="rounded-full border border-border px-2.5 py-1 text-[11px] text-muted-foreground">
+                {k} <b className="text-foreground">{v}</b>
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -418,7 +508,7 @@ const AiosPage = () => {
   const [failed, setFailed] = useState(false);
   const [now, setNow] = useState(Date.now());
   const [view, setViewState] = useState<AiosView>(() => {
-    try { return localStorage.getItem(VIEW_KEY) === 'painel' ? 'painel' : 'mundo'; } catch { return 'mundo'; }
+    try { return localStorage.getItem(VIEW_KEY) === 'painel' ? 'painel' : 'organigrama'; } catch { return 'organigrama'; }
   });
   const setView = (v: AiosView) => {
     setViewState(v);
@@ -446,18 +536,20 @@ const AiosPage = () => {
 
   const crons = useMemo(() => (state?.profiles || []).flatMap((p) => (p.crons || []).map((c) => ({ ...c, owner: c.owner || p.name }))), [state]);
 
-  if (view === 'mundo') {
+  if (view === 'organigrama') {
     return (
       <DashboardLayout>
-        <div className="flex items-center gap-3 border-b border-border px-4 py-2">
+        <div className="flex flex-wrap items-center gap-3 border-b border-border px-4 py-2">
           <h1 className="font-display text-sm font-bold text-foreground">AI OS</h1>
           <ViewSwitch view={view} onChange={setView} />
+          <button onClick={load} className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs text-muted-foreground hover:text-foreground">
+            <RefreshCw className="h-3.5 w-3.5" /> Atualizar
+          </button>
+          {state && <span className="text-xs text-muted-foreground">snapshot há {rel(state.generated_at)}</span>}
         </div>
-        <iframe
-          title="AI OS — Mundo Vianta"
-          src="/aios-live/mundo.html"
-          className="block h-[calc(100dvh-100px)] w-full border-0 lg:h-[calc(100dvh-49px)]"
-        />
+        {failed || !state
+          ? <div className="p-6 text-sm text-muted-foreground">{failed ? 'Não consegui ler o estado do AI OS.' : 'A carregar…'}</div>
+          : <OrgChart state={state} />}
       </DashboardLayout>
     );
   }
