@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { FileText, Plus, RefreshCw, Search, X } from 'lucide-react';
+import { ExternalLink, Plus, RefreshCw, Search, X } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,9 +7,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { EmptyState, ErrorBox, NativeSelect, hideCols } from '@/components/operacoes/shared';
 import { FaturaDialog } from '@/components/financeiro/FaturaDialog';
+import { FaturaThumb, FaturaViewer } from '@/components/financeiro/FaturaPreview';
 import { useCarros, useFinanceiro, useRefreshOperacoes } from '@/hooks/useOperacoes';
 import { eur } from '@/lib/operacoes/custos';
-import { faturaUrl } from '@/lib/operacoes/central';
 import type { Movimento } from '@/lib/operacoes/types';
 import { CENTROS_CUSTO, eCusto, mesDe, naturezasSugeridas, nomeMes, valorSemIva } from '@/lib/financeiro';
 import { cn } from '@/lib/utils';
@@ -28,6 +28,7 @@ export default function FinanceiroFaturas() {
   const [natureza, setNatureza] = useState('');
   const [mes, setMes] = useState('');
   const [dialog, setDialog] = useState<{ open: boolean; mov: Movimento | null }>({ open: false, mov: null });
+  const [ver, setVer] = useState<Movimento | null>(null);
 
   const carroPorId = useMemo(() => new Map(carros.map((c) => [c.id, c])), [carros]);
   const custos = useMemo(
@@ -195,15 +196,17 @@ export default function FinanceiroFaturas() {
                     <TableCell>{m.contraparte || ''}</TableCell>
                     <TableCell className="whitespace-nowrap">{carro?.matricula || ''}</TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
-                      {m.ficheiro || m.comprovativo ? (
+                      {m.ficheiro ? (
+                        <FaturaThumb path={m.ficheiro} nome={m.ficheiro_nome} onClick={() => setVer(m)} />
+                      ) : m.comprovativo ? (
                         <a
-                          href={m.ficheiro ? faturaUrl(m.ficheiro) : m.comprovativo!}
+                          href={m.comprovativo}
                           target="_blank"
                           rel="noreferrer"
-                          title={m.ficheiro_nome || 'Abrir fatura'}
-                          className="inline-flex items-center gap-1 text-primary hover:underline"
+                          title="Abrir comprovativo na Drive"
+                          className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
                         >
-                          <FileText className="h-4 w-4" /> Abrir
+                          <ExternalLink className="h-3.5 w-3.5" /> Drive
                         </a>
                       ) : (
                         <span className="text-xs text-muted-foreground">—</span>
@@ -221,6 +224,12 @@ export default function FinanceiroFaturas() {
         </div>
       )}
 
+      <FaturaViewer
+        path={ver?.ficheiro || null}
+        nome={ver?.ficheiro_nome}
+        titulo={ver ? [ver.contraparte, ver.n_documento].filter(Boolean).join(' · ') : undefined}
+        onClose={() => setVer(null)}
+      />
       <FaturaDialog
         open={dialog.open}
         mov={dialog.mov}
