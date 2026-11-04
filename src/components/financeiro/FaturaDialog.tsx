@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DateField } from '@/components/operacoes/DateField';
 import { DeleteConfirm, Field, NativeSelect } from '@/components/operacoes/shared';
-import { updateCentralField } from '@/lib/operacoes/central';
+import { MAX_FATURA_MB, faturaUrl, updateCentralField, uploadFatura } from '@/lib/operacoes/central';
 import { eur, toNum } from '@/lib/operacoes/custos';
 import type { Carro, Movimento } from '@/lib/operacoes/types';
 import { CENTROS_CUSTO } from '@/lib/financeiro';
@@ -60,10 +60,14 @@ export function FaturaDialog({
   const { create, remove } = useCentralWrites('financeiro');
   const [form, setForm] = useState<Form>(formDe(mov));
   const [saving, setSaving] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
   const set = (k: keyof Form, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   useEffect(() => {
-    if (open) setForm(formDe(mov));
+    if (open) {
+      setForm(formDe(mov));
+      setFile(null);
+    }
   }, [open, mov]);
 
   // Linhas antigas só com o total c/ IVA registado.
@@ -99,6 +103,10 @@ export function FaturaDialog({
 
     setSaving(true);
     try {
+      if (file) {
+        campos.ficheiro = await uploadFatura(file, form.data);
+        campos.ficheiro_nome = file.name;
+      }
       if (!mov) {
         await create.mutateAsync({ tipo: 'Custo', ...campos });
       } else {
@@ -199,6 +207,26 @@ export function FaturaDialog({
                   </option>
                 ))}
               </NativeSelect>
+            </Field>
+            <Field label="Fatura original (PDF ou imagem)" className="sm:col-span-2">
+              <Input
+                type="file"
+                accept="application/pdf,image/*"
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+              />
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                {mov?.ficheiro ? (
+                  <>
+                    Já guardada:{' '}
+                    <a href={faturaUrl(mov.ficheiro)} target="_blank" rel="noreferrer" className="text-primary underline">
+                      {mov.ficheiro_nome || 'abrir fatura'}
+                    </a>
+                    {file ? ' — vai ser substituída.' : ''}
+                  </>
+                ) : (
+                  `Fica guardada na base de dados (máx. ${MAX_FATURA_MB} MB).`
+                )}
+              </p>
             </Field>
             {mov?.comprovativo && (
               <a

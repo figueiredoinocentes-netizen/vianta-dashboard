@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Plus, RefreshCw, Search, X } from 'lucide-react';
+import { FileText, Plus, RefreshCw, Search, X } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { EmptyState, ErrorBox, NativeSelect, hideCols } from '@/components/opera
 import { FaturaDialog } from '@/components/financeiro/FaturaDialog';
 import { useCarros, useFinanceiro, useRefreshOperacoes } from '@/hooks/useOperacoes';
 import { eur } from '@/lib/operacoes/custos';
+import { faturaUrl } from '@/lib/operacoes/central';
 import type { Movimento } from '@/lib/operacoes/types';
 import { CENTROS_CUSTO, eCusto, mesDe, naturezasSugeridas, nomeMes, valorSemIva } from '@/lib/financeiro';
 import { cn } from '@/lib/utils';
@@ -167,6 +168,7 @@ export default function FinanceiroFaturas() {
                 <TableHead>Natureza do custo</TableHead>
                 <TableHead>Fornecedor</TableHead>
                 <TableHead>Viatura</TableHead>
+                <TableHead>Fatura</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -192,6 +194,21 @@ export default function FinanceiroFaturas() {
                     <TableCell>{m.categoria || ''}</TableCell>
                     <TableCell>{m.contraparte || ''}</TableCell>
                     <TableCell className="whitespace-nowrap">{carro?.matricula || ''}</TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      {m.ficheiro || m.comprovativo ? (
+                        <a
+                          href={m.ficheiro ? faturaUrl(m.ficheiro) : m.comprovativo!}
+                          target="_blank"
+                          rel="noreferrer"
+                          title={m.ficheiro_nome || 'Abrir fatura'}
+                          className="inline-flex items-center gap-1 text-primary hover:underline"
+                        >
+                          <FileText className="h-4 w-4" /> Abrir
+                        </a>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
                   </TableRow>
                 );
               })}

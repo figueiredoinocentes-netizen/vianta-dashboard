@@ -107,6 +107,9 @@ export interface Movimento {
   n_documento?: string | null;
   /** TVDE | Stand | Turismo | Geral (área Financeiro). A natureza do custo é `categoria`. */
   centro_custo?: string | null;
+  /** Caminho do ficheiro original da fatura no bucket privado `faturas` (Supabase Storage). */
+  ficheiro?: string | null;
+  ficheiro_nome?: string | null;
 }
 
 /** Dano, avaria ou aviso numa viatura, com fotos (tabela `ocorrencias`). */

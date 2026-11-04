@@ -110,6 +110,31 @@ export async function uploadFoto(file: File, prefix?: string): Promise<string> {
   return (d as { url: string }).url;
 }
 
+// ── Ficheiro original das faturas (Supabase Storage, bucket privado `faturas`) ──
+
+export const MAX_FATURA_MB = 4; // limite do corpo das funções Netlify (~6 MB em base64)
+
+export async function uploadFatura(file: File, data?: string): Promise<string> {
+  if (file.size > MAX_FATURA_MB * 1024 * 1024) throw new Error(`ficheiro maior que ${MAX_FATURA_MB} MB`);
+  const dataBase64 = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve((reader.result as string).split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+  const r = await fetch(`${BASE}/fatura-ficheiro`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ filename: file.name, contentType: file.type || 'application/pdf', dataBase64, data }),
+  });
+  const d = await readJson(r);
+  if (!r.ok) throw new Error((d as { error?: string }).error || 'Erro ao guardar o ficheiro');
+  return (d as { path: string }).path;
+}
+
+/** Abre o ficheiro por um URL assinado temporário (a função redireciona). */
+export const faturaUrl = (path: string) => `${BASE}/fatura-ficheiro?path=${encodeURIComponent(path)}`;
+
 // ── Documentos da viatura (Google Drive) ──
 
 export async function listDriveFiles(
