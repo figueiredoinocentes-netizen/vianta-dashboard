@@ -39,6 +39,8 @@ export interface Carro {
   fotos?: string[] | null;
   obs?: string | null;
   preco_compra?: string | number | null;
+  /** 'Compra' (fatura de compra no Financeiro) | 'Consignação'. Viaturas antigas: null. */
+  aquisicao?: string | null;
 }
 
 export interface Motorista {

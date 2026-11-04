@@ -33,7 +33,10 @@ export const eur = (n: number) => {
 export const semIva = (m: Movimento) => (m.valor_sem_iva != null ? toNum(m.valor_sem_iva) : toNum(m.valor));
 
 export function resumoCarro(carro: Carro, movs: Movimento[]) {
-  const custos = -movs.filter((m) => toNum(m.valor) < 0).reduce((a, m) => a + semIva(m), 0);
+  // A fatura de compra (tipo 'Compra') já entra pelo `preco_compra`: não conta como custo.
+  const custos = -movs
+    .filter((m) => toNum(m.valor) < 0 && m.tipo !== 'Compra')
+    .reduce((a, m) => a + semIva(m), 0);
   const receitas = movs.filter((m) => toNum(m.valor) > 0).reduce((a, m) => a + semIva(m), 0);
   const compra = toNum(carro.preco_compra);
   const venda = carro.tipo_gestao === 'Venda' ? toNum(carro.preco_venda) : 0;
