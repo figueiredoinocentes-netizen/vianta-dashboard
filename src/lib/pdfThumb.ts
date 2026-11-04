@@ -41,7 +41,7 @@ export function miniaturaPdf(url: string, largura = 160): Promise<string> {
   if (!p) {
     p = comVez(async () => {
       const pdfjs = await loadPdfJs();
-      if (!worker) worker = new pdfjs.PDFWorker({ name: 'faturas-miniaturas' });
+      if (!worker) worker = new pdfjs.PDFWorker();
       const doc = await pdfjs.getDocument({ url, worker }).promise;
       try {
         const page = await doc.getPage(1);
