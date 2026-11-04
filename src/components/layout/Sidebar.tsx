@@ -16,6 +16,7 @@ import {
   Package,
   Handshake,
   Bot,
+  PanelLeftClose,
 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
@@ -56,9 +57,12 @@ interface SidebarProps {
   /** Só relevante em ecrãs pequenos: a barra lateral abre como gaveta. */
   aberto?: boolean;
   onFechar?: () => void;
+  /** Ecrãs grandes: menu escondido para a página ocupar o ecrã todo. */
+  recolhido?: boolean;
+  onRecolher?: () => void;
 }
 
-const Sidebar = ({ aberto = false, onFechar }: SidebarProps) => {
+const Sidebar = ({ aberto = false, onFechar, recolhido = false, onRecolher }: SidebarProps) => {
   const location = useLocation();
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -87,19 +91,31 @@ const Sidebar = ({ aberto = false, onFechar }: SidebarProps) => {
     )}
     <aside
       className={cn(
-        'fixed left-0 top-0 z-50 h-[100dvh] w-64 max-w-[85vw] border-r border-border bg-sidebar flex flex-col transition-transform duration-200 lg:z-40 lg:translate-x-0',
+        'fixed left-0 top-0 z-50 h-[100dvh] w-64 max-w-[85vw] border-r border-border bg-sidebar flex flex-col transition-transform duration-200 lg:z-40',
         aberto ? 'translate-x-0' : '-translate-x-full',
+        recolhido ? 'lg:-translate-x-full' : 'lg:translate-x-0',
       )}
     >
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-6 border-b border-border">
         <img src={viantaLogo} alt="Vianta logo" className="h-9 w-9 rounded-lg object-contain" />
-        <div>
+        <div className="min-w-0 flex-1">
           <h1 className="font-display font-bold text-sm text-foreground">Vianta</h1>
           <p className="text-[10px] text-muted-foreground">
             {emOperacoes ? 'Central · Gestão de Frota' : 'Marketing & Comercial'}
           </p>
         </div>
+        {onRecolher && (
+          <button
+            type="button"
+            onClick={onRecolher}
+            aria-label="Recolher menu"
+            title="Recolher menu"
+            className="-mr-2 hidden rounded-md p-2 text-muted-foreground hover:bg-sidebar-accent hover:text-foreground lg:block"
+          >
+            <PanelLeftClose className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       {/* Vendas / Operações */}
