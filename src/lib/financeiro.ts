@@ -22,6 +22,9 @@ export function valorSemIva(m: Movimento): { valor: number; soTotal: boolean } {
   return { valor: Math.abs(toNum(m.valor)), soTotal: true };
 }
 
+/** PDF ou imagem, pelo nome/caminho do ficheiro. */
+export const ePdf = (nome?: string | null) => !/\.(jpe?g|png|webp|heic)$/i.test(nome || '');
+
 export const mesDe = (data: string | null) => (data ? data.slice(0, 7) : '');
 
 export function nomeMes(ym: string) {

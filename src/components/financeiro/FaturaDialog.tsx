@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -9,8 +9,9 @@ import { DeleteConfirm, Field, NativeSelect } from '@/components/operacoes/share
 import { MAX_FATURA_MB, faturaUrl, updateCentralField, uploadFatura } from '@/lib/operacoes/central';
 import { eur, toNum } from '@/lib/operacoes/custos';
 import type { Carro, Movimento } from '@/lib/operacoes/types';
-import { CENTROS_CUSTO } from '@/lib/financeiro';
+import { CENTROS_CUSTO, ePdf } from '@/lib/financeiro';
 import { errorMessage, useCentralWrites } from '@/hooks/useOperacoes';
+import { FaturaEmbed } from './FaturaPreview';
 
 const hoje = () => new Date().toISOString().slice(0, 10);
 const abs = (x: unknown) => (x == null || x === '' ? '' : String(Math.abs(toNum(x))).replace('.', ','));
@@ -62,6 +63,15 @@ export function FaturaDialog({
   const [saving, setSaving] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const set = (k: keyof Form, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  // Pré-visualização: o ficheiro acabado de escolher, ou o que já está guardado.
+  const fileUrl = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
+  useEffect(() => () => void (fileUrl && URL.revokeObjectURL(fileUrl)), [fileUrl]);
+  const preview = fileUrl
+    ? { src: fileUrl, pdf: file!.type === 'application/pdf' || ePdf(file!.name) }
+    : mov?.ficheiro
+      ? { src: faturaUrl(mov.ficheiro), pdf: ePdf(mov.ficheiro_nome || mov.ficheiro) }
+      : null;
 
   useEffect(() => {
     if (open) {
@@ -143,10 +153,14 @@ export function FaturaDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl" aria-describedby={undefined}>
+      <DialogContent
+        className={`max-h-[94vh] overflow-y-auto ${preview ? 'max-w-[min(96vw,1400px)]' : 'max-w-2xl'}`}
+        aria-describedby={undefined}
+      >
         <DialogHeader>
           <DialogTitle>{mov ? 'Editar fatura de custo' : 'Nova fatura de custo'}</DialogTitle>
         </DialogHeader>
+        <div className={preview ? 'grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]' : ''}>
         <form onSubmit={onSubmit}>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Field label="Nº documento">
@@ -251,6 +265,8 @@ export function FaturaDialog({
             </div>
           </DialogFooter>
         </form>
+        {preview && <FaturaEmbed src={preview.src} pdf={preview.pdf} className={`hidden h-[80vh] ${preview.pdf ? 'lg:block' : 'lg:flex'}`} />}
+        </div>
       </DialogContent>
     </Dialog>
   );
