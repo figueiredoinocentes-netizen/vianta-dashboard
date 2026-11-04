@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode, useCallback } from 'react';
-import { RefreshCw, Cpu, Database, Zap, Mic, Square, Volume2, MicOff, MessageSquareText, Network, Gauge } from 'lucide-react';
+import { RefreshCw, Cpu, Database, Zap, Mic, Square, Volume2, MicOff, MessageSquareText, Network, Gauge, Orbit } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import Aios3DView from '@/components/aios3d/Aios3DView';
+import AiosGraph from '@/components/aios/AiosGraph';
+import { AIOS_GRAPH } from '@/data/aios-graph-data';
+import type { SnapState } from '@/lib/aios/orbitGraph';
 
 /**
  * AI OS — Live: o mesmo visualizador do estado do sistema (agentes, crons,
@@ -391,18 +394,23 @@ const AiosPage = () => {
   const [state, setState] = useState<AiosState | null>(null);
   const [failed, setFailed] = useState(false);
   const [now, setNow] = useState(Date.now());
-  const [viewMode, setViewMode] = useState<'graph' | 'table'>('graph');
+  const [viewMode, setViewMode] = useState<'orbit' | 'graph' | 'table'>('orbit');
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
   const load = async () => {
-    try {
-      const r = await fetch(`${STATE_URL}?t=${Date.now()}`);
-      if (!r.ok) throw new Error(String(r.status));
-      setState(await r.json());
-      setFailed(false);
-    } catch {
-      setFailed(true);
+    // Produção e deploy previews leem o snapshot publicado; em local (sem CORS) cai para o ficheiro do repo.
+    for (const url of [STATE_URL, '/aios-live/aios-state.json']) {
+      try {
+        const r = await fetch(`${url}?t=${Date.now()}`);
+        if (!r.ok) throw new Error(String(r.status));
+        setState(await r.json());
+        setFailed(false);
+        return;
+      } catch {
+        /* tenta o próximo */
+      }
     }
+    setFailed(true);
   };
 
   useEffect(() => {
@@ -483,7 +491,12 @@ const AiosPage = () => {
       )}
 
       {/* Toggle */}
-      <div className="flex items-center gap-2 border-b border-border pb-3">
+      <div className="flex flex-wrap items-center gap-2 border-b border-border pb-3">
+        <button onClick={() => setViewMode('orbit')}
+          className={cn('flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
+            viewMode === 'orbit' ? 'bg-primary/15 text-primary border border-primary/30' : 'text-muted-foreground hover:text-foreground border border-transparent')}>
+          <Orbit className="h-3.5 w-3.5" /> Órbita 3D
+        </button>
         <button onClick={() => setViewMode('graph')}
           className={cn('flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
             viewMode === 'graph' ? 'bg-primary/15 text-primary border border-primary/30' : 'text-muted-foreground hover:text-foreground border border-transparent')}>
@@ -498,13 +511,28 @@ const AiosPage = () => {
     </div>
   );
 
+  const renderOrbitView = () => (
+    <section className="overflow-hidden rounded-xl border border-[#141821]">
+      <Aios3DView state={state as SnapState} />
+    </section>
+  );
+
   const renderGraphView = () => (
-    <div className="space-y-4">
-      {/* Órbita 3D — Centro de Comando */}
-      <section className="overflow-hidden rounded-xl border border-[#141821]">
-        <Aios3DView onNodeSelect={(id) => setSelectedNode(id)} />
-      </section>
-    </div>
+    <section className="rounded-xl border border-border bg-card p-5">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-cyan-500">
+          <Network className="h-3.5 w-3.5" /> JaNIS — Mapa do AI OS
+        </h2>
+        <span className="text-[10px] text-muted-foreground/60">
+          {AIOS_GRAPH.nodes.length} nós · {AIOS_GRAPH.edges.length} conexões
+        </span>
+      </div>
+      <AiosGraph
+        selectedNodeId={selectedNode}
+        onNodeClick={(node) => setSelectedNode(node.id === selectedNode ? null : node.id)}
+        height={520}
+      />
+    </section>
   );
 
   const renderTableView = () => (
@@ -565,7 +593,7 @@ const AiosPage = () => {
             { name: 'Google Sheets', ok: true, note: 'DB Transfers · Drivers Transfers · propostas' },
             { name: 'Gmail', ok: true, note: 'geral@vianta.pt via Composio' },
             { name: 'Frota360', ok: null, note: 'sync diário → Supabase' },
-            { name: 'Meta Ads API', ok: false, note: 'conta 293842623 · sem token', meta: 'bloqueado' },
+            { name: 'Meta Ads API', ok: state.integrations?.meta_ads?.ok ?? null, note: state.integrations?.meta_ads?.note || 'via Composio', meta: state.integrations?.meta_ads?.ok === false ? 'bloqueado' : undefined },
             { name: 'Google Drive', ok: true, note: 'docs fonte autoritativa' },
             { name: 'Netlify', ok: true, note: 'app transfers · gerador propostas · dashboard' },
           ].map((it) => (
@@ -600,7 +628,7 @@ const AiosPage = () => {
     <DashboardLayout>
       <div className="space-y-4 p-6">
         {renderHeader()}
-        {viewMode === 'graph' ? renderGraphView() : renderTableView()}
+        {viewMode === 'orbit' ? renderOrbitView() : viewMode === 'graph' ? renderGraphView() : renderTableView()}
         <VoiceAssistant />
         <footer className="pb-4 text-center text-[10px] text-muted-foreground/60">
           snapshot gerado por aios_snapshot.py (cron 10 min) · atualização automática
