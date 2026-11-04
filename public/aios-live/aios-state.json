@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-04T00:28:41+00:00",
+ "generated_at": "2026-11-04T01:01:42+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-04T00:28:43.111929+00:00",
+     "last_run_at": "2026-11-04T01:00:43.976054+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-04T00:29:43.111929+00:00",
+     "next_run_at": "2026-11-04T01:01:43.976054+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-04T00:17:44.715828+00:00",
+     "last_run_at": "2026-11-04T00:50:45.444234+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-04T00:38:41.747067+00:00",
+     "next_run_at": "2026-11-04T01:11:42.504306+00:00",
      "paused_at": null
     },
     {
@@ -150,7 +150,7 @@
      "schedule": "every 15m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-04T00:14:59.325550+00:00",
+     "last_run_at": "2026-11-04T00:48:26.860272+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -161,7 +161,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-04T00:29:59.325550+00:00",
+     "next_run_at": "2026-11-04T01:03:26.860272+00:00",
      "paused_at": null
     },
     {
@@ -210,7 +210,7 @@
      "schedule": "every 30m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-04T00:01:44.883999+00:00",
+     "last_run_at": "2026-11-04T00:33:08.255616+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -218,7 +218,7 @@
      "skills": [],
      "monitor_script": "check_choicecar_escala.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-04T00:31:44.883999+00:00",
+     "next_run_at": "2026-11-04T01:03:08.255616+00:00",
      "paused_at": null
     },
     {
