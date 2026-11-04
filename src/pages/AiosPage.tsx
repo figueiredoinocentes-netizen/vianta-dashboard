@@ -2,8 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode, useCallback } fro
 import { RefreshCw, Cpu, Database, Zap, Mic, Square, Volume2, MicOff, MessageSquareText, Network, Gauge } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import AiosGraph from '@/components/aios/AiosGraph';
-import { AIOS_GRAPH, type GraphNode } from '@/data/aios-graph-data';
+import Aios3DView from '@/components/aios3d/Aios3DView';
 
 /**
  * AI OS — Live: o mesmo visualizador do estado do sistema (agentes, crons,
@@ -501,47 +500,9 @@ const AiosPage = () => {
 
   const renderGraphView = () => (
     <div className="space-y-4">
-      <section className="rounded-xl border border-border bg-card p-5">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-cyan-500">
-            <Network className="h-3.5 w-3.5" /> JaNIS — Mapa do AI OS
-          </h2>
-          <span className="text-[10px] text-muted-foreground/60">
-            {AIOS_GRAPH.nodes.length} nós · {AIOS_GRAPH.edges.length} conexões
-          </span>
-        </div>
-        <AiosGraph
-          selectedNodeId={selectedNode}
-          onNodeClick={(node) => setSelectedNode(node.id === selectedNode ? null : node.id)}
-          height={520}
-        />
-      </section>
-
-      <section className="rounded-xl border border-border bg-card p-5">
-        <h2 className="mb-4 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-cyan-500">
-          <Database className="h-3.5 w-3.5" /> Integrações & Bases de Dados
-        </h2>
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-3">
-          {[
-            { name: 'GHL CRM', ok: state.ghl?.ok ?? null, note: 'contacts · pipelines Aluguer + Venda · Messenger/IG', meta: state.ghl?.ok != null ? (state.ghl.ok ? 'health OK (200)' : 'health DOWN') : 'sem health' },
-            { name: 'Supabase', ok: true, note: 'fonte de verdade · stock carros · transfers · cc_*', meta: [sb.carros != null ? `carros ${sb.carros}` : '', sb.transfers != null ? `transfers ${sb.transfers}` : '', sb.cc_services != null ? `cc_services ${sb.cc_services}` : '', sb.cc_offers != null ? `cc_offers ${sb.cc_offers}` : ''].filter(Boolean).join(' · ') },
-            { name: 'Composio MCP', ok: true, note: 'Gmail · Sheets · Drive (conta duarte.inocentes@vianta.pt)' },
-            { name: 'Google Sheets', ok: true, note: 'DB Transfers · Drivers Transfers · propostas' },
-            { name: 'Gmail', ok: true, note: 'geral@vianta.pt via Composio' },
-            { name: 'Frota360', ok: null, note: 'sync diário → Supabase' },
-            { name: 'Meta Ads API', ok: false, note: 'conta 293842623 · sem token', meta: 'bloqueado' },
-            { name: 'Google Drive', ok: true, note: 'docs fonte autoritativa' },
-            { name: 'Netlify', ok: true, note: 'app transfers · gerador propostas · dashboard' },
-          ].map((it) => (
-            <div key={it.name} className="rounded-lg border border-border bg-background/50 p-3">
-              <div className="mb-1 flex items-center gap-2 text-[13px] font-semibold text-foreground">
-                <span className={cn('inline-block h-2 w-2 shrink-0 rounded-full', it.ok === true ? 'bg-emerald-400' : it.ok === false ? 'bg-rose-400' : 'bg-amber-400')} /> {it.name}
-              </div>
-              <div className="text-[11px] text-muted-foreground">{it.note}</div>
-              {'meta' in it && it.meta && <div className="mt-1 text-[10px] text-muted-foreground/70">{it.meta}</div>}
-            </div>
-          ))}
-        </div>
+      {/* Órbita 3D — Centro de Comando */}
+      <section className="overflow-hidden rounded-xl border border-[#141821]">
+        <Aios3DView onNodeSelect={(id) => setSelectedNode(id)} />
       </section>
     </div>
   );
