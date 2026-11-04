@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-23T16:20:38+00:00",
+ "generated_at": "2026-11-04T15:49:41+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -7,68 +7,9 @@
    "desc": "gateway Telegram \"Vianta Jarvis\" · delegate_task para bots",
    "gateway": {
     "up": true,
-    "pid": "6448"
+    "pid": "345687"
    },
    "crons": [
-    {
-     "id": "b70dfcd3e02a",
-     "name": "Agente Comercial — Draft (2 min)",
-     "owner": "francisco",
-     "schedule": "every 2m",
-     "state": "paused",
-     "enabled": false,
-     "last_run_at": "2026-10-08T10:03:28.266726+00:00",
-     "last_status": "ok",
-     "last_error": "",
-     "script": null,
-     "no_agent": false,
-     "skills": [
-      "vianta-agente-mestre",
-      "vianta-resposta-interessados"
-     ],
-     "monitor_script": "ghl_inbound_monitor.py",
-     "failure_streak": 0,
-     "next_run_at": "2026-10-08T10:05:28.266726+00:00",
-     "paused_at": "2026-10-08T10:14:11.826226+00:00"
-    },
-    {
-     "id": "9347a667f103",
-     "name": "Isabel Teixeira — reply monitor",
-     "owner": "francisco",
-     "schedule": "every 3m",
-     "state": "scheduled",
-     "enabled": true,
-     "last_run_at": "2026-10-23T16:19:38.818669+00:00",
-     "last_status": "ok",
-     "last_error": "",
-     "script": "ghl_monitor_isabel.py",
-     "no_agent": false,
-     "skills": [
-      "vianta-resposta-interessados"
-     ],
-     "monitor_script": "ghl_monitor_isabel.py",
-     "failure_streak": 0,
-     "next_run_at": "2026-10-23T16:22:38.818669+00:00",
-     "paused_at": null
-    },
-    {
-     "id": "82c50da40d01",
-     "name": "Auto-responder FB/IG (3 min)",
-     "owner": "jarvis",
-     "schedule": "every 3m",
-     "state": "paused",
-     "enabled": false,
-     "last_run_at": "2026-10-12T09:19:28.030842+00:00",
-     "last_status": "ok",
-     "last_error": "",
-     "script": "ghl_auto_responder.py",
-     "no_agent": true,
-     "skills": [],
-     "monitor_script": null,
-     "failure_streak": 0,
-     "next_run_at": "2026-10-12T09:22:28.030842+00:00",
-     "paused_at": "2026-10-12T09:20:17.446683+00:00"
-    },
     {
      "id": "2bec7cf09741",
      "name": "GHL daily report (10h)",
@@ -76,7 +17,7 @@
      "schedule": "every day at 10:00",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-23T10:00:57.803775+00:00",
+     "last_run_at": "2026-11-04T10:00:17.519821+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "ghl_daily_report.py",
@@ -84,7 +25,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-24T10:00:00+00:00",
+     "next_run_at": "2026-11-05T10:00:00+00:00",
      "paused_at": null
     },
     {
@@ -94,18 +35,17 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-23T16:19:39.311013+00:00",
+     "last_run_at": "2026-11-04T15:48:41.028031+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
      "no_agent": false,
      "skills": [
-      "vianta-agente-mestre",
       "vianta-resposta-interessados"
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-10-23T16:20:39.311013+00:00",
+     "next_run_at": "2026-11-04T15:49:41.028031+00:00",
      "paused_at": null
     },
     {
@@ -115,7 +55,7 @@
      "schedule": "every monday at 11:00",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-19T11:01:27.294660+00:00",
+     "last_run_at": "2026-11-02T11:02:25.456447+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -125,17 +65,17 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-26T11:00:00+00:00",
+     "next_run_at": "2026-11-09T11:00:00+00:00",
      "paused_at": null
     },
     {
      "id": "a0c963ecf74a",
-     "name": "[bot:turismo-frota] ChoiceCar sync check",
-     "owner": "turismo-frota",
+     "name": "[bot:agente-turismo] ChoiceCar sync check",
+     "owner": "agente-turismo",
      "schedule": "every 30m",
-     "state": "scheduled",
-     "enabled": true,
-     "last_run_at": "2026-10-23T15:50:38.619810+00:00",
+     "state": "paused",
+     "enabled": false,
+     "last_run_at": "2026-10-28T16:25:33.747292+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -146,8 +86,8 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-23T16:20:38.619810+00:00",
-     "paused_at": null
+     "next_run_at": "2026-10-28T16:55:33.747292+00:00",
+     "paused_at": "2026-10-28T16:28:48.006800+00:00"
     },
     {
      "id": "260e945eb436",
@@ -156,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-10-23T16:09:41.753666+00:00",
+     "last_run_at": "2026-11-04T15:38:44.093352+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -164,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-23T16:30:37.963518+00:00",
+     "next_run_at": "2026-11-04T15:59:40.425033+00:00",
      "paused_at": null
     },
     {
@@ -173,8 +113,8 @@
      "owner": "jarvis",
      "schedule": "every 120m",
      "state": "scheduled",
-     "enabled": true,
-     "last_run_at": "2026-10-23T15:54:17.846325+00:00",
+     "enabled": false,
+     "last_run_at": "2026-10-29T16:11:41.858347+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -182,7 +122,159 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-10-23T17:54:17.846325+00:00",
+     "next_run_at": "2026-10-29T18:11:41.858347+00:00",
+     "paused_at": "2026-10-29T16:20:00+00:00"
+    },
+    {
+     "id": "17d27753e112",
+     "name": "Newsletter replies — encaminhar p/ comercial",
+     "owner": "jarvis",
+     "schedule": "every 30m",
+     "state": "paused",
+     "enabled": false,
+     "last_run_at": "2026-11-03T07:42:44.920507+00:00",
+     "last_status": "error",
+     "last_error": "Script not found: /opt/data/profiles/jarvis/scripts/monitor_newsletter_replies.py",
+     "script": null,
+     "no_agent": false,
+     "skills": [],
+     "monitor_script": "monitor_newsletter_replies.py",
+     "failure_streak": 326,
+     "next_run_at": "2026-11-03T08:28:43.682384+00:00",
+     "paused_at": "2026-11-03T07:58:46.343217+00:00"
+    },
+    {
+     "id": "35a6e0fec9d7",
+     "name": "[bot:agente-turismo] ChoiceCar auto-planeamento",
+     "owner": "agente-turismo",
+     "schedule": "every 15m",
+     "state": "scheduled",
+     "enabled": true,
+     "last_run_at": "2026-11-04T15:35:24.976163+00:00",
+     "last_status": "ok",
+     "last_error": "",
+     "script": null,
+     "no_agent": false,
+     "skills": [
+      "vianta-choicecar-planeamento",
+      "vianta-choicecar-atualizacao"
+     ],
+     "monitor_script": null,
+     "failure_streak": 0,
+     "next_run_at": "2026-11-04T15:50:24.976163+00:00",
+     "paused_at": null
+    },
+    {
+     "id": "13a4bd84ca7e",
+     "name": "ChoiceCar pipeline 29/10",
+     "owner": "jarvis",
+     "schedule": "every 30m",
+     "state": "paused",
+     "enabled": false,
+     "last_run_at": "2026-10-28T16:34:12.679184+00:00",
+     "last_status": "error",
+     "last_error": "Script not found: /opt/data/profiles/jarvis/scripts/check_choicecar_new_emails.py",
+     "script": null,
+     "no_agent": false,
+     "skills": [],
+     "monitor_script": "check_choicecar_new_emails.py",
+     "failure_streak": 15,
+     "next_run_at": "2026-10-28T17:04:12.679184+00:00",
+     "paused_at": "2026-10-28T16:49:28.696232+00:00"
+    },
+    {
+     "id": "d0c629e8eaf7",
+     "name": "Agente Comercial — Follow-up WhatsApp (diário)",
+     "owner": "agente-comercial",
+     "schedule": "every day at 10:00",
+     "state": "scheduled",
+     "enabled": true,
+     "last_run_at": "2026-11-04T10:00:15.423279+00:00",
+     "last_status": "ok",
+     "last_error": "",
+     "script": null,
+     "no_agent": false,
+     "skills": [
+      "vianta-resposta-interessados",
+      "vianta-base-dados"
+     ],
+     "monitor_script": "ghl_followup_monitor.py",
+     "failure_streak": 0,
+     "next_run_at": "2026-11-05T10:00:00+00:00",
+     "paused_at": null
+    },
+    {
+     "id": "74b88d95fccf",
+     "name": "ChoiceCar escala fechada → resumo+mensagens",
+     "owner": "jarvis",
+     "schedule": "every 30m",
+     "state": "paused",
+     "enabled": false,
+     "last_run_at": "2026-11-04T15:05:45.157485+00:00",
+     "last_status": "ok",
+     "last_error": "",
+     "script": null,
+     "no_agent": false,
+     "skills": [],
+     "monitor_script": "check_choicecar_escala.py",
+     "failure_streak": 0,
+     "next_run_at": "2026-11-04T15:35:45.157485+00:00",
+     "paused_at": "2026-11-04T15:08:34.325791+00:00"
+    },
+    {
+     "id": "631e732d6c9f",
+     "name": "Auditoria Agente Comercial (10h)",
+     "owner": "agente-comercial",
+     "schedule": "every day at 10:00",
+     "state": "scheduled",
+     "enabled": true,
+     "last_run_at": "2026-11-04T10:24:31.010154+00:00",
+     "last_status": "ok",
+     "last_error": "",
+     "script": null,
+     "no_agent": false,
+     "skills": [],
+     "monitor_script": null,
+     "failure_streak": 0,
+     "next_run_at": "2026-11-05T10:00:00+00:00",
+     "paused_at": null
+    },
+    {
+     "id": "d07f2fa4ad77",
+     "name": "Vistoria AIOS (08:00)",
+     "owner": "jarvis",
+     "schedule": "every day at 08:00",
+     "state": "scheduled",
+     "enabled": true,
+     "last_run_at": "2026-11-04T08:00:27.924553+00:00",
+     "last_status": "ok",
+     "last_error": "",
+     "script": null,
+     "no_agent": false,
+     "skills": [
+      "vianta-aios-vistoria"
+     ],
+     "monitor_script": null,
+     "failure_streak": 0,
+     "next_run_at": "2026-11-05T08:00:00+00:00",
+     "paused_at": null
+    },
+    {
+     "id": "34ba5170866f",
+     "name": "[Meta] Spend diário → meta_spend_daily",
+     "owner": "jarvis",
+     "schedule": "every day at 7:30am",
+     "state": "scheduled",
+     "enabled": true,
+     "last_run_at": "2026-11-04T07:30:34.445849+00:00",
+     "last_status": "ok",
+     "last_error": "",
+     "script": null,
+     "no_agent": false,
+     "skills": [],
+     "monitor_script": null,
+     "failure_streak": 0,
+     "next_run_at": "2026-11-05T07:30:00+00:00",
      "paused_at": null
     }
    ]
@@ -198,63 +290,11 @@
    "crons": []
   },
   {
-   "name": "turismo-frota",
-   "role": "Bot Turismo / ChoiceCar",
-   "desc": "transfers · email ChoiceCar · cron 30 min",
-   "gateway": {
-    "up": false,
-    "pid": null
-   },
-   "crons": []
-  },
-  {
    "name": "francisco",
    "role": "Humano — Francisco",
    "desc": "workspace fundador",
-   "gateway": {
-    "up": false,
-    "pid": null
-   },
+   "gateway": null,
    "crons": []
-  },
-  {
-   "name": "duarte",
-   "role": "Humano — Duarte",
-   "desc": "frota / turismo",
-   "gateway": {
-    "up": false,
-    "pid": null
-   },
-   "crons": []
-  },
-  {
-   "name": "vianta",
-   "role": "Humano — Equipa",
-   "desc": "workspace equipa",
-   "gateway": {
-    "up": false,
-    "pid": null
-   },
-   "crons": [
-    {
-     "id": "92832b2e108d",
-     "name": "choicecar-driver-vianta",
-     "owner": "jarvis",
-     "schedule": "every 120m",
-     "state": "paused",
-     "enabled": false,
-     "last_run_at": "2026-10-22T11:08:04.300666+00:00",
-     "last_status": "error",
-     "last_error": "Script exited with code 1\nstdout:\nToken refresh failed: {\n  \"error\": \"invalid_grant\",\n  \"error_description\": \"Token has been expired or revoked.\"\n}",
-     "script": "preencher_choicecar_driver_vianta.py",
-     "no_agent": true,
-     "skills": [],
-     "monitor_script": null,
-     "failure_streak": 1,
-     "next_run_at": "2026-10-22T13:08:04.300666+00:00",
-     "paused_at": null
-    }
-   ]
   }
  ],
  "gateways": {
@@ -270,31 +310,23 @@
    "up": false,
    "pid": null
   },
-  "duarte": {
-   "up": false,
-   "pid": null
-  },
-  "francisco": {
+  "agente-turismo": {
    "up": false,
    "pid": null
   },
   "jarvis": {
    "up": true,
-   "pid": "6448"
+   "pid": "345687"
   },
-  "turismo-frota": {
-   "up": false,
-   "pid": null
-  },
-  "vianta": {
+  "media-buyer": {
    "up": false,
    "pid": null
   }
  },
  "skills": [
   {
-   "name": "vianta-agente-mestre",
-   "description": "System prompt do Agente Comercial Vianta TVDE. Processa leads, consulta stock Supabase, responde diretamente via GHL. Canal-independente.",
+   "name": "email-inbox-monitor",
+   "description": "Use when monitoring inbox for planning email arrival.",
    "tags": []
   },
   {
@@ -313,18 +345,23 @@
    "tags": []
   },
   {
-   "name": "vianta-choicecar-planeamento",
-   "description": "Use for ChoiceCar planning: parse emails and assign drivers.",
+   "name": "vianta-choicecar-atualizacao",
+   "description": "Use for ChoiceCar updates: add/modify/cancel services on an existing day sheet, re-assign only new/changed services.",
    "tags": []
   },
   {
-   "name": "vianta-comercial",
-   "description": "Use for Vianta commercial hub — ICP, offers, positioning.",
+   "name": "vianta-choicecar-planeamento",
+   "description": "Use for ChoiceCar planeamento: criar sheet do dia, destacar células, atribuir motoristas com tipo de veículo, notificar Pedro.",
    "tags": []
   },
   {
    "name": "vianta-composio",
    "description": "Use for Vianta Composio/MCP integrations and migrations.",
+   "tags": []
+  },
+  {
+   "name": "vianta-criacao-criativos",
+   "description": "Use for new ad creatives: input, refs, cross, prio.",
    "tags": []
   },
   {
@@ -339,7 +376,7 @@
   },
   {
    "name": "vianta-edicao-video",
-   "description": "Edit video: sync audio, cut pauses, add captions, export.",
+   "description": "Editar vídeo Vianta: cortes por energia, legendas, música, SFX, export.",
    "tags": []
   },
   {
@@ -348,13 +385,23 @@
    "tags": []
   },
   {
-   "name": "vianta-ghl-lead-automation",
-   "description": "Use for Vianta GHL auto-response: cron, monitors, scripts.",
+   "name": "vianta-learning-db",
+   "description": "Use to manage the Vianta Intelligence layer.",
    "tags": []
   },
   {
-   "name": "vianta-onboarding-motorista",
-   "description": "Use for Vianta driver onboarding: docs, handover, CRM.",
+   "name": "vianta-legendas-instagram",
+   "description": "Use for IG-style subtitles on non-Vianta videos.",
+   "tags": []
+  },
+  {
+   "name": "vianta-media-buying",
+   "description": "Use for Vianta Meta Ads analysis, reports and access.",
+   "tags": []
+  },
+  {
+   "name": "vianta-meta-queries",
+   "description": "Use for Meta Ads and Sheets query templates.",
    "tags": []
   },
   {
@@ -368,21 +415,6 @@
    "tags": []
   },
   {
-   "name": "vianta-programa-referenciacao",
-   "description": "Vianta referral: Publio-style direct script for contacts.",
-   "tags": []
-  },
-  {
-   "name": "vianta-propostas-venda",
-   "description": "Use when creating/sending a Vianta TVDE sale proposal.",
-   "tags": []
-  },
-  {
-   "name": "vianta-report-aquisicao",
-   "description": "Use when creating Vianta TVDE acquisition reports.",
-   "tags": []
-  },
-  {
    "name": "vianta-resposta-interessados",
    "description": "Use for Vianta TVDE lead DMs. Uses real sheet data.",
    "tags": []
@@ -393,13 +425,13 @@
    "tags": []
   },
   {
-   "name": "vianta-thumbnail",
-   "description": "Vianta thumbnails: brand frame + ChatGPT prompt.",
+   "name": "vianta-simulacao-financeira",
+   "description": "Buy vs rent cost comparison for TVDE leads. WhatsApp format.",
    "tags": []
   },
   {
-   "name": "vianta-turismo-propostas",
-   "description": "Use for Vianta Turismo partner proposals. Style: Tivoli.",
+   "name": "vianta-thumbnail",
+   "description": "Vianta thumbnails: brand frame + ChatGPT prompt.",
    "tags": []
   },
   {
@@ -415,10 +447,10 @@
   }
  ],
  "supabase": {
-  "carros": 151,
-  "transfers": 167,
-  "cc_services": 87,
-  "cc_offers": 87
+  "carros": 156,
+  "transfers": 172,
+  "cc_services": 224,
+  "cc_offers": 192
  },
  "ghl": {
   "ok": true,
@@ -438,8 +470,8 @@
    "note": "sync diário → Supabase (ver cron)"
   },
   "meta_ads": {
-   "ok": false,
-   "note": "sem token API (conta 293842623)"
+   "ok": true,
+   "note": "conta 293842623 via Composio; spend diário → meta_spend_daily (cron 07:30)"
   },
   "drive": {
    "ok": true,
@@ -447,8 +479,594 @@
   },
   "netlify": {
    "ok": true,
-   "note": "app transfers · gerador propostas · sandbox"
+   "note": "dashboard (vendas-data) · transfers · propostas"
+  },
+  "supabase_vendas": {
+   "ok": true,
+   "note": "vendas/meta_spend_daily/campanha_oferta (11/2026) — KPIs comerciais"
   }
+ },
+ "graph": {
+  "nodes": [
+   {
+    "id": "channel-telegram",
+    "label": "Telegram",
+    "type": "channel",
+    "group": "channels"
+   },
+   {
+    "id": "channel-desktop",
+    "label": "Desktop",
+    "type": "channel",
+    "group": "channels"
+   },
+   {
+    "id": "channel-messenger",
+    "label": "Messenger",
+    "type": "channel",
+    "group": "channels"
+   },
+   {
+    "id": "channel-email",
+    "label": "Email",
+    "type": "channel",
+    "group": "channels"
+   },
+   {
+    "id": "jarvis",
+    "label": "Jarvis",
+    "type": "agent",
+    "group": "agents",
+    "status": "ok",
+    "desc": "CEO / Orquestrador"
+   },
+   {
+    "id": "agente-comercial",
+    "label": "Agente Comercial",
+    "type": "agent",
+    "group": "agents",
+    "status": "ok",
+    "desc": "Leads TVDE · GHL"
+   },
+   {
+    "id": "agente-turismo",
+    "label": "Agente Turismo",
+    "type": "agent",
+    "group": "agents",
+    "status": "off",
+    "desc": "ChoiceCar · Transfers"
+   },
+   {
+    "id": "media-buyer",
+    "label": "Media Buyer",
+    "type": "agent",
+    "group": "agents",
+    "status": "off",
+    "desc": "Meta Ads · Análise"
+   },
+   {
+    "id": "int-sheets",
+    "label": "Sheets",
+    "type": "integration",
+    "group": "integrations",
+    "status": "ok"
+   },
+   {
+    "id": "int-gmail",
+    "label": "Gmail",
+    "type": "integration",
+    "group": "integrations",
+    "status": "ok"
+   },
+   {
+    "id": "int-frota360",
+    "label": "Frota360",
+    "type": "integration",
+    "group": "integrations",
+    "status": "warn"
+   },
+   {
+    "id": "int-meta_ads",
+    "label": "Meta Ads",
+    "type": "integration",
+    "group": "integrations",
+    "status": "ok"
+   },
+   {
+    "id": "int-drive",
+    "label": "Drive",
+    "type": "integration",
+    "group": "integrations",
+    "status": "ok"
+   },
+   {
+    "id": "int-netlify",
+    "label": "Netlify",
+    "type": "integration",
+    "group": "integrations",
+    "status": "ok"
+   },
+   {
+    "id": "int-supabase_vendas",
+    "label": "Supabase Vendas",
+    "type": "integration",
+    "group": "integrations",
+    "status": "ok"
+   },
+   {
+    "id": "data-carros",
+    "label": "carros",
+    "type": "data",
+    "group": "data",
+    "meta": "156 registos"
+   },
+   {
+    "id": "data-transfers",
+    "label": "transfers",
+    "type": "data",
+    "group": "data",
+    "meta": "172 registos"
+   },
+   {
+    "id": "data-cc_services",
+    "label": "cc_services",
+    "type": "data",
+    "group": "data",
+    "meta": "224 registos"
+   },
+   {
+    "id": "data-cc_offers",
+    "label": "cc_offers",
+    "type": "data",
+    "group": "data",
+    "meta": "192 registos"
+   },
+   {
+    "id": "skill-email-inbox-monitor",
+    "label": "email-inbox-monitor",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-aios-live",
+    "label": "vianta-aios-live",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-assistente-voz",
+    "label": "vianta-assistente-voz",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-base-dados",
+    "label": "vianta-base-dados",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-choicecar-atualizacao",
+    "label": "vianta-choicecar-atualizacao",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-choicecar-planeamento",
+    "label": "vianta-choicecar-planeamento",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-composio",
+    "label": "vianta-composio",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-criacao-criativos",
+    "label": "vianta-criacao-criativos",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-descricao",
+    "label": "vianta-descricao",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-dns-workspace",
+    "label": "vianta-dns-workspace",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-edicao-video",
+    "label": "vianta-edicao-video",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-email-marketing",
+    "label": "vianta-email-marketing",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-learning-db",
+    "label": "vianta-learning-db",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-legendas-instagram",
+    "label": "vianta-legendas-instagram",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-media-buying",
+    "label": "vianta-media-buying",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-meta-queries",
+    "label": "vianta-meta-queries",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-operacoes",
+    "label": "vianta-operacoes",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-orquestracao",
+    "label": "vianta-orquestracao",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-resposta-interessados",
+    "label": "vianta-resposta-interessados",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-retoma",
+    "label": "vianta-retoma",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-simulacao-financeira",
+    "label": "vianta-simulacao-financeira",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-thumbnail",
+    "label": "vianta-thumbnail",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-web-dev",
+    "label": "vianta-web-dev",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "app-central",
+    "label": "Central Vianta",
+    "type": "app",
+    "group": "apps",
+    "desc": "ERP · React"
+   },
+   {
+    "id": "app-transfers",
+    "label": "App Transfers",
+    "type": "app",
+    "group": "apps",
+    "desc": "Booking Turismo"
+   },
+   {
+    "id": "app-propostas",
+    "label": "Gerador Propostas",
+    "type": "app",
+    "group": "apps",
+    "desc": "Propostas venda"
+   },
+   {
+    "id": "app-aios-live",
+    "label": "AI OS Live",
+    "type": "app",
+    "group": "apps",
+    "desc": "Dashboard standalone"
+   },
+   {
+    "id": "knowledge-context",
+    "label": "Context",
+    "type": "knowledge",
+    "group": "knowledge",
+    "desc": "Factos de negócio · Ofertas · Pricing"
+   },
+   {
+    "id": "knowledge-data",
+    "label": "Data",
+    "type": "knowledge",
+    "group": "knowledge",
+    "desc": "Bases de dados · Fontes estruturadas"
+   },
+   {
+    "id": "knowledge-intelligence",
+    "label": "Intelligence",
+    "type": "knowledge",
+    "group": "knowledge",
+    "desc": "Aprendizagens · Padrões · Insights"
+   }
+  ],
+  "edges": [
+   {
+    "source": "channel-telegram",
+    "target": "jarvis",
+    "label": "gateway"
+   },
+   {
+    "source": "channel-desktop",
+    "target": "jarvis",
+    "label": "UI"
+   },
+   {
+    "source": "channel-messenger",
+    "target": "agente-comercial",
+    "label": "leads"
+   },
+   {
+    "source": "channel-email",
+    "target": "agente-turismo",
+    "label": "ChoiceCar"
+   },
+   {
+    "source": "jarvis",
+    "target": "agente-comercial",
+    "label": "delegate_task",
+    "dashed": true
+   },
+   {
+    "source": "jarvis",
+    "target": "agente-turismo",
+    "label": "delegate_task",
+    "dashed": true
+   },
+   {
+    "source": "jarvis",
+    "target": "media-buyer",
+    "label": "delegate_task",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "int-ghl",
+    "label": "lê/escreve"
+   },
+   {
+    "source": "agente-comercial",
+    "target": "int-supabase_vendas",
+    "label": "consulta"
+   },
+   {
+    "source": "agente-turismo",
+    "target": "int-sheets",
+    "label": "sheets"
+   },
+   {
+    "source": "agente-turismo",
+    "target": "int-supabase_vendas",
+    "label": "escreve"
+   },
+   {
+    "source": "media-buyer",
+    "target": "int-meta_ads",
+    "label": "analisa"
+   },
+   {
+    "source": "app-central",
+    "target": "int-supabase_vendas",
+    "label": "lê"
+   },
+   {
+    "source": "app-central",
+    "target": "int-netlify",
+    "label": "deploy"
+   },
+   {
+    "source": "app-transfers",
+    "target": "int-supabase_vendas",
+    "label": "lê/escreve"
+   },
+   {
+    "source": "app-transfers",
+    "target": "int-netlify",
+    "label": "deploy"
+   },
+   {
+    "source": "int-gmail",
+    "target": "agente-turismo",
+    "label": "email ChoiceCar"
+   },
+   {
+    "source": "int-drive",
+    "target": "knowledge-context",
+    "label": "docs fonte",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-email-inbox-monitor",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-aios-live",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-assistente-voz",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-base-dados",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-choicecar-atualizacao",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-choicecar-planeamento",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-composio",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-criacao-criativos",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-descricao",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-dns-workspace",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-edicao-video",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-email-marketing",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-learning-db",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-legendas-instagram",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-media-buying",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-meta-queries",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-operacoes",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-orquestracao",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-resposta-interessados",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-retoma",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-simulacao-financeira",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-thumbnail",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-web-dev",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "data-carros",
+    "target": "knowledge-data",
+    "label": "fonte",
+    "dashed": true
+   },
+   {
+    "source": "data-transfers",
+    "target": "knowledge-data",
+    "label": "fonte",
+    "dashed": true
+   },
+   {
+    "source": "data-cc_services",
+    "target": "knowledge-data",
+    "label": "fonte",
+    "dashed": true
+   },
+   {
+    "source": "data-cc_offers",
+    "target": "knowledge-data",
+    "label": "fonte",
+    "dashed": true
+   }
+  ]
  },
  "alerts": []
 }

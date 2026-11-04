@@ -21,6 +21,7 @@ import OpsCheckin from "./pages/operacoes/OpsCheckin";
 import OpsPagamentos from "./pages/operacoes/OpsPagamentos";
 import OpsArmazem from "./pages/operacoes/OpsArmazem";
 import OpsInvestidores from "./pages/operacoes/OpsInvestidores";
+import FinanceiroFaturas from "./pages/financeiro/FinanceiroFaturas";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const App = () => (
             <Route path="armazem" element={<OpsArmazem />} />
             <Route path="investidores" element={<OpsInvestidores />} />
           </Route>
+          <Route path="/financeiro" element={<FinanceiroFaturas />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
