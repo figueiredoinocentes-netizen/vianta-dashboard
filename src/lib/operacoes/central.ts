@@ -132,6 +132,11 @@ export async function uploadFatura(file: File, data?: string): Promise<string> {
   return (d as { path: string }).path;
 }
 
+/** Apaga o ficheiro de uma fatura, se já nenhuma linha o usar (senão a função recusa e não faz nada). */
+export async function apagarFaturaFicheiro(path: string): Promise<void> {
+  await fetch(`${BASE}/fatura-ficheiro?path=${encodeURIComponent(path)}`, { method: 'DELETE' }).catch(() => undefined);
+}
+
 /** Abre o ficheiro por um URL assinado temporário (a função redireciona). */
 export const faturaUrl = (path: string) => `${BASE}/fatura-ficheiro?path=${encodeURIComponent(path)}`;
 

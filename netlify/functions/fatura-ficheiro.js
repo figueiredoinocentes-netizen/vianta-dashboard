@@ -2,6 +2,7 @@
 //   POST { filename, contentType, dataBase64, data? }  → guarda o ficheiro e devolve { path }
 //        (pasta AAAA/MM pela data da fatura, se vier; senão pela data de hoje)
 //   GET  ?path=<caminho>                        → redireciona para um URL assinado temporário (10 min)
+//   DELETE ?path=<caminho>                      → apaga o ficheiro, só se nenhuma linha de `financeiro` o usar
 
 const BUCKET = 'faturas';
 const TIPOS = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/heic'];
@@ -17,7 +18,7 @@ function cors(event) {
   return {
     'Access-Control-Allow-Origin': allow,
     'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
   };
 }
 
@@ -85,6 +86,22 @@ export const handler = async (event) => {
       }
       const { signedURL } = await res.json();
       return { statusCode: 302, headers: { ...headers, Location: `${url}/storage/v1${signedURL}` }, body: '' };
+    }
+
+    if (event.httpMethod === 'DELETE') {
+      const path = (event.queryStringParameters || {}).path || '';
+      if (!PATH_RE.test(path)) return json(400, headers, { error: 'Caminho inválido' });
+      const uso = await fetch(`${url}/rest/v1/financeiro?select=id&ficheiro=eq.${encodeURIComponent(path)}`, {
+        headers: auth,
+      });
+      if (!uso.ok) return json(500, headers, { error: 'Erro ao verificar o ficheiro' });
+      if ((await uso.json()).length) return json(409, headers, { error: 'O ficheiro ainda é usado por outra fatura' });
+      const res = await fetch(`${url}/storage/v1/object/${BUCKET}/${path}`, { method: 'DELETE', headers: auth });
+      if (!res.ok && res.status !== 404) {
+        console.error('Storage delete error:', await res.text());
+        return json(500, headers, { error: 'Erro ao apagar o ficheiro' });
+      }
+      return json(200, headers, { deleted: true });
     }
 
     return json(405, headers, { error: 'Method not allowed' });
