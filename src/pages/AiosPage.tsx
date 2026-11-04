@@ -10,7 +10,7 @@ import { AIOS_GRAPH, type GraphNode } from '@/data/aios-graph-data';
  * integrações, skills) mas nativo no dashboard. Lê o snapshot publicado em
  * /aios-live/aios-state.json (regenerado pelo cron de 10 min).
  */
-const STATE_URL = '/aios-live/aios-state.json';
+const STATE_URL = 'https://vianta-dashboard.netlify.app/aios-live/aios-state.json';
 const VOICE_URL = 'https://thomas-requires-congress-hunter.trycloudflare.com/voice';
 
 interface Cron {
