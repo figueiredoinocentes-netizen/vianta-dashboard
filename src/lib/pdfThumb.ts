@@ -15,6 +15,9 @@ function loadPdfJs(): Promise<PdfJs> {
   return pdfjsPromise;
 }
 
+// Um só worker do pdf.js para todas as miniaturas (criar um por PDF é muito lento).
+let worker: InstanceType<PdfJs['PDFWorker']> | null = null;
+
 const cache = new Map<string, Promise<string>>();
 
 // No máximo 3 PDFs a renderizar ao mesmo tempo.
@@ -32,13 +35,14 @@ async function comVez<T>(fn: () => Promise<T>): Promise<T> {
 }
 
 /** Devolve um data URL (JPEG) da 1.ª página, com `largura` px. Resultado em cache por URL. */
-export function miniaturaPdf(url: string, largura = 240): Promise<string> {
+export function miniaturaPdf(url: string, largura = 160): Promise<string> {
   const chave = `${url}|${largura}`;
   let p = cache.get(chave);
   if (!p) {
     p = comVez(async () => {
       const pdfjs = await loadPdfJs();
-      const doc = await pdfjs.getDocument({ url }).promise;
+      if (!worker) worker = new pdfjs.PDFWorker({ name: 'faturas-miniaturas' });
+      const doc = await pdfjs.getDocument({ url, worker }).promise;
       try {
         const page = await doc.getPage(1);
         const base = page.getViewport({ scale: 1 });
