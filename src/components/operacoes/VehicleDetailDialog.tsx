@@ -557,8 +557,11 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
             aviso={
               movsCarro.length ? (
                 <>
-                  Vai eliminar também {movsCarro.length === 1 ? 'este registo' : `estes ${movsCarro.length} registos`} do
-                  Financeiro, ligados a esta viatura:
+                  Vai eliminar também{' '}
+                  {movsCarro.length === 1
+                    ? 'este registo do Financeiro, ligado'
+                    : `estes ${movsCarro.length} registos do Financeiro, ligados`}{' '}
+                  a esta viatura:
                   <ul className="mt-1 list-disc pl-4">
                     {movsCarro.map((m) => (
                       <li key={m.id}>
