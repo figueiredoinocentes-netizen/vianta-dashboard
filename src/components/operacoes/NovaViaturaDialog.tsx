@@ -12,13 +12,18 @@ import {
 } from '@/components/ui/dialog';
 import { COMBUSTIVEIS, STATUSES, normalizeText } from '@/lib/operacoes/constants';
 import {
+  MAX_FATURA_MB,
   camposCarroDeExtracao,
+  createCentral,
   driveFolderUrl,
   extrairDocumentos,
   importarFotosDaPasta,
   listDriveCarFolders,
   updateCentralField,
+  uploadFatura,
 } from '@/lib/operacoes/central';
+import { toNum } from '@/lib/operacoes/custos';
+import { CENTROS_CUSTO } from '@/lib/financeiro';
 import { useCentralWrites, useInvestidores, errorMessage } from '@/hooks/useOperacoes';
 import { Field, NativeSelect } from './shared';
 
@@ -35,7 +40,17 @@ const EMPTY = {
   precoVenda: '',
   precoAluguer: '',
   precoCompra: '',
+  aquisicao: '',
+  fatNum: '',
+  fatData: '',
+  fatFornecedor: '',
+  fatSemIva: '',
+  fatIva: '',
+  fatCentro: '',
 };
+
+const hoje = () => new Date().toISOString().slice(0, 10);
+const round2 = (n: number) => Math.round(n * 100) / 100;
 
 export function NovaViaturaDialog({
   open,
@@ -48,6 +63,7 @@ export function NovaViaturaDialog({
   const [status, setStatus] = useState<'idle' | 'saving' | 'drive'>('idle');
   const [pasta, setPasta] = useState('');
   const [pastaManual, setPastaManual] = useState(false);
+  const [fatura, setFatura] = useState<File | null>(null);
   const qc = useQueryClient();
   const folders = useQuery({
     queryKey: ['drive-car-folders'],
@@ -61,6 +77,9 @@ export function NovaViaturaDialog({
 
   const set = (k: keyof typeof EMPTY, v: string) => setForm((f) => ({ ...f, [k]: v }));
   const busy = status !== 'idle';
+  const compra = form.aquisicao === 'Compra';
+  // Centro de custo da fatura de compra: por defeito pelo tipo de gestão (Venda → Stand, resto → TVDE).
+  const centroFatura = form.fatCentro || (form.gestao === 'Venda' ? 'Stand' : 'TVDE');
 
   // Sugere a pasta pela matrícula escrita (enquanto o utilizador não escolher uma à mão).
   useEffect(() => {
@@ -75,8 +94,20 @@ export function NovaViaturaDialog({
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
+    if (!form.aquisicao) return toast.error('Escolha se a viatura é de compra ou de consignação.');
+    const semIva = compra ? Math.abs(toNum(form.fatSemIva)) : 0;
+    const iva = compra && form.fatIva.trim() ? Math.abs(toNum(form.fatIva)) : 0;
+    if (compra) {
+      if (!fatura) return toast.error('Anexe a fatura de compra da viatura.');
+      if (fatura.size > MAX_FATURA_MB * 1024 * 1024) return toast.error(`A fatura tem mais de ${MAX_FATURA_MB} MB.`);
+      if (!semIva) return toast.error('Indique o valor s/ IVA da fatura de compra.');
+    }
     setStatus('saving');
     try {
+      // 1.º a fatura (se falhar, não se cria a viatura).
+      const dataFatura = form.fatData || hoje();
+      const ficheiro = compra && fatura ? await uploadFatura(fatura, dataFatura) : null;
+
       const isInvestidor = form.proprietario === 'Investidor';
       const investidor = isInvestidor
         ? investidores.find((i) => String(i.id) === form.investidorId)
@@ -92,10 +123,33 @@ export function NovaViaturaDialog({
         tipo_gestao: form.gestao || null,
         estado: form.estado || null,
         preco_venda: form.precoVenda || null,
-        preco_compra: form.precoCompra || null,
+        preco_compra: compra ? String(semIva) : form.precoCompra || null,
+        aquisicao: form.aquisicao,
         valor_aluguer_semanal: form.precoAluguer || null,
       });
       const novoId = rows[0]?.id;
+      if (compra && ficheiro) {
+        try {
+          await createCentral('financeiro', {
+            tipo: 'Compra',
+            carro_id: novoId ?? null,
+            n_documento: form.fatNum.trim() || null,
+            data: dataFatura,
+            descricao: `Compra da viatura ${[form.matricula, form.modelo].filter(Boolean).join(' · ')}`,
+            contraparte: form.fatFornecedor.trim() || null,
+            centro_custo: centroFatura,
+            categoria: 'Compra de viatura',
+            valor_sem_iva: -semIva,
+            iva: -iva,
+            valor: -round2(semIva + iva),
+            ficheiro,
+            ficheiro_nome: fatura!.name,
+          });
+          await qc.invalidateQueries({ queryKey: ['central', 'financeiro'] });
+        } catch (err) {
+          toast.error(`Viatura criada, mas a fatura de compra não foi registada no Financeiro: ${errorMessage(err)}`);
+        }
+      }
       if (pasta && novoId) {
         setStatus('drive');
         const r = await importarFotosDaPasta(pasta, []);
@@ -128,6 +182,7 @@ export function NovaViaturaDialog({
         await qc.invalidateQueries({ queryKey: ['central', 'carros'] });
       }
       setForm(EMPTY);
+      setFatura(null);
       setPasta('');
       setPastaManual(false);
       onOpenChange(false);
@@ -201,6 +256,63 @@ export function NovaViaturaDialog({
             <Field label="KMs">
               <Input type="number" value={form.kms} onChange={(e) => set('kms', e.target.value)} />
             </Field>
+            <Field label="Aquisição" required className="sm:col-span-2">
+              <NativeSelect required value={form.aquisicao} onChange={(e) => set('aquisicao', e.target.value)}>
+                <option value="">— escolher —</option>
+                <option value="Compra">Compra (com fatura de compra)</option>
+                <option value="Consignação">Consignação</option>
+              </NativeSelect>
+            </Field>
+            {compra && (
+              <div className="grid grid-cols-1 gap-3 rounded-lg border border-primary/40 bg-muted/30 p-3 sm:col-span-2 sm:grid-cols-2">
+                <p className="text-xs font-semibold text-foreground sm:col-span-2">
+                  Fatura de compra — fica registada em Financeiro, ligada a esta viatura
+                </p>
+                <Field label="Fatura (PDF ou imagem)" required className="sm:col-span-2">
+                  <Input
+                    type="file"
+                    required
+                    accept="application/pdf,image/*"
+                    onChange={(e) => setFatura(e.target.files?.[0] || null)}
+                  />
+                </Field>
+                <Field label="Nº documento">
+                  <Input value={form.fatNum} onChange={(e) => set('fatNum', e.target.value)} placeholder="ex.: FT 2026/123" />
+                </Field>
+                <Field label="Data da fatura">
+                  <Input type="date" value={form.fatData || hoje()} onChange={(e) => set('fatData', e.target.value)} />
+                </Field>
+                <Field label="Fornecedor" className="sm:col-span-2">
+                  <Input value={form.fatFornecedor} onChange={(e) => set('fatFornecedor', e.target.value)} />
+                </Field>
+                <Field label="Valor s/ IVA (€)" required>
+                  <Input
+                    required
+                    inputMode="decimal"
+                    value={form.fatSemIva}
+                    onChange={(e) => set('fatSemIva', e.target.value)}
+                  />
+                </Field>
+                <Field label="IVA (€)">
+                  <Input
+                    inputMode="decimal"
+                    value={form.fatIva}
+                    onChange={(e) => set('fatIva', e.target.value)}
+                    placeholder="0 se regime da margem"
+                  />
+                </Field>
+                <Field label="Centro de custo" className="sm:col-span-2">
+                  <NativeSelect value={centroFatura} onChange={(e) => set('fatCentro', e.target.value)}>
+                    {CENTROS_CUSTO.map((c) => (
+                      <option key={c}>{c}</option>
+                    ))}
+                  </NativeSelect>
+                </Field>
+                <p className="text-[11px] text-muted-foreground sm:col-span-2">
+                  O valor s/ IVA passa a ser o preço de compra da viatura.
+                </p>
+              </div>
+            )}
             <Field label="Proprietário" className="sm:col-span-2">
               <NativeSelect
                 value={form.proprietario}
@@ -241,13 +353,15 @@ export function NovaViaturaDialog({
                 ))}
               </NativeSelect>
             </Field>
-            <Field label="Preço de compra (€, s/ IVA)">
-              <Input
-                type="number"
-                value={form.precoCompra}
-                onChange={(e) => set('precoCompra', e.target.value)}
-              />
-            </Field>
+            {!compra && (
+              <Field label="Preço de compra (€, s/ IVA)">
+                <Input
+                  type="number"
+                  value={form.precoCompra}
+                  onChange={(e) => set('precoCompra', e.target.value)}
+                />
+              </Field>
+            )}
             <Field label="Preço Venda (€)">
               <Input
                 type="number"
