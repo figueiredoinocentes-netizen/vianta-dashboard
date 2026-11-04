@@ -59,10 +59,13 @@ export function DeleteConfirm({
   label,
   busy,
   onConfirm,
+  aviso,
 }: {
   label: string;
   busy?: boolean;
   onConfirm: () => void;
+  /** Texto extra na caixa de confirmação (ex.: o que mais vai ser eliminado). */
+  aviso?: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
@@ -81,6 +84,7 @@ export function DeleteConfirm({
       </Button>
       {open && (
         <div className="order-last mt-3 w-full basis-full rounded-lg border border-destructive/50 bg-destructive/10 p-3">
+          {aviso && <div className="mb-2 text-xs text-red-200">{aviso}</div>}
           <p className="mb-2 text-xs text-red-300">
             Esta ação não pode ser desfeita. Escreva <strong>DELETE</strong> para confirmar.
           </p>

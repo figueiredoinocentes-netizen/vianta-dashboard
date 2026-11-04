@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,13 +17,16 @@ import {
   getChecklistGroups,
   normalizeText,
 } from '@/lib/operacoes/constants';
-import { listDriveFiles, uploadDriveDoc } from '@/lib/operacoes/central';
+import { apagarFaturaFicheiro, deleteCentral, listDriveFiles, uploadDriveDoc } from '@/lib/operacoes/central';
+import { eur } from '@/lib/operacoes/custos';
+import { valorSemIva } from '@/lib/financeiro';
 import type { Carro, DriveFile } from '@/lib/operacoes/types';
 import { imprimirFichaComercial } from '@/lib/operacoes/fichaComercial';
 import {
   useCarros,
   useCentralWrites,
   useClientes,
+  useFinanceiro,
   useInvestidores,
   useMotoristas,
   useToggleChecklistItem,
@@ -155,6 +158,10 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
   const { data: motoristas = [] } = useMotoristas();
   const update = useUpdateCarroField();
   const { remove } = useCentralWrites('carros');
+  const qc = useQueryClient();
+  const { data: movs = [] } = useFinanceiro();
+  // Faturas / movimentos do Financeiro ligados a esta viatura (ex.: fatura de compra).
+  const movsCarro = movs.filter((m) => m.carro_id === carro.id);
 
   const set = (k: keyof Form, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -234,6 +241,12 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
 
   async function onDelete() {
     try {
+      // A base de dados não deixa apagar a viatura enquanto houver linhas do Financeiro ligadas.
+      for (const m of movsCarro) await deleteCentral('financeiro', m.id);
+      for (const path of new Set(movsCarro.map((m) => m.ficheiro).filter(Boolean) as string[])) {
+        await apagarFaturaFicheiro(path);
+      }
+      if (movsCarro.length) await qc.invalidateQueries({ queryKey: ['central', 'financeiro'] });
       await remove.mutateAsync(carro.id);
       onClose();
     } catch (err) {
@@ -537,7 +550,27 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
         {tab === 'sinist' && <SinistrosViatura carro={carro} />}
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-2">
-          <DeleteConfirm label="Eliminar Viatura" busy={remove.isPending} onConfirm={onDelete} />
+          <DeleteConfirm
+            label="Eliminar Viatura"
+            busy={remove.isPending}
+            onConfirm={onDelete}
+            aviso={
+              movsCarro.length ? (
+                <>
+                  Vai eliminar também {movsCarro.length === 1 ? 'este registo' : `estes ${movsCarro.length} registos`} do
+                  Financeiro, ligados a esta viatura:
+                  <ul className="mt-1 list-disc pl-4">
+                    {movsCarro.map((m) => (
+                      <li key={m.id}>
+                        {[m.categoria, m.n_documento, m.contraparte].filter(Boolean).join(' · ') || 'Movimento'} —{' '}
+                        {eur(valorSemIva(m).valor)}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : undefined
+            }
+          />
           <div className="flex gap-2">
             <Button type="button" variant="outline" onClick={onClose}>
               Fechar

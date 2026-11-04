@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DateField } from '@/components/operacoes/DateField';
 import { DeleteConfirm, Field, NativeSelect } from '@/components/operacoes/shared';
-import { MAX_FATURA_MB, faturaUrl, updateCentralField, uploadFatura } from '@/lib/operacoes/central';
+import { MAX_FATURA_MB, apagarFaturaFicheiro, faturaUrl, updateCentralField, uploadFatura } from '@/lib/operacoes/central';
 import { eur, toNum } from '@/lib/operacoes/custos';
 import type { Carro, Movimento } from '@/lib/operacoes/types';
 import { CENTROS_CUSTO, ePdf } from '@/lib/financeiro';
@@ -142,6 +142,7 @@ export function FaturaDialog({
     if (!mov) return;
     try {
       await remove.mutateAsync(mov.id);
+      if (mov.ficheiro) await apagarFaturaFicheiro(mov.ficheiro); // só apaga se nenhuma outra linha o usar
       toast.success('Fatura eliminada');
       onOpenChange(false);
     } catch (err) {
