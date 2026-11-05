@@ -70,11 +70,39 @@ interface RawSheetData {
   fontes: string[];
 }
 
+async function fetchInvestmentFromAdSpend(): Promise<InvestmentEntry[]> {
+  try {
+    const res = await fetch('/.netlify/functions/ad-spend');
+    if (!res.ok) {
+      console.warn('ad-spend function failed:', res.status);
+      return [];
+    }
+    const json = await res.json();
+    return json.investmentEntries || [];
+  } catch (err) {
+    console.warn('Failed to fetch ad-spend:', err);
+    return [];
+  }
+}
+
 async function fetchSheetData(): Promise<RawSheetData> {
-  const { data, error } = await supabase.functions.invoke('fetch-sheets-data');
-  if (error) throw new Error(error.message || 'Erro ao carregar dados da sheet');
-  if (data?.error) throw new Error(data.error);
-  return data as RawSheetData;
+  // 1. Try legacy edge function for drivers data
+  let drivers: Driver[] = [];
+  let fontes: string[] = [];
+  try {
+    const { data, error } = await supabase.functions.invoke('fetch-sheets-data');
+    if (!error && data?.drivers) {
+      drivers = data.drivers as Driver[];
+      fontes = data.fontes || [];
+    }
+  } catch (e) {
+    console.warn('fetch-sheets-data edge function unavailable, using fallback');
+  }
+
+  // 2. Get ad spend from Supabase meta_spend_daily via Netlify function
+  const metaSpendEntries = await fetchInvestmentFromAdSpend();
+
+  return { drivers, investmentEntries: metaSpendEntries, fontes };
 }
 
 // --- Offer-to-campaign mapping ---
