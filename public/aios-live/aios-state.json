@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-05T15:18:55+00:00",
+ "generated_at": "2026-11-05T15:52:05+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-05T15:17:56.551723+00:00",
+     "last_run_at": "2026-11-05T15:44:06.120711+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-05T15:18:56.551723+00:00",
+     "next_run_at": "2026-11-05T15:53:05.596481+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-05T15:08:55.385993+00:00",
+     "last_run_at": "2026-11-05T15:41:06.917121+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-05T15:28:55.769646+00:00",
+     "next_run_at": "2026-11-05T16:02:05.626282+00:00",
      "paused_at": null
     },
     {
@@ -150,7 +150,7 @@
      "schedule": "every 15m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-05T14:57:18.802304+00:00",
+     "last_run_at": "2026-11-05T15:38:16.390517+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -161,7 +161,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-05T15:27:53.588910+00:00",
+     "next_run_at": "2026-11-05T15:53:16.390517+00:00",
      "paused_at": null
     },
     {
@@ -293,6 +293,24 @@
      "monitor_script": null,
      "failure_streak": 0,
      "next_run_at": "2026-12-01T09:00:00+00:00",
+     "paused_at": null
+    },
+    {
+     "id": "e87297f6520a",
+     "name": "[Contabilidade] Sync faturas Drive → Supabase",
+     "owner": "jarvis",
+     "schedule": "every tuesday at 9am",
+     "state": "scheduled",
+     "enabled": true,
+     "last_run_at": null,
+     "last_status": null,
+     "last_error": "",
+     "script": "sync_contabilidade.py",
+     "no_agent": true,
+     "skills": [],
+     "monitor_script": null,
+     "failure_streak": 0,
+     "next_run_at": "2026-11-10T09:00:00+00:00",
      "paused_at": null
     }
    ]
