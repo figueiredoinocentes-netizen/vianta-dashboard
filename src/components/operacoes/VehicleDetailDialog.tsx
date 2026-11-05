@@ -39,6 +39,7 @@ import { SinistrosViatura } from './SinistrosViatura';
 import { DeclaracaoCirculacao } from './DeclaracaoCirculacao';
 import { FotosEditor } from './FotosEditor';
 import { DeleteConfirm, Field, NativeSelect } from './shared';
+import { AquisicaoViatura } from './AquisicaoViatura';
 
 interface Form {
   modelo: string;
@@ -74,6 +75,7 @@ interface Form {
   fimElegibilidadeTvde: string;
   docsLink: string;
   obs: string;
+  aquisicao: string;
 }
 
 const CAIXAS = ['Automático', 'Manual'] as const;
@@ -115,6 +117,7 @@ function formFromCarro(v: Carro): Form {
     fimElegibilidadeTvde: s(v.fim_elegibilidade_tvde),
     docsLink: s(v.docs_link),
     obs: s(v.obs),
+    aquisicao: s(v.aquisicao),
   };
 }
 
@@ -224,6 +227,7 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
       fim_elegibilidade_tvde: form.fimElegibilidadeTvde || null,
       docs_link: form.docsLink || null,
       obs: form.obs || null,
+      aquisicao: form.aquisicao || null,
     };
 
     try {
@@ -337,6 +341,13 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
                 </Field>
               </div>
             </div>
+            <AquisicaoViatura
+              carro={carro}
+              aquisicao={form.aquisicao}
+              gestao={form.gestao}
+              onAquisicao={(v) => set('aquisicao', v)}
+              onPrecoCompra={(v) => set('precoCompra', v)}
+            />
             <Field label="Proprietário" className="sm:col-span-2">
               <NativeSelect
                 value={form.proprietario}
