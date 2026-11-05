@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-05T11:29:30+00:00",
+ "generated_at": "2026-11-05T12:01:46+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-05T11:29:31.263603+00:00",
+     "last_run_at": "2026-11-05T12:01:47.835782+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-05T11:30:31.263603+00:00",
+     "next_run_at": "2026-11-05T12:02:47.835782+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-05T11:18:33.724048+00:00",
+     "last_run_at": "2026-11-05T11:50:54.431880+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-05T11:39:30.196624+00:00",
+     "next_run_at": "2026-11-05T12:11:46.629832+00:00",
      "paused_at": null
     },
     {
@@ -150,7 +150,7 @@
      "schedule": "every 15m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-05T11:29:10.930813+00:00",
+     "last_run_at": "2026-11-05T11:56:46.881993+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -161,7 +161,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-05T11:44:10.930813+00:00",
+     "next_run_at": "2026-11-05T12:11:46.881993+00:00",
      "paused_at": null
     },
     {
@@ -266,7 +266,7 @@
      "schedule": "every day at 7:30am",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-05T07:31:18.088763+00:00",
+     "last_run_at": "2026-11-05T11:35:59.525161+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
