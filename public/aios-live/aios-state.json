@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-04T15:49:41+00:00",
+ "generated_at": "2026-11-05T10:56:24+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -17,7 +17,7 @@
      "schedule": "every day at 10:00",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-04T10:00:17.519821+00:00",
+     "last_run_at": "2026-11-05T10:00:09.935805+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "ghl_daily_report.py",
@@ -25,7 +25,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-05T10:00:00+00:00",
+     "next_run_at": "2026-11-06T10:00:00+00:00",
      "paused_at": null
     },
     {
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-04T15:48:41.028031+00:00",
+     "last_run_at": "2026-11-05T10:55:24.884763+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-04T15:49:41.028031+00:00",
+     "next_run_at": "2026-11-05T10:56:24.884763+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-04T15:38:44.093352+00:00",
+     "last_run_at": "2026-11-05T10:46:24.036778+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-04T15:59:40.425033+00:00",
+     "next_run_at": "2026-11-05T11:06:24.441646+00:00",
      "paused_at": null
     },
     {
@@ -150,7 +150,7 @@
      "schedule": "every 15m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-04T15:35:24.976163+00:00",
+     "last_run_at": "2026-11-05T10:55:12.879783+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -161,7 +161,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-04T15:50:24.976163+00:00",
+     "next_run_at": "2026-11-05T11:10:12.879783+00:00",
      "paused_at": null
     },
     {
@@ -189,7 +189,7 @@
      "schedule": "every day at 10:00",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-04T10:00:15.423279+00:00",
+     "last_run_at": "2026-11-05T10:00:07.813256+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -200,7 +200,7 @@
      ],
      "monitor_script": "ghl_followup_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-05T10:00:00+00:00",
+     "next_run_at": "2026-11-06T10:00:00+00:00",
      "paused_at": null
     },
     {
@@ -228,7 +228,7 @@
      "schedule": "every day at 10:00",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-04T10:24:31.010154+00:00",
+     "last_run_at": "2026-11-05T10:00:51.787467+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -236,7 +236,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-05T10:00:00+00:00",
+     "next_run_at": "2026-11-06T10:00:00+00:00",
      "paused_at": null
     },
     {
@@ -246,7 +246,7 @@
      "schedule": "every day at 08:00",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-04T08:00:27.924553+00:00",
+     "last_run_at": "2026-11-05T08:00:58.751109+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -256,7 +256,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-05T08:00:00+00:00",
+     "next_run_at": "2026-11-06T08:00:00+00:00",
      "paused_at": null
     },
     {
@@ -266,7 +266,7 @@
      "schedule": "every day at 7:30am",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-04T07:30:34.445849+00:00",
+     "last_run_at": "2026-11-05T07:31:18.088763+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -274,7 +274,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-05T07:30:00+00:00",
+     "next_run_at": "2026-11-06T07:30:00+00:00",
      "paused_at": null
     }
    ]
