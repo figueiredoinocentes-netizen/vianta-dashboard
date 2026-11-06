@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-06T07:41:21+00:00",
+ "generated_at": "2026-11-06T08:14:22+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-06T07:40:22.629133+00:00",
+     "last_run_at": "2026-11-06T08:14:23.714794+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-06T07:41:22.629133+00:00",
+     "next_run_at": "2026-11-06T08:15:23.714794+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-06T07:30:25.296150+00:00",
+     "last_run_at": "2026-11-06T08:03:25.529122+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-06T07:51:21.878312+00:00",
+     "next_run_at": "2026-11-06T08:24:22.706150+00:00",
      "paused_at": null
     },
     {
@@ -150,7 +150,7 @@
      "schedule": "every 15m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-06T07:18:41.723119+00:00",
+     "last_run_at": "2026-11-06T07:59:54.711473+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -161,7 +161,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-06T07:49:21.710195+00:00",
+     "next_run_at": "2026-11-06T08:14:54.711473+00:00",
      "paused_at": null
     },
     {
@@ -246,7 +246,7 @@
      "schedule": "every day at 08:00",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-05T08:00:58.751109+00:00",
+     "last_run_at": "2026-11-06T08:00:31.981116+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -256,7 +256,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-06T08:00:00+00:00",
+     "next_run_at": "2026-11-07T08:00:00+00:00",
      "paused_at": null
     },
     {
