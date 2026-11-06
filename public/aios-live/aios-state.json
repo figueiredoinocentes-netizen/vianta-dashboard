@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-06T18:37:51+00:00",
+ "generated_at": "2026-11-06T19:10:52+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-06T18:37:53.037710+00:00",
+     "last_run_at": "2026-11-06T19:09:53.429174+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-06T18:38:53.037710+00:00",
+     "next_run_at": "2026-11-06T19:10:53.429174+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-06T18:26:54.740826+00:00",
+     "last_run_at": "2026-11-06T18:59:55.712102+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-06T18:47:51.696274+00:00",
+     "next_run_at": "2026-11-06T19:20:52.709851+00:00",
      "paused_at": null
     },
     {
@@ -150,7 +150,7 @@
      "schedule": "every 15m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-06T18:37:47.918391+00:00",
+     "last_run_at": "2026-11-06T18:57:19.655780+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -161,7 +161,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-06T18:52:47.918391+00:00",
+     "next_run_at": "2026-11-06T19:12:19.655780+00:00",
      "paused_at": null
     },
     {
@@ -483,7 +483,7 @@
   }
  ],
  "supabase": {
-  "carros": 156,
+  "carros": 155,
   "transfers": 174,
   "cc_services": 224,
   "cc_offers": 192
@@ -662,7 +662,7 @@
     "label": "carros",
     "type": "data",
     "group": "data",
-    "meta": "156 registos"
+    "meta": "155 registos"
    },
    {
     "id": "data-transfers",
