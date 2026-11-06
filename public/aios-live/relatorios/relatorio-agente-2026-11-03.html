@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório Agente Comercial — Últimas 124h</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; padding: 20px; }
+  .header { max-width: 900px; margin: 0 auto 30px; }
+  .header h1 { font-size: 24px; color: #f8fafc; }
+  .header .sub { color: #94a3b8; font-size: 14px; margin-top: 4px; }
+  .stats { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+  .stat { background: #1e293b; border-radius: 10px; padding: 14px 20px; flex: 1; min-width: 120px; }
+  .stat .num { font-size: 28px; font-weight: 700; }
+  .stat .label { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+  .stat.ok .num { color: #22c55e; }
+  .stat.warn .num { color: #eab308; }
+  .stat.err .num { color: #ef4444; }
+
+  .slide { background: #1e293b; border-radius: 12px; max-width: 900px; margin: 0 auto 20px; overflow: hidden; }
+  .slide-header { padding: 16px 20px; }
+  .slide-title-row { display: flex; justify-content: space-between; align-items: center; }
+  .slide-title-row h2 { font-size: 18px; }
+  .status-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; color: #fff; font-weight: 600; }
+  .slide-meta { display: flex; gap: 16px; margin-top: 8px; font-size: 12px; color: #94a3b8; }
+  .slide-body { padding: 0 20px 20px; }
+
+  .section { margin-top: 16px; }
+  .section h3 { font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .section p { font-size: 14px; line-height: 1.5; color: #cbd5e1; }
+
+  .msg-list { display: flex; flex-direction: column; gap: 6px; }
+  .msg { font-size: 13px; padding: 8px 12px; border-radius: 8px; line-height: 1.4; }
+  .msg-agent { background: #1a3a4a; border-left: 3px solid #3b82f6; }
+  .msg-lead { background: #2a1a3a; border-left: 3px solid #a855f7; }
+  .msg-label { font-size: 11px; color: #64748b; display: block; margin-bottom: 2px; }
+  .msg-body { color: #e2e8f0; }
+
+  .issue { margin-top: 12px; padding: 12px; border-radius: 8px; font-size: 13px; }
+  .issue-warning { background: #3a2f00; border-left: 3px solid #eab308; }
+  .issue-error { background: #3a0f0f; border-left: 3px solid #ef4444; }
+  .issue-header { font-weight: 600; margin-bottom: 4px; }
+  .issue-detail { color: #cbd5e1; }
+  .issue-fix { color: #93c5fd; margin-top: 4px; }
+
+  .no-issues { color: #22c55e; font-size: 13px; margin-top: 12px; }
+
+  .suggestions-section { max-width: 900px; margin: 30px auto 0; }
+  .suggestions-section h2 { font-size: 20px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #334155; }
+  .suggestion-card { background: #1e293b; border-radius: 10px; padding: 16px 20px; margin-bottom: 12px; }
+  .suggestion-card h3 { font-size: 15px; color: #f8fafc; margin-bottom: 6px; }
+  .suggestion-card p { font-size: 13px; color: #94a3b8; line-height: 1.5; }
+
+  .footer { text-align: center; color: #475569; font-size: 12px; margin-top: 40px; padding-bottom: 40px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>📋 Relatório Agente Comercial</h1>
+  <div class="sub">Últimas 124h • 1 conversas analisadas</div>
+  <div class="stats">
+    <div class="stat ok"><div class="num">0</div><div class="label">✅ OK</div></div>
+    <div class="stat warn"><div class="num">1</div><div class="label">⚠️ Atenção</div></div>
+    <div class="stat err"><div class="num">0</div><div class="label">❌ Problemas</div></div>
+  </div>
+</div>
+
+
+        <div class="slide">
+          <div class="slide-header" style="border-left: 4px solid #eab308;">
+            <div class="slide-title-row">
+              <h2>Vitor Serrano</h2>
+              <span class="status-badge" style="background:#eab308;">⚠️ Atenção</span>
+            </div>
+            <div class="slide-meta">
+              <span>📱 Messenger</span>
+              <span>🏷 Venda</span>
+              <span>🕐 2026-11-02</span>
+            </div>
+          </div>
+          <div class="slide-body">
+            <div class="section">
+              <h3>📌 Motivo do contacto</h3>
+              <p>Mas, OK.... Eu já entendi. Obgd e boas vendas</p>
+            </div>
+            <div class="section">
+              <h3>💡 Soluções apresentadas</h3>
+              <p>Pode ficar tranquilo, Vitor — sim, a primeira resposta é automática, mas por trás está a equipa comercial da Vianta, com acompanhamento humano em cada processo.
+
+O seu perfil está registado: assim que</p>
+            </div>
+            <div class="section">
+              <h3>💬 Últimas mensagens</h3>
+              <div class="msg-list"><div class="msg msg-agent"><span class="msg-label">🤖 Agente 12:32:05</span><span class="msg-body">Perfeito Vitor, fica registado.
+
+Assim que entrar uma viatura elétrica até 30.000€ com os 3 anos de black garantidos, avisamo-lo em primeiro lugar.
+
+Tem preferência por alguma marca ou modelo em espec</span></div><div class="msg msg-lead"><span class="msg-label">👤 Lead 12:28:48</span><span class="msg-body">Naturalmente. Obrigado</span></div><div class="msg msg-agent"><span class="msg-label">🤖 Agente 12:14:21</span><span class="msg-body">Boa tarde Vitor.
+
+Registei o seu perfil: viatura elétrica, até 30.000€ e financiamento a verificar.
+
+Mantém-se o que lhe disse: de momento não temos nenhuma viatura que garanta 3 anos de black. A únic</span></div><div class="msg msg-agent"><span class="msg-label">🤖 Agente 12:14:02</span><span class="msg-body">Opportunity created</span></div><div class="msg msg-lead"><span class="msg-label">👤 Lead 12:10:15</span><span class="msg-body">Financiamento a verificar
+Até o máximo de 30 mil eur
+De preferência, viatura Elétrica</span></div><div class="msg msg-agent"><span class="msg-label">🤖 Agente 11:52:29</span><span class="msg-body">Bom dia Vitor.
+
+Verifiquei o nosso stock e, neste momento, não temos nenhuma viatura que garanta 3 anos de black — a única disponível elegível para black só tem a categoria garantida até dezembro de 2</span></div><div class="msg msg-lead"><span class="msg-label">👤 Lead 11:47:49</span><span class="msg-body">Bom dia
+Pode enviar sugestões até final de Novembro, mas preciso que faça 3 anos de black. 
+
+Obrigado</span></div><div class="msg msg-agent"><span class="msg-label">🤖 Agente 11:45:10</span><span class="msg-body">Bom dia Vitor, obrigado pelo interesse.
+
+Neste momento temos apenas um Model Y que faz a categoria black até dezembro de 2027.
+
+Se tiver interesse posso-lhe passar mais informações ou até marcarmos um</span></div></div>
+            </div>
+            
+            <div class="issue issue-warning">
+              <div class="issue-header">⚠️ Mensagem repetida</div>
+              <div class="issue-detail">O agente enviou a mesma mensagem mais que uma vez.</div>
+              <div class="issue-fix"><strong>→ Sugestão:</strong> Verificar se o agente está a re-enviar o template sem detetar que já o enviou.</div>
+            </div>
+          </div>
+        </div>
+
+<div class="suggestions-section">
+  <h2>🚀 Propostas de melhoria — Agente Comercial</h2>
+  
+        <div class="suggestion-card">
+          <h3>🧠 Memória de conversa — evitar re-envios</h3>
+          <p>O agente enviou a mesma mensagem mais que uma vez para o mesmo lead. Garantir que o agente lê SEMPRE o histórico completo da conversa antes de responder. Adicionar verificação: se a última mensagem do agente for idêntica ao que vai enviar, abortar.</p>
+        </div>
+        <div class="suggestion-card">
+          <h3>📊 Dashboard de qualidade semanal</h3>
+          <p>Criar um segundo relatório semanal com métricas agregadas: taxa de resposta, tempo médio de resposta, ofertas mais comuns, leads que avançaram para visita vs perdidos. Ajuda a identificar tendências antes de se tornarem problemas.</p>
+        </div>
+</div>
+
+<div class="footer">Gerado automaticamente • Vianta AI OS</div>
+</body>
+</html>

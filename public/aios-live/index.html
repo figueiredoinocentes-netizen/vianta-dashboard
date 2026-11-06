@@ -107,6 +107,13 @@ footer { text-align:center; margin-top:1.5rem; color:#475569; font-size:.7rem; }
   </section>
 
   <section>
+    <h2>🤖 Agente Comercial — Performance</h2>
+    <div id="comercial-kpis" style="display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:1rem"></div>
+    <div id="comercial-followups" style="margin-bottom:.8rem"></div>
+    <div id="comercial-reports"></div>
+  </section>
+
+  <section>
     <h2>Integrações & Bases de Dados</h2>
     <div class="grid" id="integrations"></div>
   </section>
@@ -184,6 +191,7 @@ function render() {
   renderChannels();
   renderCeoAndBots(crons);
   renderCrons(crons);
+  renderAgenteComercial();
   renderIntegrations(sb);
   renderSkills();
 }
@@ -239,6 +247,54 @@ function renderCrons(crons) {
       <td>${c.last_status === 'error' ? `<span class="err-msg" title="${(c.last_error || '').replace(/"/g, '&quot;').slice(0, 500)}">${(c.last_error || 'erro').slice(0, 120)}</span>` : (c.last_run_at ? `next ${rel(c.next_run_at)}` : '—')}</td>
     </tr>`).join('');
   $('cron-table').querySelector('tbody').innerHTML = rows;
+}
+
+function renderAgenteComercial() {
+  const ac = state.agente_comercial;
+  if (!ac) { $('comercial-kpis').innerHTML = '<div class="note">sem dados</div>'; return; }
+
+  const convs = ac.conversas_respondidas || 0;
+  const fups = ac.followups_pendentes || 0;
+  const reports = ac.relatorios_total || 0;
+  const err = ac.ultimo_erro || '';
+
+  $('comercial-kpis').innerHTML = `
+    <div class="stat ok"><div class="num">${convs}</div><div class="label">💬 Conversas respondidas</div></div>
+    <div class="stat ${fups > 0 ? 'warn' : 'ok'}"><div class="num">${fups}</div><div class="label">📅 Follow-ups pendentes</div></div>
+    <div class="stat ok"><div class="num">${reports}</div><div class="label">📋 Relatórios gerados</div></div>
+    ${err ? `<div class="stat err"><div class="num" style="font-size:.9rem">⚠</div><div class="label" title="${err.replace(/"/g, '&quot;')}">${err.slice(0, 60)}</div></div>` : ''}
+  `;
+
+  // Follow-ups
+  if (ac.followups && ac.followups.length) {
+    $('comercial-followups').innerHTML = `
+      <div style="font-size:.72rem;color:#94a3b8;margin-bottom:.45rem">Próximos follow-ups:</div>
+      <table style="font-size:.72rem">
+        <thead><tr><th>Lead</th><th>Canal</th><th>Data</th></tr></thead>
+        <tbody>${ac.followups.map(f => `
+          <tr><td>${f.lead}</td><td>${f.channel}</td><td>${f.date}</td></tr>
+        `).join('')}</tbody>
+      </table>
+      <div style="margin-top:.5rem;font-size:.66rem;color:#64748b">
+        ⏰ Maria Matei a 12/11 · David Trancozo a 15/11 · Luso Brasileiro + Vitor Serrano a 16/11
+      </div>`;
+  } else {
+    $('comercial-followups').innerHTML = '<div style="font-size:.72rem;color:#64748b">📅 Sem follow-ups pendentes</div>';
+  }
+
+  // Reports
+  const report = ac.ultimo_relatorio;
+  if (report) {
+    $('comercial-reports').innerHTML = `
+      <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+        <span style="font-size:.72rem;color:#94a3b8">📄 Último relatório: ${report}</span>
+        <button class="btn" onclick="openReport('${report}')">📂 Abrir</button>
+      </div>`;
+  }
+}
+
+function openReport(fn) {
+  window.open('relatorios/' + fn, '_blank');
 }
 
 function renderIntegrations(sb) {
