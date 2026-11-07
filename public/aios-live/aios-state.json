@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-07T04:25:24+00:00",
+ "generated_at": "2026-11-07T04:58:25+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-07T04:24:25.640163+00:00",
+     "last_run_at": "2026-11-07T04:58:26.742567+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-07T04:25:25.640163+00:00",
+     "next_run_at": "2026-11-07T04:59:26.742567+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-07T04:14:27.842001+00:00",
+     "last_run_at": "2026-11-07T04:47:29.063689+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-07T04:35:24.646779+00:00",
+     "next_run_at": "2026-11-07T05:08:25.534525+00:00",
      "paused_at": null
     },
     {
@@ -150,7 +150,7 @@
      "schedule": "every 15m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-07T04:15:20.108813+00:00",
+     "last_run_at": "2026-11-07T04:48:49.307606+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -161,7 +161,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-07T04:30:20.108813+00:00",
+     "next_run_at": "2026-11-07T05:03:49.307606+00:00",
      "paused_at": null
     },
     {
