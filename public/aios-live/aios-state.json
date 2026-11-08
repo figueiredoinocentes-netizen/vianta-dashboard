@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-08T09:40:24+00:00",
+ "generated_at": "2026-11-08T10:13:25+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -17,7 +17,7 @@
      "schedule": "every day at 10:00",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-07T10:00:47.326389+00:00",
+     "last_run_at": "2026-11-08T10:00:26.764786+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "ghl_daily_report.py",
@@ -25,7 +25,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-08T10:00:00+00:00",
+     "next_run_at": "2026-11-09T10:00:00+00:00",
      "paused_at": null
     },
     {
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-08T09:40:26.131499+00:00",
+     "last_run_at": "2026-11-08T10:13:27.034037+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-08T09:41:26.131499+00:00",
+     "next_run_at": "2026-11-08T10:14:27.034037+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-08T09:29:27.599696+00:00",
+     "last_run_at": "2026-11-08T10:02:28.511674+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-08T09:50:24.547255+00:00",
+     "next_run_at": "2026-11-08T10:23:25.481923+00:00",
      "paused_at": null
     },
     {
@@ -150,7 +150,7 @@
      "schedule": "every 15m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-08T09:24:33.559365+00:00",
+     "last_run_at": "2026-11-08T09:59:37.052240+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -161,7 +161,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-08T09:55:24.568885+00:00",
+     "next_run_at": "2026-11-08T10:14:37.052240+00:00",
      "paused_at": null
     },
     {
@@ -189,7 +189,7 @@
      "schedule": "every day at 10:00",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-07T10:00:42.089034+00:00",
+     "last_run_at": "2026-11-08T10:00:25.481890+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -200,7 +200,7 @@
      ],
      "monitor_script": "ghl_followup_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-08T10:00:00+00:00",
+     "next_run_at": "2026-11-09T10:00:00+00:00",
      "paused_at": null
     },
     {
@@ -228,7 +228,7 @@
      "schedule": "every day at 10:00",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-07T10:01:19.223532+00:00",
+     "last_run_at": "2026-11-08T10:02:21.560222+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -236,7 +236,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-08T10:00:00+00:00",
+     "next_run_at": "2026-11-09T10:00:00+00:00",
      "paused_at": null
     },
     {
@@ -517,8 +517,8 @@
     "channel": "FACEBOOK"
    }
   ],
-  "ultimo_relatorio": "relatorio-agente-2026-11-07.html",
-  "relatorios_total": 6
+  "ultimo_relatorio": "relatorio-agente-2026-11-08.html",
+  "relatorios_total": 7
  },
  "integrations": {
   "sheets": {
