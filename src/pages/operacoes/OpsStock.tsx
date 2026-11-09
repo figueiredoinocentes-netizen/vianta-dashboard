@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { matchesSearch } from '@/lib/operacoes/constants';
-import { splitMarcaModelo } from '@/lib/operacoes/identidadeViatura';
+import { nomeCarro } from '@/lib/operacoes/identidadeViatura';
 import { useCarros } from '@/hooks/useOperacoes';
 import { useOps } from '@/components/operacoes/OpsContext';
 import { EmptyState, ErrorBox, OpsHeader, StatusSelect, hideCols } from '@/components/operacoes/shared';
@@ -43,14 +43,12 @@ export default function OpsStock() {
       ) : !lista.length ? (
         <EmptyState icon="🏪" text="Nenhum carro em stock" />
       ) : (
-        <div className={`rounded-xl border border-border bg-card ${hideCols(5, 6, 7, 9)}`}>
+        <div className={`rounded-xl border border-border bg-card ${hideCols(3, 4, 5, 7)}`}>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Matrícula</TableHead>
-                <TableHead>Marca</TableHead>
-                <TableHead>Modelo</TableHead>
-                <TableHead>Versão</TableHead>
+                <TableHead>Carro</TableHead>
                 <TableHead>Ano</TableHead>
                 <TableHead>KMs</TableHead>
                 <TableHead>Proprietário</TableHead>
@@ -71,13 +69,7 @@ export default function OpsStock() {
                     onClick={() => openVehicle(v.id)}
                   >
                     <TableCell className="font-semibold">{v.matricula || '-'}</TableCell>
-                    <TableCell>{splitMarcaModelo(v).marca || '-'}</TableCell>
-                    <TableCell>
-                      {emPrep && '🔧 '}
-                      {emMaint && '🛠️ '}
-                      {splitMarcaModelo(v).modelo || ''}
-                    </TableCell>
-                    <TableCell>{v.versao || '-'}</TableCell>
+                    <TableCell>{`${emPrep ? '🔧 ' : emMaint ? '🛠️ ' : ''}${nomeCarro(v) || '-'}`}</TableCell>
                     <TableCell>{v.ano || ''}</TableCell>
                     <TableCell>{v.kms_atuais || '-'}</TableCell>
                     <TableCell className="text-xs">{v.proprietario || ''}</TableCell>

@@ -25,6 +25,13 @@ export function splitMarcaModelo(carro: Pick<Carro, 'marca' | 'marca_modelo'>) {
     : { marca: '', modelo };
 }
 
+export function nomeCarro(carro: Pick<Carro, 'marca' | 'marca_modelo' | 'versao'>) {
+  const identidade = splitMarcaModelo(carro);
+  return [identidade.marca, identidade.modelo, carro.versao?.trim()]
+    .filter(Boolean)
+    .join(' ');
+}
+
 export function marcasRegistadas(carros: Pick<Carro, 'marca' | 'marca_modelo'>[]) {
   return [...new Set(carros.map((c) => splitMarcaModelo(c).marca).filter(Boolean))]
     .sort((a, b) => a.localeCompare(b, 'pt'));

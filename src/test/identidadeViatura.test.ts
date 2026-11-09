@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { marcasRegistadas, splitMarcaModelo } from '@/lib/operacoes/identidadeViatura';
+import { marcasRegistadas, nomeCarro, splitMarcaModelo } from '@/lib/operacoes/identidadeViatura';
 
 describe('identidade da viatura', () => {
   it('separa a marca conhecida dos valores legados', () => {
@@ -14,6 +14,10 @@ describe('identidade da viatura', () => {
       marca: 'Volvo',
       modelo: 'XC40',
     });
+  });
+
+  it('junta marca, modelo e versão numa única etiqueta com espaços', () => {
+    expect(nomeCarro({ marca: 'VW', marca_modelo: 'ID.5', versao: 'Pro' })).toBe('VW ID.5 Pro');
   });
 
   it('gera sugestões únicas de marcas a partir dos registos', () => {
