@@ -421,8 +421,12 @@ function AgenteComercialKpis({ state, audit, ago, C, lbl }: { state: SnapState |
   const ac = state?.agente_comercial;
   if (!ac) return null;
   const s = ac.resumo_semanal;
-  const kpik = (v: number | string | undefined, clr: string) => ({ display: 'flex', flexDirection: 'column' as const, gap: 2, padding: '8px 12px', borderRadius: 8, border: `1px solid ${C.line2}`, background: C.stage, minWidth: 80, flex: '1 1 0' });
+  const reportUrl = ac.ultimo_relatorio
+    ? 'https://vianta-dashboard.netlify.app/aios-live/relatorios/' + ac.ultimo_relatorio
+    : null;
+  const kpik = (v: number | string | undefined) => ({ display: 'flex', flexDirection: 'column' as const, gap: 2, padding: '8px 12px', borderRadius: 8, border: `1px solid ${C.line2}`, background: C.stage, minWidth: 80, flex: '1 1 0', cursor: reportUrl ? 'pointer' as const : undefined });
   const kpiv = (v: number | string | undefined) => ({ fontFamily: MONO, fontSize: 18, fontWeight: 600, color: v && Number(v) > 0 ? '#5FD39A' : C.faint });
+  const openReport = () => { if (reportUrl) window.open(reportUrl, '_blank'); };
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {/* Audit status */}
@@ -432,33 +436,40 @@ function AgenteComercialKpis({ state, audit, ago, C, lbl }: { state: SnapState |
           Auditoria diária «{audit.name}»: {audit.lastRun ? `último resultado ${audit.error ? 'erro' : 'ok'} ${ago(audit.lastRun)}` : 'sem execuções'} · entregue no Telegram
         </div>
       )}
-      {/* KPIs row */}
+      {/* KPIs row — clicáveis → abrem relatório */}
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-        <div style={kpik(ac.conversas_respondidas, C.ok)}>
+        <div style={kpik(ac.conversas_respondidas)} onClick={openReport} title="Abrir relatório diário">
           <span style={kpiv(ac.conversas_respondidas)}>{ac.conversas_respondidas ?? 0}</span>
-          <span style={{ fontSize: 10, color: C.muted }}>💬 Conversas respondidas</span>
+          <span style={{ fontSize: 10, color: C.muted }}>💬 Conversas respondidas ↗</span>
         </div>
-        <div style={kpik(ac.followups_pendentes, C.warn)}>
+        <div style={kpik(ac.followups_pendentes)} onClick={openReport} title="Abrir relatório diário">
           <span style={{ ...kpiv(ac.followups_pendentes), color: (ac.followups_pendentes ?? 0) > 0 ? '#F2C98A' : C.faint }}>{ac.followups_pendentes ?? 0}</span>
-          <span style={{ fontSize: 10, color: C.muted }}>📅 Follow-ups pend.</span>
+          <span style={{ fontSize: 10, color: C.muted }}>📅 Follow-ups pend. ↗</span>
         </div>
         {s && (
           <>
-            <div style={kpik(s.leads_contactadas, C.ok)}>
+            <div style={kpik(s.leads_contactadas)} onClick={openReport} title="Abrir relatório diário">
               <span style={kpiv(s.leads_contactadas)}>{s.leads_contactadas ?? 0}</span>
-              <span style={{ fontSize: 10, color: C.muted }}>👥 Leads na semana</span>
+              <span style={{ fontSize: 10, color: C.muted }}>👥 Leads na semana ↗</span>
             </div>
-            <div style={kpik(s.convertidas, C.faint)}>
+            <div style={kpik(s.convertidas)} onClick={openReport} title="Abrir relatório diário">
               <span style={{ ...kpiv(s.convertidas), color: (s.convertidas ?? 0) > 0 ? '#5FD39A' : C.faint }}>{s.convertidas ?? 0}</span>
-              <span style={{ fontSize: 10, color: C.muted }}>✅ Convertidas</span>
+              <span style={{ fontSize: 10, color: C.muted }}>✅ Convertidas ↗</span>
             </div>
-            <div style={kpik(s.ocorrencias, C.warn)}>
+            <div style={kpik(s.ocorrencias)} onClick={openReport} title="Abrir relatório diário">
               <span style={{ ...kpiv(s.ocorrencias), color: (s.ocorrencias ?? 0) > 0 ? '#F2C98A' : C.faint }}>{s.ocorrencias ?? 0}</span>
-              <span style={{ fontSize: 10, color: C.muted }}>⚠️ Ocorrências</span>
+              <span style={{ fontSize: 10, color: C.muted }}>⚠️ Ocorrências ↗</span>
             </div>
           </>
         )}
       </div>
+      {/* Botão abrir relatório */}
+      {reportUrl && (
+        <a href={reportUrl} target="_blank" rel="noopener noreferrer"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, alignSelf: 'flex-start', minHeight: 32, padding: '0 12px', borderRadius: 8, border: `1px solid ${C.line2}`, background: C.raised, color: C.link, textDecoration: 'none', fontSize: 12, fontFamily: MONO, cursor: 'pointer' }}>
+          📂 Relatório completo ↗
+        </a>
+      )}
       {/* Follow-ups */}
       {ac.followups && ac.followups.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
