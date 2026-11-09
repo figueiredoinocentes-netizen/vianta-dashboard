@@ -319,6 +319,9 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
                 <Field label="Modelo" className="sm:col-span-2">
                   <Input value={form.modelo} onChange={(e) => set('modelo', e.target.value)} />
                 </Field>
+                <Field label="Características" className="sm:col-span-2">
+                  <Input value={form.versao} onChange={(e) => set('versao', e.target.value)} />
+                </Field>
                 <Field label="Matrícula">
                   <Input value={form.matricula} onChange={(e) => set('matricula', e.target.value)} />
                 </Field>
@@ -458,9 +461,6 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
 
         {tab === 'ficha' && (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Field label="Versão" className="sm:col-span-2">
-              <Input value={form.versao} onChange={(e) => set('versao', e.target.value)} />
-            </Field>
             <Field label="Cor">
               <Input value={form.cor} onChange={(e) => set('cor', e.target.value)} />
             </Field>

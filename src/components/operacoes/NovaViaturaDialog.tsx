@@ -34,6 +34,7 @@ import { Field, NativeSelect } from './shared';
 
 const EMPTY = {
   modelo: '',
+  versao: '',
   matricula: '',
   ano: '',
   combustivel: '',
@@ -108,6 +109,7 @@ export function NovaViaturaDialog({
       const rows = await create.mutateAsync({
         matricula: form.matricula || null,
         marca_modelo: form.modelo || null,
+        versao: form.versao || null,
         ano: form.ano || null,
         combustivel: form.combustivel || null,
         kms_atuais: form.kms || null,
@@ -190,6 +192,9 @@ export function NovaViaturaDialog({
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Field label="Modelo" required className="sm:col-span-2">
               <Input required value={form.modelo} onChange={(e) => set('modelo', e.target.value)} />
+            </Field>
+            <Field label="Características" className="sm:col-span-2">
+              <Input value={form.versao} onChange={(e) => set('versao', e.target.value)} />
             </Field>
             <Field label="Pasta da Drive (CARROS)" className="sm:col-span-2">
               <NativeSelect

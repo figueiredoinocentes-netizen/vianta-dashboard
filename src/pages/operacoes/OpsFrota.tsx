@@ -34,11 +34,12 @@ export default function OpsFrota() {
       ) : !lista.length ? (
         <EmptyState icon="🚗" text="Nenhum carro alugado de momento" />
       ) : (
-        <div className={`rounded-xl border border-border bg-card ${hideCols(4, 5, 6)}`}>
+        <div className={`rounded-xl border border-border bg-card ${hideCols(5, 6, 7)}`}>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Matrícula</TableHead>
+                <TableHead>Características</TableHead>
                 <TableHead>Modelo</TableHead>
                 <TableHead>Motorista</TableHead>
                 <TableHead>Gestão</TableHead>
@@ -51,6 +52,7 @@ export default function OpsFrota() {
               {lista.map((v) => (
                 <TableRow key={v.id} className="cursor-pointer" onClick={() => openVehicle(v.id)}>
                   <TableCell className="font-semibold">{v.matricula || '-'}</TableCell>
+                  <TableCell>{v.versao || '-'}</TableCell>
                   <TableCell>{v.marca_modelo || ''}</TableCell>
                   <TableCell>{v.motorista_atual || '-'}</TableCell>
                   <TableCell className="text-xs">{v.tipo_gestao || ''}</TableCell>

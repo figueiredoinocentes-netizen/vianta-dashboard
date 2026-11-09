@@ -42,11 +42,12 @@ export default function OpsStock() {
       ) : !lista.length ? (
         <EmptyState icon="🏪" text="Nenhum carro em stock" />
       ) : (
-        <div className={`rounded-xl border border-border bg-card ${hideCols(3, 4, 5, 7)}`}>
+        <div className={`rounded-xl border border-border bg-card ${hideCols(4, 5, 6, 8)}`}>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Matrícula</TableHead>
+                <TableHead>Características</TableHead>
                 <TableHead>Modelo</TableHead>
                 <TableHead>Ano</TableHead>
                 <TableHead>KMs</TableHead>
@@ -68,6 +69,7 @@ export default function OpsStock() {
                     onClick={() => openVehicle(v.id)}
                   >
                     <TableCell className="font-semibold">{v.matricula || '-'}</TableCell>
+                    <TableCell>{v.versao || '-'}</TableCell>
                     <TableCell>
                       {emPrep && '🔧 '}
                       {emMaint && '🛠️ '}
