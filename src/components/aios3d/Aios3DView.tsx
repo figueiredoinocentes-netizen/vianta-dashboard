@@ -407,7 +407,7 @@ export default function Aios3DView({ state }: { state: SnapState | null }) {
           <div style={{ position: 'relative', display: 'flex', gap: 12, alignItems: 'stretch', maxWidth: '100%', maxHeight: '100%', overflowX: 'auto' }}>
             {panels.map((pn) => (
               <PopupPanel key={pn.id} pn={pn} wide={panels.length === 1} last={pn.i === panels.length - 1 && panels.length > 1}
-                graph={graph} onOpen={(id) => openFrom(pn.i, id)} onClose={() => setStack(validStack.slice(0, pn.i))} />
+                graph={graph} state={state} onOpen={(id) => openFrom(pn.i, id)} onClose={() => setStack(validStack.slice(0, pn.i))} />
             ))}
           </div>
         </div>
@@ -416,8 +416,79 @@ export default function Aios3DView({ state }: { state: SnapState | null }) {
   );
 }
 
+// ── Agente Comercial KPIs (dashboard no pop-up) ──
+function AgenteComercialKpis({ state, audit, ago, C, lbl }: { state: SnapState | null; audit: any; ago: (d: Date) => string; C: Record<string, string>; lbl: CSSProperties }) {
+  const ac = state?.agente_comercial;
+  if (!ac) return null;
+  const s = ac.resumo_semanal;
+  const kpik = (v: number | string | undefined, clr: string) => ({ display: 'flex', flexDirection: 'column' as const, gap: 2, padding: '8px 12px', borderRadius: 8, border: `1px solid ${C.line2}`, background: C.stage, minWidth: 80, flex: '1 1 0' });
+  const kpiv = (v: number | string | undefined) => ({ fontFamily: MONO, fontSize: 18, fontWeight: 600, color: v && Number(v) > 0 ? '#5FD39A' : C.faint });
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {/* Audit status */}
+      {audit && (
+        <div style={{ fontSize: 12, color: C.text2, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ width: 7, height: 7, borderRadius: '50%', background: audit.lastRun && !audit.error ? C.ok : C.err }} />
+          Auditoria diária «{audit.name}»: {audit.lastRun ? `último resultado ${audit.error ? 'erro' : 'ok'} ${ago(audit.lastRun)}` : 'sem execuções'} · entregue no Telegram
+        </div>
+      )}
+      {/* KPIs row */}
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        <div style={kpik(ac.conversas_respondidas, C.ok)}>
+          <span style={kpiv(ac.conversas_respondidas)}>{ac.conversas_respondidas ?? 0}</span>
+          <span style={{ fontSize: 10, color: C.muted }}>💬 Conversas respondidas</span>
+        </div>
+        <div style={kpik(ac.followups_pendentes, C.warn)}>
+          <span style={{ ...kpiv(ac.followups_pendentes), color: (ac.followups_pendentes ?? 0) > 0 ? '#F2C98A' : C.faint }}>{ac.followups_pendentes ?? 0}</span>
+          <span style={{ fontSize: 10, color: C.muted }}>📅 Follow-ups pend.</span>
+        </div>
+        {s && (
+          <>
+            <div style={kpik(s.leads_contactadas, C.ok)}>
+              <span style={kpiv(s.leads_contactadas)}>{s.leads_contactadas ?? 0}</span>
+              <span style={{ fontSize: 10, color: C.muted }}>👥 Leads na semana</span>
+            </div>
+            <div style={kpik(s.convertidas, C.faint)}>
+              <span style={{ ...kpiv(s.convertidas), color: (s.convertidas ?? 0) > 0 ? '#5FD39A' : C.faint }}>{s.convertidas ?? 0}</span>
+              <span style={{ fontSize: 10, color: C.muted }}>✅ Convertidas</span>
+            </div>
+            <div style={kpik(s.ocorrencias, C.warn)}>
+              <span style={{ ...kpiv(s.ocorrencias), color: (s.ocorrencias ?? 0) > 0 ? '#F2C98A' : C.faint }}>{s.ocorrencias ?? 0}</span>
+              <span style={{ fontSize: 10, color: C.muted }}>⚠️ Ocorrências</span>
+            </div>
+          </>
+        )}
+      </div>
+      {/* Follow-ups */}
+      {ac.followups && ac.followups.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <span style={lbl}>Próximos follow-ups</span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+            {ac.followups.map((f: any, i: number) => (
+              <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 24, padding: '0 8px', borderRadius: 5, border: `1px solid ${C.line2}`, background: C.raised, fontFamily: MONO, fontSize: 10, color: C.text2 }}>
+                <span style={{ width: 5, height: 5, borderRadius: '50%', background: C.warn }} />
+                {f.lead} · {f.date}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      {/* Weekly summary */}
+      {s && (
+        <div style={{ fontSize: 11, color: C.muted, lineHeight: '18px', padding: '6px 0' }}>
+          Esta semana falou com <strong style={{ color: C.text }}>{s.leads_contactadas ?? 0}</strong> pessoas,
+          converteu <strong style={{ color: (s.convertidas ?? 0) > 0 ? C.ok : C.faint }}>{s.convertidas ?? 0}</strong>,
+          {s.ocorrencias ? <span> teve <strong style={{ color: C.warn }}>{s.ocorrencias}</strong> ocorrências, </span> : ' '}
+          <strong style={{ color: C.warn }}>{s.pendentes ?? 0}</strong> pendentes
+          e <strong style={{ color: C.link }}>{s.sugestoes ?? 0}</strong> sugestões.
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Pop-up ──
-function PopupPanel({ pn, wide, last, graph, onOpen, onClose }: { pn: Panel; wide: boolean; last: boolean; graph: OrbitGraph; onOpen: (id: string) => void; onClose: () => void }) {
+function PopupPanel({ pn, wide, last, graph, state, onOpen, onClose }: { pn: Panel; wide: boolean; last: boolean; graph: OrbitGraph; state: SnapState | null; onOpen: (id: string) => void; onClose: () => void }) {
   const { n } = pn;
   const audit = graph.crons.find((c) => /auditoria/i.test(c.name));
   return (
@@ -446,10 +517,16 @@ function PopupPanel({ pn, wide, last, graph, onOpen, onClose }: { pn: Panel; wid
       {n.type === 'agent' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 14, border: `1px dashed ${C.line2}`, borderRadius: 10 }}>
           <span style={lbl}>Dashboard de performance</span>
-          {n.id === 'p:agente-comercial' && audit && (
-            <span style={{ fontSize: 13, color: C.text2 }}>Auditoria diária «{audit.name}»: {audit.lastRun ? `último resultado ${audit.error ? 'erro' : 'ok'} ${ago(audit.lastRun)}` : 'sem execuções'} · entregue no Telegram.</span>
+          {n.id === 'p:agente-comercial' ? (
+            <AgenteComercialKpis state={state} audit={audit} ago={ago} C={C} lbl={lbl} />
+          ) : (
+            <>
+              {audit && (
+                <span style={{ fontSize: 13, color: C.text2 }}>Auditoria diária «{audit.name}»: {audit.lastRun ? `último resultado ${audit.error ? 'erro' : 'ok'} ${ago(audit.lastRun)}` : 'sem execuções'}.</span>
+              )}
+              <span style={{ fontSize: 13, color: C.muted }}>[Por criar] Faltam os objetivos deste agente.</span>
+            </>
           )}
-          <span style={{ fontSize: 13, color: C.muted }}>[Por criar] Faltam os objetivos deste agente{n.id === 'p:agente-comercial' ? ' e o JSON diário das auditorias (fase 4 do brief)' : ''}.</span>
         </div>
       )}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '18px 26px' }}>

@@ -3,7 +3,6 @@ import { Mic, Square, Volume2, MicOff, MessageSquareText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import Aios3DView from '@/components/aios3d/Aios3DView';
-import AgenteComercialDashboard from '@/components/aios/AgenteComercialDashboard';
 import type { SnapState } from '@/lib/aios/orbitGraph';
 
 /**
@@ -313,9 +312,6 @@ const AiosPage = () => {
         <section className="overflow-hidden rounded-xl border border-[#141821]">
           <Aios3DView state={state} />
         </section>
-
-        {/* Agente Comercial — Dashboard */}
-        <AgenteComercialDashboard state={state} />
 
         <VoiceAssistant />
         <footer className="pb-4 text-center text-[10px] text-muted-foreground/60">
