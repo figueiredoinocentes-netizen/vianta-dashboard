@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-09T16:07:04+00:00",
+ "generated_at": "2026-11-09T16:39:41+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-09T16:07:07.347260+00:00",
+     "last_run_at": "2026-11-09T16:38:42.288121+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-09T16:08:07.347260+00:00",
+     "next_run_at": "2026-11-09T16:39:42.288121+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-09T15:57:03.354372+00:00",
+     "last_run_at": "2026-11-09T16:29:16.540522+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-09T16:17:03.977420+00:00",
+     "next_run_at": "2026-11-09T16:49:41.088134+00:00",
      "paused_at": null
     },
     {
@@ -150,7 +150,7 @@
      "schedule": "every 15m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-09T16:05:02.899929+00:00",
+     "last_run_at": "2026-11-09T16:35:15.177852+00:00",
      "last_status": "error",
      "last_error": "RuntimeError: [drift_skip:silent] Skipped to prevent unintended spend: global inference config drifted since this job was created (provider 'openrouter' -> 'ope",
      "script": null,
@@ -160,8 +160,8 @@
       "vianta-choicecar-atualizacao"
      ],
      "monitor_script": null,
-     "failure_streak": 12,
-     "next_run_at": "2026-11-09T16:20:02.899929+00:00",
+     "failure_streak": 14,
+     "next_run_at": "2026-11-09T16:50:15.177852+00:00",
      "paused_at": null
     },
     {
@@ -451,6 +451,11 @@
    "tags": []
   },
   {
+   "name": "vianta-processamento-faturas",
+   "description": "Use when processing Vianta invoices.",
+   "tags": []
+  },
+  {
    "name": "vianta-resposta-interessados",
    "description": "Use for Vianta TVDE lead DMs. Uses real sheet data.",
    "tags": []
@@ -524,7 +529,7 @@
   ],
   "ultimo_relatorio": "relatorio-agente-2026-11-09.html",
   "relatorios_total": 8,
-  "ultima_execucao": "2026-11-09T16:07:07.347260+00:00",
+  "ultima_execucao": "2026-11-09T16:38:42.288121+00:00",
   "ultimo_status": "ok",
   "resumo_semanal": {
    "leads_contactadas": 7,
@@ -808,6 +813,12 @@
     "group": "skills"
    },
    {
+    "id": "skill-vianta-processamento-faturas",
+    "label": "vianta-processamento-faturas",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
     "id": "skill-vianta-resposta-interessados",
     "label": "vianta-resposta-interessados",
     "type": "skill",
@@ -1087,6 +1098,12 @@
    {
     "source": "agente-comercial",
     "target": "skill-vianta-orquestracao",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-processamento-faturas",
     "label": "usa",
     "dashed": true
    },
