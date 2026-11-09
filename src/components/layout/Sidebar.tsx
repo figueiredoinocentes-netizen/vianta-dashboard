@@ -7,6 +7,7 @@ import {
   RefreshCw,
   Layers,
   Receipt,
+  ChartNoAxesCombined,
   Settings,
   Gauge,
   Car,
@@ -45,6 +46,7 @@ const operacoesItems = [
 
 const financeiroItems = [
   { to: '/financeiro', label: 'Faturas de Custos', icon: Receipt, end: true },
+  { to: '/financeiro/pl', label: 'P&L', icon: ChartNoAxesCombined },
 ];
 
 const settingsItem = { to: '/configuracoes', label: 'Configurações', icon: Settings };
