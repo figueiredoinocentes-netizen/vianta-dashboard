@@ -107,10 +107,33 @@ footer { text-align:center; margin-top:1.5rem; color:#475569; font-size:.7rem; }
   </section>
 
   <section>
-    <h2>🤖 Agente Comercial — Performance</h2>
-    <div id="comercial-kpis" style="display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:1rem"></div>
-    <div id="comercial-followups" style="margin-bottom:.8rem"></div>
-    <div id="comercial-reports"></div>
+    <h2>🤖 Agente Comercial</h2>
+    
+    <!-- Nav tabs -->
+    <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap">
+      <button class="btn" onclick="showComercialTab('dashboard')" id="tab-dashboard" style="background:#1e293b;color:white;border-color:#3b82f6">📊 Dashboard Performance</button>
+      <button class="btn" onclick="showComercialTab('auditoria')" id="tab-auditoria">📋 Auditoria Diária</button>
+      <button class="btn" onclick="showComercialTab('semanal')" id="tab-semanal">📈 Auditoria Semanal</button>
+    </div>
+    
+    <!-- Último resultado -->
+    <div id="comercial-status" style="display:flex;align-items:center;gap:0.5rem;font-size:.72rem;color:#94a3b8;margin-bottom:1rem"></div>
+    
+    <!-- Dashboard tab -->
+    <div id="comercial-dashboard">
+      <div id="comercial-kpis" style="display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:1rem"></div>
+      <div id="comercial-followups" style="margin-bottom:.8rem"></div>
+    </div>
+    
+    <!-- Auditoria tab (hidden by default) -->
+    <div id="comercial-auditoria" style="display:none">
+      <div id="comercial-reports"></div>
+    </div>
+    
+    <!-- Semanal tab (hidden by default) -->
+    <div id="comercial-semanal" style="display:none">
+      <div id="comercial-resumo-semanal"></div>
+    </div>
   </section>
 
   <section>
@@ -249,19 +272,61 @@ function renderCrons(crons) {
   $('cron-table').querySelector('tbody').innerHTML = rows;
 }
 
+function showComercialTab(tab) {
+  ['dashboard', 'auditoria', 'semanal'].forEach(t => {
+    document.getElementById('comercial-' + t).style.display = (t === tab) ? 'block' : 'none';
+    const btn = document.getElementById('tab-' + t);
+    if (t === tab) {
+      btn.style.background = '#1e293b';
+      btn.style.color = 'white';
+      btn.style.borderColor = '#3b82f6';
+    } else {
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }
+  });
+}
+
 function renderAgenteComercial() {
   const ac = state.agente_comercial;
-  if (!ac) { $('comercial-kpis').innerHTML = '<div class="note">sem dados</div>'; return; }
+  if (!ac) {
+    $('comercial-kpis').innerHTML = '<div class="note">sem dados</div>';
+    $('comercial-status').innerHTML = '';
+    $('comercial-resumo-semanal').innerHTML = '';
+    return;
+  }
 
   const convs = ac.conversas_respondidas || 0;
   const fups = ac.followups_pendentes || 0;
   const reports = ac.relatorios_total || 0;
   const err = ac.ultimo_erro || '';
+  const rs = ac.resumo_semanal || {};
+
+  // Status line
+  const exec = ac.ultima_execucao;
+  const status = ac.ultimo_status || 'unknown';
+  const statusColor = status === 'ok' ? '#34d399' : (status === 'error' ? '#fb7185' : '#eab308');
+  if (exec) {
+    $('comercial-status').innerHTML = `
+      <span class="dot ${statusColor === '#34d399' ? 'ok' : statusColor === '#fb7185' ? 'err' : 'warn'}" style="background:${statusColor}"></span>
+      Última execução: há ${rel(exec)} · Status: <strong style="color:${statusColor}">${status.toUpperCase()}</strong>`;
+  } else {
+    $('comercial-status').innerHTML = '';
+  }
+
+  // KPIs
+  const leads = rs.leads_contactadas != null ? rs.leads_contactadas : 0;
+  const convertidas = rs.convertidas != null ? rs.convertidas : 0;
+  const ocorrencias = rs.ocorrencias != null ? rs.ocorrencias : 0;
 
   $('comercial-kpis').innerHTML = `
     <div class="stat ok"><div class="num">${convs}</div><div class="label">💬 Conversas respondidas</div></div>
     <div class="stat ${fups > 0 ? 'warn' : 'ok'}"><div class="num">${fups}</div><div class="label">📅 Follow-ups pendentes</div></div>
     <div class="stat ok"><div class="num">${reports}</div><div class="label">📋 Relatórios gerados</div></div>
+    <div class="stat ok"><div class="num">${leads}</div><div class="label">📞 Leads contactadas (semana)</div></div>
+    <div class="stat ok"><div class="num">${convertidas}</div><div class="label">✅ Convertidas (semana)</div></div>
+    <div class="stat ${ocorrencias > 0 ? 'warn' : 'ok'}"><div class="num">${ocorrencias}</div><div class="label">⚠️ Ocorrências (semana)</div></div>
     ${err ? `<div class="stat err"><div class="num" style="font-size:.9rem">⚠</div><div class="label" title="${err.replace(/"/g, '&quot;')}">${err.slice(0, 60)}</div></div>` : ''}
   `;
 
@@ -274,10 +339,7 @@ function renderAgenteComercial() {
         <tbody>${ac.followups.map(f => `
           <tr><td>${f.lead}</td><td>${f.channel}</td><td>${f.date}</td></tr>
         `).join('')}</tbody>
-      </table>
-      <div style="margin-top:.5rem;font-size:.66rem;color:#64748b">
-        ⏰ Maria Matei a 12/11 · David Trancozo a 15/11 · Luso Brasileiro + Vitor Serrano a 16/11
-      </div>`;
+      </table>`;
   } else {
     $('comercial-followups').innerHTML = '<div style="font-size:.72rem;color:#64748b">📅 Sem follow-ups pendentes</div>';
   }
@@ -291,6 +353,17 @@ function renderAgenteComercial() {
         <button class="btn" onclick="openReport('${report}')">📂 Abrir</button>
       </div>`;
   }
+
+  // Resumo semanal
+  const pendentes = rs.pendentes != null ? rs.pendentes : 0;
+  const sugestoes = rs.sugestoes != null ? rs.sugestoes : 0;
+  $('comercial-resumo-semanal').innerHTML = `
+    <div style="background:#1e293b;border-radius:10px;padding:1rem;font-size:.82rem;line-height:1.6">
+      <p>Esta semana o agente falou com <strong>${leads}</strong> pessoas, converteu <strong>${convertidas}</strong>, teve <strong>${ocorrencias}</strong> ocorrências, <strong>${pendentes}</strong> pendentes, <strong>${sugestoes}</strong> sugestões de melhoria.</p>
+    </div>
+    <div style="margin-top:.8rem;font-size:.66rem;color:#64748b">
+      ⏰ Maria Matei a 12/11 · David Trancozo a 15/11 · Luso Brasileiro + Vitor Serrano a 16/11
+    </div>`;
 }
 
 function openReport(fn) {
