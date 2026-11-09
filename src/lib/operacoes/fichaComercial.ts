@@ -64,7 +64,7 @@ export function gerarFichaComercialHTML(carro: Carro): string {
   // Especificações
   const specs =
     linha('Marca / Modelo', v.marca_modelo) +
-    linha('Características', v.versao) +
+    linha('Versão', v.versao) +
     linha('Matrícula', v.matricula) +
     linha('Ano', v.ano) +
     linha('Combustível', v.combustivel) +

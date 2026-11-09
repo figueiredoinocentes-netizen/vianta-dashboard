@@ -22,6 +22,7 @@ import { eur } from '@/lib/operacoes/custos';
 import { valorSemIva } from '@/lib/financeiro';
 import type { Carro, DriveFile } from '@/lib/operacoes/types';
 import { imprimirFichaComercial } from '@/lib/operacoes/fichaComercial';
+import { splitMarcaModelo, marcasRegistadas } from '@/lib/operacoes/identidadeViatura';
 import {
   useCarros,
   useCentralWrites,
@@ -43,6 +44,7 @@ import { AquisicaoViatura } from './AquisicaoViatura';
 
 interface Form {
   modelo: string;
+  marca: string;
   matricula: string;
   ano: string;
   combustivel: string;
@@ -83,8 +85,10 @@ const CAIXAS = ['Automático', 'Manual'] as const;
 const s = (x: string | number | null | undefined) => (x == null ? '' : String(x));
 
 function formFromCarro(v: Carro): Form {
+  const identidade = splitMarcaModelo(v);
   return {
-    modelo: s(v.marca_modelo),
+    marca: identidade.marca,
+    modelo: identidade.modelo,
     matricula: s(v.matricula),
     ano: s(v.ano),
     combustivel: s(v.combustivel),
@@ -136,6 +140,7 @@ export function VehicleDetailDialog({
 }) {
   const open = carId != null;
   const { data: carros = [] } = useCarros();
+  const marcas = marcasRegistadas(carros);
   const carro = carros.find((c) => c.id === carId) || null;
 
   return (
@@ -144,13 +149,13 @@ export function VehicleDetailDialog({
         className="max-h-[90vh] max-w-3xl overflow-y-auto"
         aria-describedby={undefined}
       >
-        {carro && <Body key={carro.id} carro={carro} onClose={onClose} />}
+        {carro && <Body key={carro.id} carro={carro} marcas={marcas} onClose={onClose} />}
       </DialogContent>
     </Dialog>
   );
 }
 
-function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
+function Body({ carro, marcas, onClose }: { carro: Carro; marcas: string[]; onClose: () => void }) {
   const [tab, setTab] = useState<'carac' | 'ficha' | 'prep' | 'sinist'>('carac');
   const [form, setForm] = useState<Form>(() => formFromCarro(carro));
   const [saving, setSaving] = useState<'idle' | 'saving'>('idle');
@@ -194,6 +199,7 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
     setSaving('saving');
 
     const updates: Record<string, string | number | null> = {
+      marca: form.marca || null,
       marca_modelo: form.modelo || null,
       matricula: form.matricula || null,
       ano: form.ano || null,
@@ -262,7 +268,7 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
     <>
       <DialogHeader>
         <DialogTitle>
-          {(carro.marca_modelo || 'Viatura') + (carro.matricula ? ` — ${carro.matricula}` : '')}
+          {(carro.marca ? `${carro.marca} ${splitMarcaModelo(carro).modelo}` : carro.marca_modelo) || 'Viatura'}{carro.matricula ? ` — ${carro.matricula}` : ''}
         </DialogTitle>
       </DialogHeader>
 
@@ -316,10 +322,14 @@ function Body({ carro, onClose }: { carro: Carro; onClose: () => void }) {
                 )}
               </div>
               <div className="grid min-w-0 flex-1 grid-cols-2 gap-3">
-                <Field label="Modelo" className="sm:col-span-2">
+                <Field label="Marca">
+                  <Input list={`marcas-registadas-${carro.id}`} value={form.marca} onChange={(e) => set('marca', e.target.value)} />
+                  <datalist id={`marcas-registadas-${carro.id}`}>{marcas.map((marca) => <option key={marca} value={marca} />)}</datalist>
+                </Field>
+                <Field label="Modelo">
                   <Input value={form.modelo} onChange={(e) => set('modelo', e.target.value)} />
                 </Field>
-                <Field label="Características" className="sm:col-span-2">
+                <Field label="Versão" className="sm:col-span-2">
                   <Input value={form.versao} onChange={(e) => set('versao', e.target.value)} />
                 </Field>
                 <Field label="Matrícula">

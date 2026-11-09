@@ -310,7 +310,8 @@ export function camposCarroDeExtracao(dados: Partial<Record<string, string>>): {
   if (dados.cor) out.push({ field: 'cor', value: dados.cor });
   const marca = String(dados.marca || '').trim();
   const modelo = String(dados.modelo || '').trim();
-  if (marca || modelo) out.push({ field: 'marca_modelo', value: `${marca} ${modelo}`.trim() });
+  if (marca) out.push({ field: 'marca', value: marca });
+  if (modelo) out.push({ field: 'marca_modelo', value: modelo });
   if (dados.matricula) out.push({ field: 'matricula', value: dados.matricula });
   return out;
 }

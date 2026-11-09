@@ -513,14 +513,11 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                Características: {txt(v.versao)}
-              </p>
               <h2 className="font-display text-lg font-bold leading-tight text-foreground">
                 {v.marca_modelo || 'Sem modelo'}
               </h2>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                {[v.matricula, v.cor, v.caixa].filter((x) => !vazio(x)).join(' · ') || '—'}
+                {[v.matricula, v.versao, v.cor, v.caixa].filter((x) => !vazio(x)).join(' · ') || '—'}
               </p>
               <div className="mt-1.5">
                 <BadgeEstado v={v} />
@@ -835,7 +832,7 @@ const Stock = () => {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Modelo, características, matrícula, cor…"
+              placeholder="Modelo, matrícula, cor…"
               className="pl-9"
             />
           </div>

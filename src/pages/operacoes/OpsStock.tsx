@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { matchesSearch } from '@/lib/operacoes/constants';
+import { splitMarcaModelo } from '@/lib/operacoes/identidadeViatura';
 import { useCarros } from '@/hooks/useOperacoes';
 import { useOps } from '@/components/operacoes/OpsContext';
 import { EmptyState, ErrorBox, OpsHeader, StatusSelect, hideCols } from '@/components/operacoes/shared';
@@ -42,13 +43,14 @@ export default function OpsStock() {
       ) : !lista.length ? (
         <EmptyState icon="🏪" text="Nenhum carro em stock" />
       ) : (
-        <div className={`rounded-xl border border-border bg-card ${hideCols(4, 5, 6, 8)}`}>
+        <div className={`rounded-xl border border-border bg-card ${hideCols(5, 6, 7, 9)}`}>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Matrícula</TableHead>
-                <TableHead>Características</TableHead>
+                <TableHead>Marca</TableHead>
                 <TableHead>Modelo</TableHead>
+                <TableHead>Versão</TableHead>
                 <TableHead>Ano</TableHead>
                 <TableHead>KMs</TableHead>
                 <TableHead>Proprietário</TableHead>
@@ -69,12 +71,13 @@ export default function OpsStock() {
                     onClick={() => openVehicle(v.id)}
                   >
                     <TableCell className="font-semibold">{v.matricula || '-'}</TableCell>
-                    <TableCell>{v.versao || '-'}</TableCell>
+                    <TableCell>{splitMarcaModelo(v).marca || '-'}</TableCell>
                     <TableCell>
                       {emPrep && '🔧 '}
                       {emMaint && '🛠️ '}
-                      {v.marca_modelo || ''}
+                      {splitMarcaModelo(v).modelo || ''}
                     </TableCell>
+                    <TableCell>{v.versao || '-'}</TableCell>
                     <TableCell>{v.ano || ''}</TableCell>
                     <TableCell>{v.kms_atuais || '-'}</TableCell>
                     <TableCell className="text-xs">{v.proprietario || ''}</TableCell>
