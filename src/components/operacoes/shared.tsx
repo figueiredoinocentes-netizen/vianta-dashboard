@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { BADGE_CLASS, STATUSES } from '@/lib/operacoes/constants';
 import type { Carro } from '@/lib/operacoes/types';
-import { useRefreshOperacoes, useUpdateCarroField } from '@/hooks/useOperacoes';
+import { useAlterarEstado, useRefreshOperacoes } from '@/hooks/useOperacoes';
 import { useOps } from './OpsContext';
 
 export function Field({
@@ -112,13 +112,17 @@ export function DeleteConfirm({
 
 /** Estado da viatura: sempre um <select> real, com a cor do estado. */
 export function StatusSelect({ carro }: { carro: Carro }) {
-  const update = useUpdateCarroField();
+  const alterar = useAlterarEstado();
   return (
     <select
       value={carro.estado || ''}
       title="Alterar estado"
       onClick={(e) => e.stopPropagation()}
-      onChange={(e) => update(carro, 'estado', e.target.value)}
+      onChange={async (e) => {
+        const novo = e.target.value;
+        // Se o estado exigir a ficha e ela estiver incompleta, o select volta ao valor antigo.
+        if (!(await alterar(carro, novo))) e.target.value = carro.estado || '';
+      }}
       className={cn(
         'cursor-pointer rounded px-2 py-0.5 text-[11px] font-medium outline-none transition hover:brightness-125',
         BADGE_CLASS[carro.estado || ''] || 'bg-muted text-muted-foreground',

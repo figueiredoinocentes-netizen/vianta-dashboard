@@ -9,7 +9,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { destinoDepoisDePreparacao, matchesSearch } from '@/lib/operacoes/constants';
-import { useCarros, useOcorrencias, useUpdateCarroField } from '@/hooks/useOperacoes';
+import { faltamParaEstado } from '@/lib/operacoes/estadoRequisitos';
+import { useAlterarEstado, useCarros, useOcorrencias } from '@/hooks/useOperacoes';
 import { emAberto, ePreparacao, gravidadeClass } from '@/lib/operacoes/trabalhos';
 import { useOps } from '@/components/operacoes/OpsContext';
 import { EmptyState, ErrorBox, OpsHeader, StatusSelect, hideCols } from '@/components/operacoes/shared';
@@ -17,7 +18,7 @@ import { EmptyState, ErrorBox, OpsHeader, StatusSelect, hideCols } from '@/compo
 export default function OpsManutencao() {
   const { search, openVehicle, openNovaViatura } = useOps();
   const { data: carros = [], isLoading, isError } = useCarros();
-  const update = useUpdateCarroField();
+  const alterar = useAlterarEstado();
   const { data: ocorrencias = [] } = useOcorrencias();
   const pendentes = ocorrencias
     .filter((o) => emAberto(o) && !ePreparacao(o))
@@ -100,7 +101,11 @@ export default function OpsManutencao() {
                       variant="outline"
                       onClick={(e) => {
                         e.stopPropagation();
-                        update(v, 'estado', destinoDepoisDePreparacao(v));
+                        const destino = destinoDepoisDePreparacao(v);
+                        // Sem a ficha completa a viatura não passa a disponível: abre-a
+                        // na Ficha comercial para se preencher o que falta.
+                        if (faltamParaEstado(v, destino).length) openVehicle(v.id, 'ficha');
+                        void alterar(v, destino);
                       }}
                     >
                       Marcar Disponível
