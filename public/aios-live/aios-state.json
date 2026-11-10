@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-10T08:34:53+00:00",
+ "generated_at": "2026-11-10T09:07:54+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T08:34:55.109139+00:00",
+     "last_run_at": "2026-11-10T09:06:56.067756+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-10T08:35:55.109139+00:00",
+     "next_run_at": "2026-11-10T09:07:56.067756+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T08:23:56.855486+00:00",
+     "last_run_at": "2026-11-10T08:56:57.414368+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-10T08:44:52.976207+00:00",
+     "next_run_at": "2026-11-10T09:17:53.954911+00:00",
      "paused_at": null
     },
     {
@@ -150,7 +150,7 @@
      "schedule": "every 15m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T08:28:53.388463+00:00",
+     "last_run_at": "2026-11-10T09:00:54.655300+00:00",
      "last_status": "error",
      "last_error": "RuntimeError: [drift_skip:silent] Skipped to prevent unintended spend: global inference config drifted since this job was created (provider 'openrouter' -> 'ope",
      "script": null,
@@ -160,8 +160,8 @@
       "vianta-choicecar-atualizacao"
      ],
      "monitor_script": null,
-     "failure_streak": 75,
-     "next_run_at": "2026-11-10T08:43:53.388463+00:00",
+     "failure_streak": 77,
+     "next_run_at": "2026-11-10T09:15:54.655300+00:00",
      "paused_at": null
     },
     {
@@ -310,7 +310,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-10T09:00:00+00:00",
+     "next_run_at": "2026-11-17T09:00:00+00:00",
      "paused_at": null
     }
    ]
@@ -529,7 +529,7 @@
   ],
   "ultimo_relatorio": "relatorio-agente-2026-11-09.html",
   "relatorios_total": 8,
-  "ultima_execucao": "2026-11-10T08:34:55.109139+00:00",
+  "ultima_execucao": "2026-11-10T09:06:56.067756+00:00",
   "ultimo_status": "ok",
   "resumo_semanal": {
    "leads_contactadas": 7,
