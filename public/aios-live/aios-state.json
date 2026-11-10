@@ -1,16 +1,13 @@
 {
- "generated_at": "2026-11-10T15:44:17+00:00",
+ "generated_at": "2026-11-10T15:56:52+00:00",
  "profiles": [
   {
    "name": "jarvis",
    "role": "CEO / Orquestrador",
    "desc": "gateway Telegram \"Vianta Jarvis\" · delegate_task para bots",
    "gateway": {
-    "pid": 142,
-    "last_heartbeat": 1794325454.4661686,
-    "started_at": 1792667317.4672155,
-    "age_s": 3,
-    "up": true
+    "up": true,
+    "pid": "908664"
    },
    "crons": [
     {
@@ -38,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T15:43:24.275759+00:00",
+     "last_run_at": "2026-11-10T15:56:53.877523+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -48,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-10T15:44:24.275759+00:00",
+     "next_run_at": "2026-11-10T15:57:53.877523+00:00",
      "paused_at": null
     },
     {
@@ -99,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T15:34:10.452315+00:00",
+     "last_run_at": "2026-11-10T15:46:28.388215+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -107,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-10T15:54:16.851446+00:00",
+     "next_run_at": "2026-11-10T16:06:52.177896+00:00",
      "paused_at": null
     },
     {
@@ -153,7 +150,7 @@
      "schedule": "every 15m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T15:28:55.574549+00:00",
+     "last_run_at": "2026-11-10T15:50:59.023294+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -164,7 +161,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-10T15:59:16.871316+00:00",
+     "next_run_at": "2026-11-10T16:05:59.023294+00:00",
      "paused_at": null
     },
     {
@@ -322,7 +319,10 @@
    "name": "agente-comercial",
    "role": "Bot Comercial TVDE",
    "desc": "leads TVDE · GHL Messenger/IG · cron 1 min",
-   "gateway": null,
+   "gateway": {
+    "up": false,
+    "pid": null
+   },
    "crons": []
   },
   {
@@ -333,7 +333,32 @@
    "crons": []
   }
  ],
- "gateways": {},
+ "gateways": {
+  "default": {
+   "up": true,
+   "pid": null
+  },
+  "agente-comercial": {
+   "up": false,
+   "pid": null
+  },
+  "agente-conteudo": {
+   "up": false,
+   "pid": null
+  },
+  "agente-turismo": {
+   "up": false,
+   "pid": null
+  },
+  "jarvis": {
+   "up": true,
+   "pid": "908664"
+  },
+  "media-buyer": {
+   "up": false,
+   "pid": null
+  }
+ },
  "skills": [
   {
    "name": "email-inbox-monitor",
@@ -509,7 +534,7 @@
   ],
   "ultimo_relatorio": "relatorio-agente-2026-11-10.html",
   "relatorios_total": 9,
-  "ultima_execucao": "2026-11-10T15:43:24.275759+00:00",
+  "ultima_execucao": "2026-11-10T15:56:53.877523+00:00",
   "ultimo_status": "ok",
   "resumo_semanal": {
    "leads_contactadas": 9,
@@ -580,7 +605,7 @@
     "label": "Jarvis",
     "type": "agent",
     "group": "agents",
-    "status": "err",
+    "status": "ok",
     "desc": "CEO / Orquestrador"
    },
    {
