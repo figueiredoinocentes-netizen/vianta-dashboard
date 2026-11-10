@@ -30,17 +30,18 @@ const logoB64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAawAAABWCAYAAACTt
 
 export function gerarFichaComercialHTML(carro: Carro): string {
   const v = carro;
-  const isVenda = v.tipo_gestao === 'Venda';
+  const temVenda = v.tipo_gestao === 'Venda' || v.tipo_gestao === 'Venda e Aluguer';
+  const temAluguer = v.tipo_gestao === 'Aluguer' || v.tipo_gestao === 'Venda e Aluguer';
 
   const modelo = v.marca_modelo || '';
   const title = [modelo, v.versao].filter(Boolean).join(' ');
   const subtitulo = [v.matricula, v.ano, v.combustivel, v.kms_atuais ? `${fmtNum(v.kms_atuais)} km` : null]
     .filter(Boolean).join(' · ');
 
-  // Preço
-  let precoHtml: string;
-  if (isVenda) {
-    precoHtml = `<div class="preco">${fmtNum(v.preco_venda)} €</div>`;
+  // Preço(s)
+  let precoHtml = '';
+  if (temVenda) {
+    precoHtml += `<div class="preco">${fmtNum(v.preco_venda)} €</div>`;
     const credLinhas = [
       ['120 meses (10 anos)', v.credito_120_meses],
       ['60 meses (5 anos)', v.credito_60_meses],
@@ -51,8 +52,10 @@ export function gerarFichaComercialHTML(carro: Carro): string {
         credLinhas.map(([l, x]) => `<li>${fmtNum(x)}€/mês (${l})</li>`).join('') +
         '</ul></div>';
     }
-  } else {
-    precoHtml = `<div class="preco aluguer">${fmtNum(v.valor_aluguer_semanal)} € / semana</div>`;
+  }
+  if (temAluguer) {
+    if (temVenda) precoHtml += '<div style="height:10px"></div>';
+    precoHtml += `<div class="preco aluguer">${fmtNum(v.valor_aluguer_semanal)} € / semana</div>`;
     if (!vazio(v.caucao)) precoHtml += `<div class="credito">Caução: ${fmtNum(v.caucao)} €</div>`;
   }
 

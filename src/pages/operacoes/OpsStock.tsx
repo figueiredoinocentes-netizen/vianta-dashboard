@@ -14,8 +14,9 @@ import { nomeCarro } from '@/lib/operacoes/identidadeViatura';
 import { useCarros } from '@/hooks/useOperacoes';
 import { useOps } from '@/components/operacoes/OpsContext';
 import { EmptyState, ErrorBox, OpsHeader, StatusSelect, hideCols } from '@/components/operacoes/shared';
+import { camposEmFalta } from '@/lib/operacoes/estadoRequisitos';
 
-const STOCK_STATES = ['Para Venda', 'Para Aluguer', 'Manutenção', 'Em Preparação'];
+const STOCK_STATES = ['Para Venda', 'Para Aluguer', 'Para Venda e Aluguer', 'Manutenção', 'Em Preparação'];
 
 export default function OpsStock() {
   const { search, openVehicle, openNovaViatura } = useOps();
@@ -27,6 +28,7 @@ export default function OpsStock() {
     .filter((v) => STOCK_STATES.includes(v.estado || ''))
     .filter((v) => matchesSearch(search, v))
     .sort((a, b) => rank(a.estado) - rank(b.estado));
+  const incompletos = lista.filter((v) => camposEmFalta(v, v.estado).length > 0);
 
   return (
     <>
@@ -36,6 +38,11 @@ export default function OpsStock() {
         newLabel="Nova Viatura"
         onNew={openNovaViatura}
       />
+      {!isLoading && !isError && incompletos.length > 0 && (
+        <div className="mb-3 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
+          ⚠️ {incompletos.length === 1 ? '1 viatura tem' : `${incompletos.length} viaturas têm`} a Ficha comercial incompleta. As linhas assinaladas mostram o que falta.
+        </div>
+      )}
       {isError ? (
         <ErrorBox text="Erro ao carregar o stock." />
       ) : isLoading ? (
@@ -62,6 +69,7 @@ export default function OpsStock() {
               {lista.map((v) => {
                 const emPrep = v.estado === 'Em Preparação';
                 const emMaint = v.estado === 'Manutenção';
+                const faltam = camposEmFalta(v, v.estado);
                 return (
                   <TableRow
                     key={v.id}
@@ -69,7 +77,22 @@ export default function OpsStock() {
                     onClick={() => openVehicle(v.id)}
                   >
                     <TableCell className="font-semibold">{v.matricula || '-'}</TableCell>
-                    <TableCell>{`${emPrep ? '🔧 ' : emMaint ? '🛠️ ' : ''}${nomeCarro(v) || '-'}`}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5">
+                        <span>{`${emPrep ? '🔧 ' : emMaint ? '🛠️ ' : ''}${nomeCarro(v) || '-'}`}</span>
+                        {!!faltam.length && (
+                          <button
+                            type="button"
+                            title={`Ficha comercial incompleta: ${faltam.map((f) => f.label).join(', ')}`}
+                            aria-label={`Ficha comercial incompleta: ${faltam.map((f) => f.label).join(', ')}`}
+                            className="shrink-0 rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300 hover:bg-amber-500/25"
+                            onClick={(e) => { e.stopPropagation(); openVehicle(v.id, 'ficha'); }}
+                          >
+                            ⚠ Ficha incompleta
+                          </button>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>{v.ano || ''}</TableCell>
                     <TableCell>{v.kms_atuais || '-'}</TableCell>
                     <TableCell className="text-xs">{v.proprietario || ''}</TableCell>

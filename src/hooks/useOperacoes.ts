@@ -22,6 +22,7 @@ import type {
 } from '@/lib/operacoes/types';
 
 import { ORIGEM_PREP, itensPreparacao, tipoDoItem } from '@/lib/operacoes/trabalhos';
+import { faltamParaEstado, mensagemCamposEmFalta } from '@/lib/operacoes/estadoRequisitos';
 
 const KEY = 'central';
 
@@ -68,6 +69,28 @@ export function useUpdateCarroField() {
       toast.error(`Erro ao guardar: ${errorMessage(e)}`);
       return false;
     }
+  };
+}
+
+/**
+ * Muda o estado de uma viatura. Bloqueia a passagem a um estado disponível
+ * enquanto faltarem os campos exigidos pelo tipo de gestão (incluindo pelo menos
+ * uma fotografia; garantia só em Venda; valor semanal+caução em Aluguer).
+ * As simulações de crédito são recomendadas em Venda, mas não bloqueiam o estado.
+ * Devolve `false` quando bloqueou ou quando a gravação falhou.
+ */
+export function useAlterarEstado() {
+  const update = useUpdateCarroField();
+  return async (carro: Carro, estado: string): Promise<boolean> => {
+    const faltam = faltamParaEstado(carro, estado);
+    if (faltam.length) {
+      toast.error(mensagemCamposEmFalta(faltam, estado), {
+        description: 'Abre a viatura e preenche a Ficha comercial.',
+        duration: 9000,
+      });
+      return false;
+    }
+    return update(carro, 'estado', estado);
   };
 }
 

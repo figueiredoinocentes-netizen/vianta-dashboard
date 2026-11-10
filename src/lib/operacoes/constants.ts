@@ -4,6 +4,7 @@ export const STATUSES = [
   'Alugado',
   'Para Venda',
   'Para Aluguer',
+  'Para Venda e Aluguer',
   'Em Preparação',
   'Inativo',
   'Manutenção',
@@ -33,6 +34,7 @@ export const BADGE_CLASS: Record<string, string> = {
   Vendido: 'bg-[#1f2937] text-[#9ca3af]',
   'Em Preparação': 'bg-[#312e81] text-[#a5b4fc]',
   'Para Aluguer': 'bg-[#14532d] text-[#86efac]',
+  'Para Venda e Aluguer': 'bg-[#164e63] text-[#67e8f9]',
 };
 
 // Checklist de preparação — Instrução de Trabalho "Preparação de Viatura STAND".
@@ -108,6 +110,11 @@ export const DOC_KEYWORDS: Record<string, string[]> = {
 export function getChecklistGroups(v: Carro): Record<string, string[]> {
   if (v.tipo_gestao === 'Venda') return CHECKLIST_GROUPS_VENDA;
   if (v.tipo_gestao === 'Aluguer') return CHECKLIST_GROUPS_ALUGUER;
+  if (v.tipo_gestao === 'Venda e Aluguer') {
+    const unir = (grupo: 'Documentos' | 'A Fazer') =>
+      Array.from(new Set([...(CHECKLIST_GROUPS_VENDA[grupo] || []), ...(CHECKLIST_GROUPS_ALUGUER[grupo] || [])]));
+    return { Documentos: unir('Documentos'), 'A Fazer': unir('A Fazer') };
+  }
   return {};
 }
 
@@ -122,6 +129,7 @@ export function getMissingItems(v: Carro): string[] {
 }
 
 export function destinoDepoisDePreparacao(v: Carro): string {
+  if (v.tipo_gestao === 'Venda e Aluguer') return 'Para Venda e Aluguer';
   return v.tipo_gestao === 'Aluguer' ? 'Para Aluguer' : 'Para Venda';
 }
 
@@ -162,7 +170,9 @@ export function getStats(carros: Carro[]) {
     total: carros.length,
     frota: c((v) => v.estado === 'Alugado' && v.tipo_gestao !== 'Slot'),
     stock: c(
-      (v) => (v.estado === 'Para Venda' || v.estado === 'Para Aluguer') && v.tipo_gestao !== 'Slot',
+      (v) =>
+        (v.estado === 'Para Venda' || v.estado === 'Para Aluguer' || v.estado === 'Para Venda e Aluguer') &&
+        v.tipo_gestao !== 'Slot',
     ),
     inativos: c((v) => v.estado === 'Inativo'),
     manutencao: c((v) => v.estado === 'Manutenção'),

@@ -9,12 +9,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { normalizeText } from '@/lib/operacoes/constants';
 import type { Carro } from '@/lib/operacoes/types';
-import { useCarros } from '@/hooks/useOperacoes';
+import { useCarros, useUpdateCarroField } from '@/hooks/useOperacoes';
 
 /**
  * Stock para o comercial (vista de chamada). Fonte única: tabela `carros` do
  * Supabase — a mesma que a Operações edita. Filtra-se por TIPO DE GESTÃO
- * (Venda / Aluguer), nunca por estado; dentro de cada tipo, as viaturas ainda
+ * (Venda / Aluguer); as viaturas "Venda e Aluguer" aparecem nos dois separadores.
+ * Dentro de cada tipo, as viaturas ainda
  * não disponíveis (em preparação / manutenção) aparecem esbatidas mas com toda
  * a informação, para o comercial poder agendar o interessado.
  */
@@ -22,7 +23,10 @@ import { useCarros } from '@/hooks/useOperacoes';
 type Gestao = 'Venda' | 'Aluguer';
 type Disponibilidade = 'pronto' | 'preparacao' | 'manutencao';
 
-const ESTADOS_STOCK = ['Para Venda', 'Para Aluguer', 'Em Preparação', 'Manutenção'];
+const ESTADOS_STOCK = ['Para Venda', 'Para Aluguer', 'Para Venda e Aluguer', 'Em Preparação', 'Manutenção'];
+
+const pertenceA = (v: Carro, gestao: Gestao) =>
+  v.tipo_gestao === gestao || v.tipo_gestao === 'Venda e Aluguer';
 
 function disponibilidade(v: Carro): Disponibilidade {
   if (v.estado === 'Em Preparação') return 'preparacao';
@@ -39,6 +43,8 @@ const BADGE: Record<Disponibilidade, string> = {
 };
 
 const vazio = (v: unknown) => v == null || String(v).trim() === '';
+const simulacaoCreditoIncompleta = (v: Carro) =>
+  [v.credito_120_meses, v.credito_60_meses, v.credito_48_meses].some(vazio);
 const txt = (v: unknown) => (vazio(v) ? '—' : String(v));
 const eur = (v: unknown, sufixo = '') => (vazio(v) ? '—' : `${v} €${sufixo}`);
 const km = (v: unknown) => (vazio(v) ? '—' : `${v} km`);
@@ -251,6 +257,9 @@ function CartaoViatura({
             .join(' · ') || '—'}
         </div>
         <BadgeEstado v={v} />
+        {gestao === 'Venda' && simulacaoCreditoIncompleta(v) && (
+          <div className="mt-1 text-[10px] font-semibold text-amber-300">⚠ Sem simulação de crédito</div>
+        )}
       </div>
     </button>
   );
@@ -391,11 +400,35 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
   const fotos = fotosDe(v);
   const [foto, setFoto] = useState(0);
   const [aberta, setAberta] = useState(false);
+  const [credito, setCredito] = useState({
+    credito_120_meses: String(v.credito_120_meses ?? ''),
+    credito_60_meses: String(v.credito_60_meses ?? ''),
+    credito_48_meses: String(v.credito_48_meses ?? ''),
+  });
+  const [aGuardarCredito, setAGuardarCredito] = useState(false);
+  const updateCarro = useUpdateCarroField();
   const disp = disponibilidade(v);
 
   useEffect(() => {
     setFoto(0);
-  }, [v.id]);
+    setCredito({
+      credito_120_meses: String(v.credito_120_meses ?? ''),
+      credito_60_meses: String(v.credito_60_meses ?? ''),
+      credito_48_meses: String(v.credito_48_meses ?? ''),
+    });
+  }, [v.id, v.credito_120_meses, v.credito_60_meses, v.credito_48_meses]);
+
+  const guardarCredito = async () => {
+    setAGuardarCredito(true);
+    try {
+      for (const [campo, valor] of Object.entries(credito)) {
+        if (!(await updateCarro(v, campo, valor.trim()))) return;
+      }
+      toast.success('Simulação de crédito guardada.');
+    } finally {
+      setAGuardarCredito(false);
+    }
+  };
 
   const copiar = async () => {
     try {
@@ -571,18 +604,53 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
             ))}
           </div>
           {gestao !== 'Aluguer' && (
-          <div className="mt-2 grid grid-cols-3 gap-2">
-            {[
-              ['Crédito 120 m', eur(v.credito_120_meses, '/mês')],
-              ['Crédito 60 m', eur(v.credito_60_meses, '/mês')],
-              ['Crédito 48 m', eur(v.credito_48_meses, '/mês')],
-            ].map(([label, valor]) => (
-              <div key={label} className="rounded-lg border border-border px-2.5 py-1.5">
-                <div className="text-[11px] text-muted-foreground">{label}</div>
-                <div className="text-sm font-semibold text-foreground">{valor}</div>
+            simulacaoCreditoIncompleta(v) ? (
+              <div className="mt-2 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3">
+                <div className="text-xs font-semibold text-amber-300">⚠ Simulação de crédito em falta</div>
+                <p className="mt-1 text-xs text-amber-200/80">
+                  Faça o pedido ao intermediário de crédito e introduza os três valores recebidos.
+                </p>
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                  {([
+                    ['credito_120_meses', '120 meses'],
+                    ['credito_60_meses', '60 meses'],
+                    ['credito_48_meses', '48 meses'],
+                  ] as const).map(([campo, label]) => (
+                    <label key={campo} className="text-[11px] text-muted-foreground">
+                      {label} (€/mês)
+                      <Input
+                        inputMode="decimal"
+                        value={credito[campo]}
+                        onChange={(e) => setCredito((atual) => ({ ...atual, [campo]: e.target.value }))}
+                        className="mt-1 h-8 bg-background"
+                      />
+                    </label>
+                  ))}
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  className="mt-3"
+                  disabled={aGuardarCredito || Object.values(credito).some(vazio)}
+                  onClick={guardarCredito}
+                >
+                  {aGuardarCredito ? 'A guardar…' : 'Guardar simulação de crédito'}
+                </Button>
               </div>
-            ))}
-          </div>
+            ) : (
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                {[
+                  ['Crédito 120 m', eur(v.credito_120_meses, '/mês')],
+                  ['Crédito 60 m', eur(v.credito_60_meses, '/mês')],
+                  ['Crédito 48 m', eur(v.credito_48_meses, '/mês')],
+                ].map(([label, valor]) => (
+                  <div key={label} className="rounded-lg border border-border px-2.5 py-1.5">
+                    <div className="text-[11px] text-muted-foreground">{label}</div>
+                    <div className="text-sm font-semibold text-foreground">{valor}</div>
+                  </div>
+                ))}
+              </div>
+            )
           )}
         </div>
       </div>
@@ -733,8 +801,8 @@ const Stock = () => {
 
   const contagens = useMemo(
     () => ({
-      Venda: stock.filter((v) => v.tipo_gestao === 'Venda').length,
-      Aluguer: stock.filter((v) => v.tipo_gestao === 'Aluguer').length,
+      Venda: stock.filter((v) => pertenceA(v, 'Venda')).length,
+      Aluguer: stock.filter((v) => pertenceA(v, 'Aluguer')).length,
     }),
     [stock],
   );
@@ -744,7 +812,7 @@ const Stock = () => {
   const [combs, setCombs] = useState<string[]>([]);
   const [cats, setCats] = useState<string[]>([]);
 
-  const doTipo = useMemo(() => stock.filter((v) => v.tipo_gestao === gestao), [stock, gestao]);
+  const doTipo = useMemo(() => stock.filter((v) => pertenceA(v, gestao)), [stock, gestao]);
 
   // Opções dos filtros: só o que existe nas viaturas do separador atual.
   const combustiveis = useMemo(

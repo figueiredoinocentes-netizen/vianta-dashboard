@@ -65,6 +65,76 @@ function sbHeaders() {
   };
 }
 
+// ── Ficha obrigatória por tipo de gestão ───────────────────────────────────────
+// ⚠️ Manter em sincronia com src/lib/operacoes/estadoRequisitos.ts
+const TIPO_GESTAO_MISTO = 'Venda e Aluguer';
+const ESTADO_MISTO = 'Para Venda e Aluguer';
+const ESTADOS_COM_FICHA = ['Para Venda', 'Para Aluguer', ESTADO_MISTO];
+const CAMPOS_FICHA_COMUNS = [
+  ['cavalos', 'Cavalos (cv)'],
+  ['caixa', 'Caixa'],
+  ['categorias_tvde', 'Categorias TVDE'],
+  ['fotos', 'Fotos da viatura'],
+];
+const CAMPOS_FICHA_VENDA = [
+  ['garantia_viatura', 'Garantia viatura'],
+  ['preco_venda', 'Preço de venda'],
+];
+const CAMPOS_FICHA_ALUGUER = [
+  ['valor_aluguer_semanal', 'Valor do aluguer semanal'],
+  ['caucao', 'Caução'],
+];
+const CAMPOS_FICHA_ELETRICO = [
+  ['bateria_kwh', 'Bateria (kWh)'],
+  ['autonomia_km', 'Autonomia (km)'],
+];
+
+const preenchido = (v) => v != null && String(v).trim() !== '';
+const eEletrico = (r) =>
+  String((r && r.combustivel) || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .includes('eletric');
+
+function ofertasFicha(registo, estado) {
+  const tipo = String((registo && registo.tipo_gestao) || '');
+  if (tipo === TIPO_GESTAO_MISTO || estado === ESTADO_MISTO) return ['venda', 'aluguer'];
+  if (tipo === 'Venda') return ['venda'];
+  if (tipo === 'Aluguer') return ['aluguer'];
+  if (estado === 'Para Venda') return ['venda'];
+  if (estado === 'Para Aluguer') return ['aluguer'];
+  return [];
+}
+
+/** Etiquetas dos campos da ficha que faltam preencher nesta viatura. */
+function camposFichaEmFalta(registo, estado) {
+  const ofertas = ofertasFicha(registo, estado);
+  let campos = CAMPOS_FICHA_COMUNS.slice();
+  if (ofertas.includes('venda')) campos = campos.concat(CAMPOS_FICHA_VENDA);
+  if (ofertas.includes('aluguer')) campos = campos.concat(CAMPOS_FICHA_ALUGUER);
+  if (eEletrico(registo)) campos = campos.concat(CAMPOS_FICHA_ELETRICO);
+  return campos
+    .filter(([campo]) => {
+      if (campo === 'fotos') {
+        return !(
+          (Array.isArray(registo && registo.fotos) && registo.fotos.some(preenchido)) ||
+          preenchido(registo && registo.foto_url)
+        );
+      }
+      return !preenchido(registo && registo[campo]);
+    })
+    .map(([, label]) => label);
+}
+
+/** Mensagem de erro, ou null quando a viatura pode assumir o estado pedido. */
+function erroFichaEmFalta(registo, estado) {
+  if (!ESTADOS_COM_FICHA.includes(estado)) return null;
+  const faltam = camposFichaEmFalta(registo, estado);
+  if (!faltam.length) return null;
+  return `Não é possível passar a "${estado}" sem preencher: ${faltam.join(', ')}.`;
+}
+
 export const handler = async (event) => {
   const origin = resolveOrigin(event);
 
@@ -99,6 +169,12 @@ export const handler = async (event) => {
     if (event.httpMethod === 'POST') {
       if (!event.body) return err('Body required for POST', 400, origin);
       const record = JSON.parse(event.body);
+      if (table === 'carros') {
+        for (const r of Array.isArray(record) ? record : [record]) {
+          const erro = erroFichaEmFalta(r, r && r.estado);
+          if (erro) return err(erro, 422, origin);
+        }
+      }
       const res = await fetch(baseUrl, { method: 'POST', headers, body: JSON.stringify(record) });
       if (!res.ok) return await supaErr(res, `POST ${table}`, origin);
       const data = await res.json();
@@ -110,6 +186,15 @@ export const handler = async (event) => {
       const { id, field, value } = JSON.parse(event.body);
       if (!id || !field) return err('PUT body must include id and field', 400, origin);
       const url = `${baseUrl}?id=eq.${encodeURIComponent(id)}`;
+      // Passar a viatura a disponível exige a ficha completa: valida-se contra a
+      // linha atual na base de dados, não apenas contra o que o frontend enviou.
+      if (table === 'carros' && field === 'estado' && ESTADOS_COM_FICHA.includes(value)) {
+        const atual = await fetch(`${url}&select=*`, { headers });
+        if (!atual.ok) return await supaErr(atual, `GET ${table} (validar estado)`, origin);
+        const [registo] = await atual.json();
+        const erro = erroFichaEmFalta(registo, value);
+        if (erro) return err(erro, 422, origin);
+      }
       const res = await fetch(url, { method: 'PATCH', headers, body: JSON.stringify({ [field]: value }) });
       if (!res.ok) return await supaErr(res, `PUT ${table}`, origin);
       return ok({ updated: true }, origin);

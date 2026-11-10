@@ -12,14 +12,15 @@ import type { Carro } from '@/lib/operacoes/types';
 import { toast } from 'sonner';
 import { updateCentralField } from '@/lib/operacoes/central';
 import { ePreparacao, emAberto } from '@/lib/operacoes/trabalhos';
+import { faltamParaEstado } from '@/lib/operacoes/estadoRequisitos';
 import type { Ocorrencia } from '@/lib/operacoes/types';
 import {
   errorMessage,
+  useAlterarEstado,
   useCarros,
   useOcorrencias,
   useRefreshOperacoes,
   useToggleChecklistItem,
-  useUpdateCarroField,
 } from '@/hooks/useOperacoes';
 import { useOps } from '@/components/operacoes/OpsContext';
 import { EmptyState, ErrorBox, OpsHeader } from '@/components/operacoes/shared';
@@ -115,7 +116,7 @@ function MissingTags({ v }: { v: Carro }) {
 export default function OpsCheckin() {
   const { search, openVehicle, openNovaViatura } = useOps();
   const { data: carros = [], isLoading, isError } = useCarros();
-  const update = useUpdateCarroField();
+  const alterar = useAlterarEstado();
   const { data: ocorrencias = [] } = useOcorrencias();
   const lista = carros.filter((v) => v.estado === 'Em Preparação').filter((v) => matchesSearch(search, v));
 
@@ -186,7 +187,11 @@ export default function OpsCheckin() {
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        update(v, 'estado', destinoDepoisDePreparacao(v));
+                        const destino = destinoDepoisDePreparacao(v);
+                        // Sem a ficha completa a viatura não passa a disponível: abre-a
+                        // na Ficha comercial para se preencher o que falta.
+                        if (faltamParaEstado(v, destino).length) openVehicle(v.id, 'ficha');
+                        void alterar(v, destino);
                       }}
                     >
                       Concluir Preparação
