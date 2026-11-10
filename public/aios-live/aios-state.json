@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-10T10:11:16+00:00",
+ "generated_at": "2026-11-10T10:47:04+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T10:11:04.704050+00:00",
+     "last_run_at": "2026-11-10T10:46:06.035170+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-10T10:12:04.704050+00:00",
+     "next_run_at": "2026-11-10T10:47:06.035170+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T10:03:06.296311+00:00",
+     "last_run_at": "2026-11-10T10:36:08.319713+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-10T10:13:06.296311+00:00",
+     "next_run_at": "2026-11-10T10:57:04.832616+00:00",
      "paused_at": null
     },
     {
@@ -150,9 +150,9 @@
      "schedule": "every 15m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T10:02:02.664093+00:00",
-     "last_status": "error",
-     "last_error": "RuntimeError: [drift_skip:silent] Skipped to prevent unintended spend: global inference config drifted since this job was created (provider 'openrouter' -> 'ope",
+     "last_run_at": "2026-11-10T10:36:44.332288+00:00",
+     "last_status": "ok",
+     "last_error": "",
      "script": null,
      "no_agent": false,
      "skills": [
@@ -160,8 +160,8 @@
       "vianta-choicecar-atualizacao"
      ],
      "monitor_script": null,
-     "failure_streak": 81,
-     "next_run_at": "2026-11-10T10:17:02.664093+00:00",
+     "failure_streak": 0,
+     "next_run_at": "2026-11-10T10:51:44.332288+00:00",
      "paused_at": null
     },
     {
@@ -228,14 +228,14 @@
      "schedule": "every day at 10:00",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T10:00:03.375462+00:00",
-     "last_status": "error",
-     "last_error": "RuntimeError: [drift_skip] Skipped to prevent unintended spend: global inference config drifted since this job was created (provider 'openrouter' -> 'openai-cod",
+     "last_run_at": "2026-11-10T10:18:19.864593+00:00",
+     "last_status": "ok",
+     "last_error": "",
      "script": null,
      "no_agent": false,
      "skills": [],
      "monitor_script": null,
-     "failure_streak": 1,
+     "failure_streak": 0,
      "next_run_at": "2026-11-11T10:00:00+00:00",
      "paused_at": null
     },
@@ -246,16 +246,16 @@
      "schedule": "every day at 08:00",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T08:00:52.893615+00:00",
-     "last_status": "error",
-     "last_error": "RuntimeError: [drift_skip] Skipped to prevent unintended spend: global inference config drifted since this job was created (provider 'openrouter' -> 'openai-cod",
+     "last_run_at": "2026-11-10T10:35:25.783540+00:00",
+     "last_status": "ok",
+     "last_error": "",
      "script": null,
      "no_agent": false,
      "skills": [
       "vianta-aios-vistoria"
      ],
      "monitor_script": null,
-     "failure_streak": 1,
+     "failure_streak": 0,
      "next_run_at": "2026-11-11T08:00:00+00:00",
      "paused_at": null
     },
@@ -266,14 +266,14 @@
      "schedule": "every day at 7:30am",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T07:30:51.432033+00:00",
-     "last_status": "error",
-     "last_error": "RuntimeError: [drift_skip] Skipped to prevent unintended spend: global inference config drifted since this job was created (provider 'openrouter' -> 'openai-cod",
+     "last_run_at": "2026-11-10T10:19:46.704617+00:00",
+     "last_status": "ok",
+     "last_error": "",
      "script": null,
      "no_agent": false,
      "skills": [],
      "monitor_script": null,
-     "failure_streak": 1,
+     "failure_streak": 0,
      "next_run_at": "2026-11-11T07:30:00+00:00",
      "paused_at": null
     },
@@ -498,7 +498,7 @@
   "status": 200
  },
  "agente_comercial": {
-  "conversas_respondidas": 10,
+  "conversas_respondidas": 12,
   "followups_pendentes": 5,
   "followups": [
    {
@@ -527,12 +527,12 @@
     "channel": "INSTAGRAM"
    }
   ],
-  "ultimo_relatorio": "relatorio-agente-2026-11-09.html",
-  "relatorios_total": 8,
-  "ultima_execucao": "2026-11-10T10:11:04.704050+00:00",
+  "ultimo_relatorio": "relatorio-agente-2026-11-10.html",
+  "relatorios_total": 9,
+  "ultima_execucao": "2026-11-10T10:46:06.035170+00:00",
   "ultimo_status": "ok",
   "resumo_semanal": {
-   "leads_contactadas": 7,
+   "leads_contactadas": 9,
    "convertidas": 0,
    "ocorrencias": 0,
    "pendentes": 5,
@@ -1163,10 +1163,5 @@
    }
   ]
  },
- "alerts": [
-  "[jarvis] [bot:agente-turismo] ChoiceCar auto-planeamento: RuntimeError: [drift_skip:silent] Skipped to prevent unintended spend: global inference config drift",
-  "[jarvis] Auditoria Agente Comercial (10h): RuntimeError: [drift_skip] Skipped to prevent unintended spend: global inference config drifted sinc",
-  "[jarvis] Vistoria AIOS (08:00): RuntimeError: [drift_skip] Skipped to prevent unintended spend: global inference config drifted sinc",
-  "[jarvis] [Meta] Spend diário → meta_spend_daily: RuntimeError: [drift_skip] Skipped to prevent unintended spend: global inference config drifted sinc"
- ]
+ "alerts": []
 }
