@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-10T09:07:54+00:00",
+ "generated_at": "2026-11-10T09:41:00+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T09:06:56.067756+00:00",
+     "last_run_at": "2026-11-10T09:41:03.011886+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-10T09:07:56.067756+00:00",
+     "next_run_at": "2026-11-10T09:42:03.011886+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T08:56:57.414368+00:00",
+     "last_run_at": "2026-11-10T09:30:00.612291+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-10T09:17:53.954911+00:00",
+     "next_run_at": "2026-11-10T09:51:00.207882+00:00",
      "paused_at": null
     },
     {
@@ -150,7 +150,7 @@
      "schedule": "every 15m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T09:00:54.655300+00:00",
+     "last_run_at": "2026-11-10T09:31:58.213415+00:00",
      "last_status": "error",
      "last_error": "RuntimeError: [drift_skip:silent] Skipped to prevent unintended spend: global inference config drifted since this job was created (provider 'openrouter' -> 'ope",
      "script": null,
@@ -160,8 +160,8 @@
       "vianta-choicecar-atualizacao"
      ],
      "monitor_script": null,
-     "failure_streak": 77,
-     "next_run_at": "2026-11-10T09:15:54.655300+00:00",
+     "failure_streak": 79,
+     "next_run_at": "2026-11-10T09:46:58.213415+00:00",
      "paused_at": null
     },
     {
@@ -302,8 +302,8 @@
      "schedule": "every tuesday at 9am",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": null,
-     "last_status": null,
+     "last_run_at": "2026-11-10T09:09:11.558121+00:00",
+     "last_status": "ok",
      "last_error": "",
      "script": "sync_contabilidade.py",
      "no_agent": true,
@@ -529,7 +529,7 @@
   ],
   "ultimo_relatorio": "relatorio-agente-2026-11-09.html",
   "relatorios_total": 8,
-  "ultima_execucao": "2026-11-10T09:06:56.067756+00:00",
+  "ultima_execucao": "2026-11-10T09:41:03.011886+00:00",
   "ultimo_status": "ok",
   "resumo_semanal": {
    "leads_contactadas": 7,
