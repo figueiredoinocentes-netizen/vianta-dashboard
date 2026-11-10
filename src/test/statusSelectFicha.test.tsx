@@ -32,9 +32,9 @@ function montar(c: Carro) {
   return utils.container.querySelector('select') as HTMLSelectElement;
 }
 
-function renderSelect(c: Carro) {
+function renderSelect(c: Carro, estado = 'Para Venda') {
   const select = montar(c);
-  fireEvent.change(select, { target: { value: 'Para Venda' } });
+  fireEvent.change(select, { target: { value: estado } });
   return select;
 }
 
@@ -45,7 +45,7 @@ describe('StatusSelect — ficha obrigatória', () => {
   });
 
   it('bloqueia "Para Venda" quando falta a ficha e não grava nada', async () => {
-    const select = renderSelect(carro({ caixa: 'Manual', cavalos: '130' }));
+    const select = renderSelect(carro({ tipo_gestao: 'Venda', caixa: 'Manual', cavalos: '130' }));
     await waitFor(() => expect(toastError).toHaveBeenCalled());
     expect(updateCentralField).not.toHaveBeenCalled();
     // o select volta ao estado anterior
@@ -56,15 +56,16 @@ describe('StatusSelect — ficha obrigatória', () => {
   it('exige bateria e autonomia quando a viatura é elétrica', async () => {
     renderSelect(
       carro({
+        tipo_gestao: 'Aluguer',
         combustivel: 'Elétrico',
         caixa: 'Automático',
         cavalos: '204',
         categorias_tvde: 'Eletric + Comfort',
         garantia_viatura: '8 anos',
-        credito_120_meses: '210',
-        credito_60_meses: '330',
-        credito_48_meses: '390',
+        valor_aluguer_semanal: '295',
+        caucao: '400',
       }),
+      'Para Aluguer',
     );
     await waitFor(() => expect(toastError).toHaveBeenCalled());
     const msg = String(toastError.mock.calls[0][0]);
@@ -76,10 +77,12 @@ describe('StatusSelect — ficha obrigatória', () => {
   it('deixa passar e grava quando a ficha está completa', async () => {
     renderSelect(
       carro({
+        tipo_gestao: 'Venda',
         caixa: 'Manual',
         cavalos: '130',
         categorias_tvde: 'X + Comfort',
         garantia_viatura: '3 anos',
+        preco_venda: '24900',
         credito_120_meses: '210',
         credito_60_meses: '330',
         credito_48_meses: '390',

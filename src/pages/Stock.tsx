@@ -14,7 +14,8 @@ import { useCarros } from '@/hooks/useOperacoes';
 /**
  * Stock para o comercial (vista de chamada). Fonte única: tabela `carros` do
  * Supabase — a mesma que a Operações edita. Filtra-se por TIPO DE GESTÃO
- * (Venda / Aluguer), nunca por estado; dentro de cada tipo, as viaturas ainda
+ * (Venda / Aluguer); as viaturas "Venda e Aluguer" aparecem nos dois separadores.
+ * Dentro de cada tipo, as viaturas ainda
  * não disponíveis (em preparação / manutenção) aparecem esbatidas mas com toda
  * a informação, para o comercial poder agendar o interessado.
  */
@@ -22,7 +23,10 @@ import { useCarros } from '@/hooks/useOperacoes';
 type Gestao = 'Venda' | 'Aluguer';
 type Disponibilidade = 'pronto' | 'preparacao' | 'manutencao';
 
-const ESTADOS_STOCK = ['Para Venda', 'Para Aluguer', 'Em Preparação', 'Manutenção'];
+const ESTADOS_STOCK = ['Para Venda', 'Para Aluguer', 'Para Venda e Aluguer', 'Em Preparação', 'Manutenção'];
+
+const pertenceA = (v: Carro, gestao: Gestao) =>
+  v.tipo_gestao === gestao || v.tipo_gestao === 'Venda e Aluguer';
 
 function disponibilidade(v: Carro): Disponibilidade {
   if (v.estado === 'Em Preparação') return 'preparacao';
@@ -733,8 +737,8 @@ const Stock = () => {
 
   const contagens = useMemo(
     () => ({
-      Venda: stock.filter((v) => v.tipo_gestao === 'Venda').length,
-      Aluguer: stock.filter((v) => v.tipo_gestao === 'Aluguer').length,
+      Venda: stock.filter((v) => pertenceA(v, 'Venda')).length,
+      Aluguer: stock.filter((v) => pertenceA(v, 'Aluguer')).length,
     }),
     [stock],
   );
@@ -744,7 +748,7 @@ const Stock = () => {
   const [combs, setCombs] = useState<string[]>([]);
   const [cats, setCats] = useState<string[]>([]);
 
-  const doTipo = useMemo(() => stock.filter((v) => v.tipo_gestao === gestao), [stock, gestao]);
+  const doTipo = useMemo(() => stock.filter((v) => pertenceA(v, gestao)), [stock, gestao]);
 
   // Opções dos filtros: só o que existe nas viaturas do separador atual.
   const combustiveis = useMemo(

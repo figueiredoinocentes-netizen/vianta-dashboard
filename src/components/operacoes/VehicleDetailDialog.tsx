@@ -44,6 +44,7 @@ import { AquisicaoViatura } from './AquisicaoViatura';
 import type { VehicleTab } from './OpsContext';
 import {
   URL_VEICULOS_ELEGIVEIS_UBER,
+  camposEmFalta,
   camposObrigatorios,
   exigeFicha,
   faltamParaEstado,
@@ -216,11 +217,13 @@ function Body({
     nomes.push(carro.motorista_atual);
   }
 
-  const isVenda = form.gestao === 'Venda';
+  const temVenda = form.gestao === 'Venda' || form.gestao === 'Venda e Aluguer';
+  const temAluguer = form.gestao === 'Aluguer' || form.gestao === 'Venda e Aluguer';
 
   // Ficha exigida para "Para Venda"/"Para Aluguer": os asteriscos e a validação do
   // Guardar usam as mesmas regras (lib/operacoes/estadoRequisitos).
   const valoresFicha = {
+    tipo_gestao: form.gestao,
     combustivel: form.combustivel,
     cavalos: form.cavalos,
     caixa: form.caixa,
@@ -228,15 +231,17 @@ function Body({
     autonomia_km: form.autonomiaKm,
     categorias_tvde: form.categoriasTvde,
     garantia_viatura: form.garantiaViatura,
+    preco_venda: form.precoVenda,
     credito_120_meses: form.credito120,
     credito_60_meses: form.credito60,
     credito_48_meses: form.credito48,
+    valor_aluguer_semanal: form.precoAluguer,
+    caucao: form.caucao,
   };
-  const fichaExigida = exigeFicha(form.estado);
-  const faltamFicha = fichaExigida ? faltamParaEstado(valoresFicha, form.estado) : [];
-  const camposExigidos = new Set<string>(
-    (fichaExigida ? camposObrigatorios(valoresFicha) : []).map((c) => c.campo),
-  );
+  const estadoExigeFicha = exigeFicha(form.estado);
+  const camposExigidos = new Set<string>(camposObrigatorios(valoresFicha, form.estado).map((c) => c.campo));
+  const fichaExigida = camposExigidos.size > 0;
+  const faltamFicha = fichaExigida ? camposEmFalta(valoresFicha, form.estado) : [];
   const obrigatorio = (campo: CampoObrigatorio['campo']) => camposExigidos.has(campo);
 
   async function onSubmit(e: FormEvent) {
@@ -270,9 +275,9 @@ function Body({
       proprietario: isInvestidor ? (investidor ? investidor.nome : null) : 'VIANTA',
       investidor_id: investidor ? investidor.id : null,
       tipo_gestao: form.gestao || null,
-      preco_venda: isVenda ? form.precoVenda || null : null,
+      preco_venda: form.precoVenda || null,
       preco_compra: form.precoCompra || null,
-      valor_aluguer_semanal: !isVenda ? form.precoAluguer || null : null,
+      valor_aluguer_semanal: form.precoAluguer || null,
       motorista_atual: form.estado === 'Em Preparação' ? null : form.motoristaAtual || null,
       cliente_id: form.estado === 'Vendido' && form.clienteId ? Number(form.clienteId) : null,
       data_previsao_pronto: form.previsaoPronto || null,
@@ -455,6 +460,7 @@ function Body({
               <NativeSelect value={form.gestao} onChange={(e) => set('gestao', e.target.value)}>
                 <option>Aluguer</option>
                 <option>Venda</option>
+                <option>Venda e Aluguer</option>
                 <option>Slot</option>
               </NativeSelect>
             </Field>
@@ -472,21 +478,7 @@ function Body({
                 onChange={(e) => set('precoCompra', e.target.value)}
               />
             </Field>
-            {isVenda ? (
-              <Field label="Preço Venda (€)" className="sm:col-span-2">
-                <Input
-                  value={form.precoVenda}
-                  onChange={(e) => set('precoVenda', e.target.value)}
-                />
-              </Field>
-            ) : (
-              <Field label="Valor Aluguer (€/sem)" className="sm:col-span-2">
-                <Input
-                  value={form.precoAluguer}
-                  onChange={(e) => set('precoAluguer', e.target.value)}
-                />
-              </Field>
-            )}
+
             {form.estado !== 'Em Preparação' && (
               <Field label="Motorista Atual" className="sm:col-span-2">
                 <NativeSelect
@@ -546,11 +538,17 @@ function Body({
               >
                 {faltamFicha.length ? (
                   <>
-                    Para passar a <strong>{form.estado}</strong> falta preencher:{' '}
+                    {estadoExigeFicha ? (
+                      <>Para passar a <strong>{form.estado}</strong> falta preencher: </>
+                    ) : (
+                      <>Para disponibilizar esta viatura falta preencher: </>
+                    )}
                     {faltamFicha.map((c) => c.label).join(', ')}.
                   </>
                 ) : (
-                  <>Ficha completa — a viatura já pode passar a {form.estado}.</>
+                  <>
+                    Ficha completa — {estadoExigeFicha ? `a viatura já pode passar a ${form.estado}.` : 'a viatura está pronta para ser disponibilizada.'}
+                  </>
                 )}
               </div>
             )}
@@ -586,9 +584,24 @@ function Body({
             <Field label="Autonomia (km)" required={obrigatorio('autonomia_km')}>
               <Input value={form.autonomiaKm} onChange={(e) => set('autonomiaKm', e.target.value)} />
             </Field>
-            <Field label="Caução (€)">
-              <Input value={form.caucao} onChange={(e) => set('caucao', e.target.value)} />
-            </Field>
+            {temAluguer && (
+              <>
+                <Field label="Valor Aluguer (€/sem)" required={obrigatorio('valor_aluguer_semanal')}>
+                  <Input
+                    inputMode="decimal"
+                    value={form.precoAluguer}
+                    onChange={(e) => set('precoAluguer', e.target.value)}
+                  />
+                </Field>
+                <Field label="Caução (€)" required={obrigatorio('caucao')}>
+                  <Input
+                    inputMode="decimal"
+                    value={form.caucao}
+                    onChange={(e) => set('caucao', e.target.value)}
+                  />
+                </Field>
+              </>
+            )}
             <Field label="Categorias TVDE" className="sm:col-span-2" required={obrigatorio('categorias_tvde')}>
               <Input
                 value={form.categoriasTvde}
@@ -615,18 +628,29 @@ function Body({
                 onChange={(e) => set('garantiaBateria', e.target.value)}
               />
             </Field>
-            <div className="sm:col-span-2 mt-2 border-t border-border pt-3 text-xs font-medium text-muted-foreground">
-              Simulação de crédito — prestação mensal (€)
-            </div>
-            <Field label="120 meses (10 anos)" required={obrigatorio('credito_120_meses')}>
-              <Input value={form.credito120} onChange={(e) => set('credito120', e.target.value)} />
-            </Field>
-            <Field label="60 meses (5 anos)" required={obrigatorio('credito_60_meses')}>
-              <Input value={form.credito60} onChange={(e) => set('credito60', e.target.value)} />
-            </Field>
-            <Field label="48 meses (4 anos)" required={obrigatorio('credito_48_meses')}>
-              <Input value={form.credito48} onChange={(e) => set('credito48', e.target.value)} />
-            </Field>
+            {temVenda && (
+              <>
+                <div className="sm:col-span-2 mt-2 border-t border-border pt-3 text-xs font-medium text-muted-foreground">
+                  Venda e simulação de crédito — prestação mensal (€)
+                </div>
+                <Field label="Preço Venda (€)" className="sm:col-span-2" required={obrigatorio('preco_venda')}>
+                  <Input
+                    inputMode="decimal"
+                    value={form.precoVenda}
+                    onChange={(e) => set('precoVenda', e.target.value)}
+                  />
+                </Field>
+                <Field label="120 meses (10 anos)" required={obrigatorio('credito_120_meses')}>
+                  <Input value={form.credito120} onChange={(e) => set('credito120', e.target.value)} />
+                </Field>
+                <Field label="60 meses (5 anos)" required={obrigatorio('credito_60_meses')}>
+                  <Input value={form.credito60} onChange={(e) => set('credito60', e.target.value)} />
+                </Field>
+                <Field label="48 meses (4 anos)" required={obrigatorio('credito_48_meses')}>
+                  <Input value={form.credito48} onChange={(e) => set('credito48', e.target.value)} />
+                </Field>
+              </>
+            )}
             <div className="sm:col-span-2">
               <FotosEditor carro={carro} />
             </div>
