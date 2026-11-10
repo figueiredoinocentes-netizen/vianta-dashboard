@@ -25,6 +25,8 @@ export type ValoresFicha = {
   autonomia_km?: unknown;
   categorias_tvde?: unknown;
   garantia_viatura?: unknown;
+  fotos?: unknown;
+  foto_url?: unknown;
   preco_venda?: unknown;
   credito_120_meses?: unknown;
   credito_60_meses?: unknown;
@@ -51,11 +53,9 @@ export const CAMPOS_OBRIGATORIOS: CampoObrigatorio[] = [
   { campo: 'bateria_kwh', label: 'Bateria (kWh)', apenasEletricos: true },
   { campo: 'autonomia_km', label: 'Autonomia (km)', apenasEletricos: true },
   { campo: 'categorias_tvde', label: 'Categorias TVDE' },
-  { campo: 'garantia_viatura', label: 'Garantia viatura' },
+  { campo: 'fotos', label: 'Fotos da viatura' },
+  { campo: 'garantia_viatura', label: 'Garantia viatura', oferta: 'venda' },
   { campo: 'preco_venda', label: 'Preço de venda', oferta: 'venda' },
-  { campo: 'credito_120_meses', label: 'Simulação de crédito — 120 meses', oferta: 'venda' },
-  { campo: 'credito_60_meses', label: 'Simulação de crédito — 60 meses', oferta: 'venda' },
-  { campo: 'credito_48_meses', label: 'Simulação de crédito — 48 meses', oferta: 'venda' },
   { campo: 'valor_aluguer_semanal', label: 'Valor do aluguer semanal', oferta: 'aluguer' },
   { campo: 'caucao', label: 'Caução', oferta: 'aluguer' },
 ];
@@ -92,7 +92,12 @@ export function camposObrigatorios(v: ValoresFicha, estado?: string | null): Cam
 
 /** Campos da ficha ainda por preencher. Pode ser usada no Stock mesmo antes de mudar o estado. */
 export function camposEmFalta(v: ValoresFicha, estado?: string | null): CampoObrigatorio[] {
-  return camposObrigatorios(v, estado).filter((c) => !preenchido(v[c.campo]));
+  return camposObrigatorios(v, estado).filter((c) => {
+    if (c.campo === 'fotos') {
+      return !(Array.isArray(v.fotos) && v.fotos.some(preenchido)) && !preenchido(v.foto_url);
+    }
+    return !preenchido(v[c.campo]);
+  });
 }
 
 /** O que falta para a viatura poder assumir `estado` (lista vazia = pode passar). */

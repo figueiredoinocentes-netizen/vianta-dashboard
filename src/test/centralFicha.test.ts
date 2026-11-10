@@ -16,15 +16,13 @@ const COMUM = {
   cavalos: '130',
   caixa: 'Manual',
   categorias_tvde: 'X + Comfort',
-  garantia_viatura: '3 anos',
+  foto_url: 'https://exemplo.test/carro.jpg',
 };
 const VENDA = {
   ...COMUM,
   tipo_gestao: 'Venda',
+  garantia_viatura: '3 anos',
   preco_venda: '24900',
-  credito_120_meses: '210',
-  credito_60_meses: '330',
-  credito_48_meses: '390',
 };
 const ALUGUER = {
   ...COMUM,
@@ -69,15 +67,15 @@ describe('central.js — ficha obrigatória para passar a disponível', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it('Venda exige crédito mas não exige caução nem aluguer', async () => {
-    fetchMock.mockResolvedValueOnce(linhaAtual(VENDA)).mockResolvedValueOnce(patchOk());
+  it('Venda sem crédito pode ficar disponível e não exige caução nem aluguer', async () => {
+    fetchMock.mockResolvedValueOnce(linhaAtual({ ...VENDA, credito_120_meses: null, credito_60_meses: null, credito_48_meses: null })).mockResolvedValueOnce(patchOk());
     const res = await put({ id: 7, field: 'estado', value: 'Para Venda' });
     expect(res.statusCode).toBe(200);
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it('Aluguer exige valor semanal e caução mas não exige crédito', async () => {
-    fetchMock.mockResolvedValueOnce(linhaAtual({ ...ALUGUER, caucao: null }));
+  it('Aluguer exige valor semanal e caução mas não exige garantia nem crédito', async () => {
+    fetchMock.mockResolvedValueOnce(linhaAtual({ ...ALUGUER, caucao: null, garantia_viatura: null }));
     const recusado = await put({ id: 7, field: 'estado', value: 'Para Aluguer' });
     expect(recusado.statusCode).toBe(422);
     expect(JSON.parse(recusado.body).error).toContain('Caução');
@@ -89,13 +87,21 @@ describe('central.js — ficha obrigatória para passar a disponível', () => {
     expect(aceite.statusCode).toBe(200);
   });
 
-  it('misto exige venda, aluguer, caução e crédito', async () => {
-    fetchMock.mockResolvedValueOnce(linhaAtual({ ...MISTO, caucao: null, credito_60_meses: null }));
+  it('misto exige venda, aluguer, caução e garantia, mas não crédito', async () => {
+    fetchMock.mockResolvedValueOnce(linhaAtual({ ...MISTO, caucao: null, garantia_viatura: null, credito_60_meses: null }));
     const res = await put({ id: 7, field: 'estado', value: 'Para Venda e Aluguer' });
     expect(res.statusCode).toBe(422);
     const erro = JSON.parse(res.body).error;
     expect(erro).toContain('Caução');
-    expect(erro).toContain('Simulação de crédito — 60 meses');
+    expect(erro).toContain('Garantia viatura');
+    expect(erro).not.toContain('Simulação de crédito');
+  });
+
+  it('recusa qualquer oferta sem fotografias', async () => {
+    fetchMock.mockResolvedValueOnce(linhaAtual({ ...ALUGUER, foto_url: null, fotos: [] }));
+    const res = await put({ id: 7, field: 'estado', value: 'Para Aluguer' });
+    expect(res.statusCode).toBe(422);
+    expect(JSON.parse(res.body).error).toContain('Fotos da viatura');
   });
 
   it('recusa elétrico de aluguer sem bateria nem autonomia', async () => {

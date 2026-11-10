@@ -19,6 +19,7 @@ const carro = (extra: Partial<Carro>): Carro =>
     id: 1,
     estado: 'Em Preparação',
     combustivel: 'Gasóleo/Diesel',
+    foto_url: 'https://exemplo.test/carro.jpg',
     ...extra,
   }) as Carro;
 

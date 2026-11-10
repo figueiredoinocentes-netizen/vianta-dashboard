@@ -74,13 +74,11 @@ const CAMPOS_FICHA_COMUNS = [
   ['cavalos', 'Cavalos (cv)'],
   ['caixa', 'Caixa'],
   ['categorias_tvde', 'Categorias TVDE'],
-  ['garantia_viatura', 'Garantia viatura'],
+  ['fotos', 'Fotos da viatura'],
 ];
 const CAMPOS_FICHA_VENDA = [
+  ['garantia_viatura', 'Garantia viatura'],
   ['preco_venda', 'Preço de venda'],
-  ['credito_120_meses', 'Simulação de crédito — 120 meses'],
-  ['credito_60_meses', 'Simulação de crédito — 60 meses'],
-  ['credito_48_meses', 'Simulação de crédito — 48 meses'],
 ];
 const CAMPOS_FICHA_ALUGUER = [
   ['valor_aluguer_semanal', 'Valor do aluguer semanal'],
@@ -116,7 +114,17 @@ function camposFichaEmFalta(registo, estado) {
   if (ofertas.includes('venda')) campos = campos.concat(CAMPOS_FICHA_VENDA);
   if (ofertas.includes('aluguer')) campos = campos.concat(CAMPOS_FICHA_ALUGUER);
   if (eEletrico(registo)) campos = campos.concat(CAMPOS_FICHA_ELETRICO);
-  return campos.filter(([campo]) => !preenchido(registo && registo[campo])).map(([, label]) => label);
+  return campos
+    .filter(([campo]) => {
+      if (campo === 'fotos') {
+        return !(
+          (Array.isArray(registo && registo.fotos) && registo.fotos.some(preenchido)) ||
+          preenchido(registo && registo.foto_url)
+        );
+      }
+      return !preenchido(registo && registo[campo]);
+    })
+    .map(([, label]) => label);
 }
 
 /** Mensagem de erro, ou null quando a viatura pode assumir o estado pedido. */

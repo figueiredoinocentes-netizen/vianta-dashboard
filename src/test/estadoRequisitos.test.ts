@@ -12,16 +12,14 @@ const COMUM = {
   cavalos: '130',
   caixa: 'Manual',
   categorias_tvde: 'X + Comfort',
-  garantia_viatura: '3 anos',
+  foto_url: 'https://exemplo.test/carro.jpg',
 };
 
 const VENDA_COMPLETA = {
   ...COMUM,
   tipo_gestao: 'Venda',
+  garantia_viatura: '3 anos',
   preco_venda: '24900',
-  credito_120_meses: '210',
-  credito_60_meses: '330',
-  credito_48_meses: '390',
 };
 
 const ALUGUER_COMPLETO = {
@@ -47,27 +45,25 @@ describe('estadoRequisitos', () => {
     expect(faltamParaEstado(VENDA_COMPLETA, null)).toEqual([]);
   });
 
-  it('Venda exige preço e as 3 simulações, mas não aluguer nem caução', () => {
-    expect(labels(camposObrigatorios({ ...VENDA_COMPLETA, preco_venda: '' }, 'Para Venda'))).toEqual([
+  it('Venda exige preço e garantia, mas não caução nem simulação de crédito', () => {
+    expect(labels(camposObrigatorios(VENDA_COMPLETA, 'Para Venda'))).toEqual([
       'Cavalos (cv)',
       'Caixa',
       'Categorias TVDE',
+      'Fotos da viatura',
       'Garantia viatura',
       'Preço de venda',
-      'Simulação de crédito — 120 meses',
-      'Simulação de crédito — 60 meses',
-      'Simulação de crédito — 48 meses',
     ]);
-    expect(labels(faltamParaEstado({ ...VENDA_COMPLETA, preco_venda: '' }, 'Para Venda'))).toEqual(['Preço de venda']);
     expect(faltamParaEstado(VENDA_COMPLETA, 'Para Venda')).toEqual([]);
+    expect(labels(faltamParaEstado({ ...VENDA_COMPLETA, preco_venda: '' }, 'Para Venda'))).toEqual(['Preço de venda']);
   });
 
-  it('Aluguer exige valor semanal e caução, mas não preço nem crédito', () => {
+  it('Aluguer exige valor semanal e caução, mas não garantia nem crédito', () => {
     expect(labels(camposObrigatorios(ALUGUER_COMPLETO, 'Para Aluguer'))).toEqual([
       'Cavalos (cv)',
       'Caixa',
       'Categorias TVDE',
-      'Garantia viatura',
+      'Fotos da viatura',
       'Valor do aluguer semanal',
       'Caução',
     ]);
@@ -75,18 +71,18 @@ describe('estadoRequisitos', () => {
     expect(labels(faltamParaEstado({ ...ALUGUER_COMPLETO, caucao: '' }, 'Para Aluguer'))).toEqual(['Caução']);
   });
 
-  it('Venda e Aluguer exige os dois conjuntos comerciais', () => {
+  it('Venda e Aluguer exige os dois conjuntos, incluindo garantia', () => {
     expect(faltamParaEstado(MISTO_COMPLETO, 'Para Venda e Aluguer')).toEqual([]);
-    expect(labels(faltamParaEstado({ ...MISTO_COMPLETO, preco_venda: '', caucao: '' }, 'Para Venda e Aluguer'))).toEqual([
-      'Preço de venda',
+    expect(labels(faltamParaEstado({ ...MISTO_COMPLETO, garantia_viatura: '', caucao: '' }, 'Para Venda e Aluguer'))).toEqual([
+      'Garantia viatura',
       'Caução',
     ]);
   });
 
-  it('o tipo misto exige os dois conjuntos mesmo se escolher Para Venda', () => {
-    expect(labels(faltamParaEstado({ ...MISTO_COMPLETO, valor_aluguer_semanal: '' }, 'Para Venda'))).toEqual([
-      'Valor do aluguer semanal',
-    ]);
+  it('exige pelo menos uma foto, aceitando foto_url ou a lista fotos', () => {
+    expect(labels(faltamParaEstado({ ...VENDA_COMPLETA, foto_url: null }, 'Para Venda'))).toEqual(['Fotos da viatura']);
+    expect(faltamParaEstado({ ...VENDA_COMPLETA, foto_url: null, fotos: ['https://exemplo.test/1.jpg'] }, 'Para Venda')).toEqual([]);
+    expect(labels(faltamParaEstado({ ...ALUGUER_COMPLETO, foto_url: '', fotos: [] }, 'Para Aluguer'))).toEqual(['Fotos da viatura']);
   });
 
   it('num elétrico exige bateria e autonomia em qualquer oferta', () => {

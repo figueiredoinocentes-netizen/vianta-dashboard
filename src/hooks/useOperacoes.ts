@@ -73,10 +73,11 @@ export function useUpdateCarroField() {
 }
 
 /**
- * Muda o estado de uma viatura. Bloqueia a passagem a "Para Venda" / "Para Aluguer"
- * enquanto a ficha não estiver preenchida (características, categorias TVDE,
- * garantia viatura e as três simulações de crédito; bateria e autonomia nos
- * elétricos). Devolve `false` quando bloqueou ou quando a gravação falhou.
+ * Muda o estado de uma viatura. Bloqueia a passagem a um estado disponível
+ * enquanto faltarem os campos exigidos pelo tipo de gestão (incluindo pelo menos
+ * uma fotografia; garantia só em Venda; valor semanal+caução em Aluguer).
+ * As simulações de crédito são recomendadas em Venda, mas não bloqueiam o estado.
+ * Devolve `false` quando bloqueou ou quando a gravação falhou.
  */
 export function useAlterarEstado() {
   const update = useUpdateCarroField();

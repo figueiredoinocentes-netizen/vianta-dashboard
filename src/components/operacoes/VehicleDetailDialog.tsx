@@ -231,6 +231,8 @@ function Body({
     autonomia_km: form.autonomiaKm,
     categorias_tvde: form.categoriasTvde,
     garantia_viatura: form.garantiaViatura,
+    fotos: carro.fotos,
+    foto_url: carro.foto_url,
     preco_venda: form.precoVenda,
     credito_120_meses: form.credito120,
     credito_60_meses: form.credito60,
