@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-10T22:28:59+00:00",
+ "generated_at": "2026-11-10T23:02:09+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T22:28:00.867042+00:00",
+     "last_run_at": "2026-11-10T23:02:11.998143+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-10T22:29:00.867042+00:00",
+     "next_run_at": "2026-11-10T23:03:11.998143+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T22:18:59.640138+00:00",
+     "last_run_at": "2026-11-10T22:51:10.898798+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-10T22:38:59.662441+00:00",
+     "next_run_at": "2026-11-10T23:12:09.306612+00:00",
      "paused_at": null
     },
     {
@@ -150,7 +150,7 @@
      "schedule": "every 15m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T22:17:27.841759+00:00",
+     "last_run_at": "2026-11-10T22:49:50.960043+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -161,7 +161,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-10T22:32:27.841759+00:00",
+     "next_run_at": "2026-11-10T23:04:50.960043+00:00",
      "paused_at": null
     },
     {
@@ -539,7 +539,7 @@
   ],
   "ultimo_relatorio": "relatorio-agente-2026-11-10.html",
   "relatorios_total": 9,
-  "ultima_execucao": "2026-11-10T22:28:00.867042+00:00",
+  "ultima_execucao": "2026-11-10T23:02:11.998143+00:00",
   "ultimo_status": "ok",
   "resumo_semanal": {
    "leads_contactadas": 9,
