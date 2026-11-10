@@ -312,6 +312,7 @@ const AiosPage = () => {
         <section className="overflow-hidden rounded-xl border border-[#141821]">
           <Aios3DView state={state} />
         </section>
+
         <VoiceAssistant />
         <footer className="pb-4 text-center text-[10px] text-muted-foreground/60">
           snapshot gerado por aios_snapshot.py (cron 10 min) · atualização automática a cada 60 s

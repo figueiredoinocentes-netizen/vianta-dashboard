@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório Agente Comercial — Últimos 5 dias</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; padding: 20px; }
+  .header { max-width: 900px; margin: 0 auto 30px; }
+  .header h1 { font-size: 24px; color: #f8fafc; }
+  .header .sub { color: #94a3b8; font-size: 14px; margin-top: 4px; }
+  .stats { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+  .stat { background: #1e293b; border-radius: 10px; padding: 14px 20px; flex: 1; min-width: 120px; }
+  .stat .num { font-size: 28px; font-weight: 700; }
+  .stat .label { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+  .stat.ok .num { color: #22c55e; }
+  .stat.warn .num { color: #eab308; }
+  .stat.err .num { color: #ef4444; }
+
+  .slide { background: #1e293b; border-radius: 12px; max-width: 900px; margin: 0 auto 20px; overflow: hidden; }
+  .slide-header { padding: 16px 20px; }
+  .slide-title-row { display: flex; justify-content: space-between; align-items: center; }
+  .slide-title-row h2 { font-size: 18px; }
+  .status-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; color: #fff; font-weight: 600; }
+  .slide-meta { display: flex; gap: 16px; margin-top: 8px; font-size: 12px; color: #94a3b8; }
+  .slide-body { padding: 0 20px 20px; }
+
+  .section { margin-top: 16px; }
+  .section h3 { font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .section p { font-size: 14px; line-height: 1.5; color: #cbd5e1; }
+
+  .msg-list { display: flex; flex-direction: column; gap: 6px; }
+  .msg { font-size: 13px; padding: 8px 12px; border-radius: 8px; line-height: 1.4; }
+  .msg-agent { background: #1a3a4a; border-left: 3px solid #3b82f6; }
+  .msg-lead { background: #2a1a3a; border-left: 3px solid #a855f7; }
+  .msg-label { font-size: 11px; color: #64748b; display: block; margin-bottom: 2px; }
+  .msg-body { color: #e2e8f0; }
+
+  .issue { margin-top: 12px; padding: 12px; border-radius: 8px; font-size: 13px; }
+  .issue-warning { background: #3a2f00; border-left: 3px solid #eab308; }
+  .issue-error { background: #3a0f0f; border-left: 3px solid #ef4444; }
+  .issue-header { font-weight: 600; margin-bottom: 4px; }
+  .issue-detail { color: #cbd5e1; }
+  .issue-fix { color: #93c5fd; margin-top: 4px; }
+
+  .no-issues { color: #22c55e; font-size: 13px; margin-top: 12px; }
+
+  .suggestions-section { max-width: 900px; margin: 30px auto 0; }
+  .suggestions-section h2 { font-size: 20px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #334155; }
+  .suggestion-card { background: #1e293b; border-radius: 10px; padding: 16px 20px; margin-bottom: 12px; }
+  .suggestion-card h3 { font-size: 15px; color: #f8fafc; margin-bottom: 6px; }
+  .suggestion-card p { font-size: 13px; color: #94a3b8; line-height: 1.5; }
+
+  .footer { text-align: center; color: #475569; font-size: 12px; margin-top: 40px; padding-bottom: 40px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>📋 Relatório Agente Comercial</h1>
+  <div class="sub">Últimos 5 dias • 3 conversas analisadas</div>
+  <div class="stats">
+    <div class="stat ok"><div class="num">3</div><div class="label">✅ OK</div></div>
+    <div class="stat warn"><div class="num">0</div><div class="label">⚠️ Atenção</div></div>
+    <div class="stat err"><div class="num">0</div><div class="label">❌ Problemas</div></div>
+  </div>
+</div>
+
+
+        <div class="slide">
+          <div class="slide-header" style="border-left: 4px solid #22c55e;">
+            <div class="slide-title-row">
+              <h2>Carlos Alberto</h2>
+              <span class="status-badge" style="background:#22c55e;">✅ OK</span>
+            </div>
+            <div class="slide-meta">
+              <span>📱 Messenger</span>
+              <span>🏷 Aluguer</span>
+              <span>🕐 2026-11-03</span>
+            </div>
+          </div>
+          <div class="slide-body">
+            <div class="section">
+              <h3>📌 Motivo do contacto</h3>
+              <p>Sim pode ser? Estou a trabalhar em tvde com carro alugado.</p>
+            </div>
+            <div class="section">
+              <h3>💡 Soluções apresentadas</h3>
+              <p>Carlos, perfeito. Ja esta a trabalhar em TVDE, por isso sabe bem o que precisa.
+
+O MG Marvel R Luxury esta disponivel para ver ao vivo. Temos disponibilidade das 9h as 17h, de segunda a sexta. Que dia</p>
+            </div>
+            <div class="section">
+              <h3>💬 Últimas mensagens</h3>
+              <div class="msg-list"><div class="msg msg-lead"><span class="msg-label">👤 Lead 12:28:05</span><span class="msg-body">Marvel faz confort?</span></div><div class="msg msg-lead"><span class="msg-label">👤 Lead 12:27:00</span><span class="msg-body">Pode detalhar o mg marvel, agradecia se possível? Mas uma questão consegue o ioniq 6?</span></div><div class="msg msg-agent"><span class="msg-label">🤖 Agente 11:55:41</span><span class="msg-body">Boa tarde, Carlos.
+
+Percebemos a sua preferência pelo Ioniq 6 — não temos nenhum em stock e não trabalhamos por encomenda, por isso não conseguimos fornecer esse modelo em concreto.
+
+Com o valor que i</span></div><div class="msg msg-lead"><span class="msg-label">👤 Lead 11:51:36</span><span class="msg-body">Em mente tenho um valor que oscila entre 350 e máximo 500. Mas estou focado no ioniq 6.</span></div><div class="msg msg-agent"><span class="msg-label">🤖 Agente 10:38:29</span><span class="msg-body">Carlos, sim — pode trabalhar connosco na mesma. O Slot serve exatamente para isso: a viatura é sua, comprada onde quiser, e a Vianta trata da parte administrativa para a pôr a operar em TVDE.
+
+O que e</span></div><div class="msg msg-lead"><span class="msg-label">👤 Lead 10:34:52</span><span class="msg-body">Estou a ponderar. Mas a minha opção é o ioniq 6. Se adquirir por outra via, posso trabalhar convosco na mesma? Estou à espera da reforma que começa em Novembro.</span></div><div class="msg msg-agent"><span class="msg-label">🤖 Agente 10:32:12</span><span class="msg-body">Bom dia, Carlos. Obrigado pelo contacto.
+
+Antes de mais: trabalhamos apenas com viaturas em stock, não por encomenda. Neste momento não temos nenhum Ioniq 6 Performance disponível.
+
+Em 100% elétrico e</span></div><div class="msg msg-lead"><span class="msg-label">👤 Lead 10:30:45</span><span class="msg-body">Bom dia. Se estiver interessado num ioniq 6 performance para trabalhar como tvde, é possível adquirir a viatura através da vianta.</span></div></div>
+            </div>
+            <div class="no-issues">✅ Sem problemas detetados</div>
+          </div>
+        </div>
+        <div class="slide">
+          <div class="slide-header" style="border-left: 4px solid #22c55e;">
+            <div class="slide-title-row">
+              <h2>Abimael Saavedra</h2>
+              <span class="status-badge" style="background:#22c55e;">✅ OK</span>
+            </div>
+            <div class="slide-meta">
+              <span>📱 Messenger</span>
+              <span>🏷 Venda</span>
+              <span>🕐 2026-11-04</span>
+            </div>
+          </div>
+          <div class="slide-body">
+            <div class="section">
+              <h3>📌 Motivo do contacto</h3>
+              <p>Quero tentar financiar esta</p>
+            </div>
+            <div class="section">
+              <h3>💡 Soluções apresentadas</h3>
+              <p>Olá Abimael,
+
+Ótimo — o Seat Leon ST 1.6 TDI avança no financiamento, sim. Fica a partir de 167€/mês a 120 meses, com o nosso acompanhamento em todo o processo (simulação, pedido de crédito e seguro).</p>
+            </div>
+            <div class="section">
+              <h3>💬 Últimas mensagens</h3>
+              <div class="msg-list"><div class="msg msg-lead"><span class="msg-label">👤 Lead 04:33:18</span><span class="msg-body">Gasóleo</span></div><div class="msg msg-agent"><span class="msg-label">🤖 Agente 04:32:53</span><span class="msg-body">Olá Abimael,
+
+Perfeito — já tem o certificado de motorista TVDE, e todas as nossas viaturas são elegíveis e prontas a operar na Uber (dístico, inspeção e extintor incluídos), com financiamento até 120</span></div><div class="msg msg-lead"><span class="msg-label">👤 Lead 04:30:51</span><span class="msg-body">Para utilizar na Uber</span></div><div class="msg msg-lead"><span class="msg-label">👤 Lead 04:30:45</span><span class="msg-body">Gostaria de financiar um carro</span></div><div class="msg msg-lead"><span class="msg-label">👤 Lead 04:30:29</span><span class="msg-body">Já tenho o certificado</span></div><div class="msg msg-agent"><span class="msg-label">🤖 Agente 04:29:48</span><span class="msg-body">Olá Abimael,
+
+Sobre o financiamento: a compra da viatura é feita através de uma instituição de crédito, com o nosso acompanhamento em todo o processo — simulação, pedido de crédito e seguro. Não há cr</span></div><div class="msg msg-lead"><span class="msg-label">👤 Lead 04:26:55</span><span class="msg-body">Gostaria de saber com funciona o financiamento</span></div><div class="msg msg-lead"><span class="msg-label">👤 Lead 04:26:40</span><span class="msg-body">Boas</span></div></div>
+            </div>
+            <div class="no-issues">✅ Sem problemas detetados</div>
+          </div>
+        </div>
+        <div class="slide">
+          <div class="slide-header" style="border-left: 4px solid #22c55e;">
+            <div class="slide-title-row">
+              <h2>Waldino Correia</h2>
+              <span class="status-badge" style="background:#22c55e;">✅ OK</span>
+            </div>
+            <div class="slide-meta">
+              <span>📱 Messenger</span>
+              <span>🏷 Aluguer</span>
+              <span>🕐 2026-11-04</span>
+            </div>
+          </div>
+          <div class="slide-body">
+            <div class="section">
+              <h3>📌 Motivo do contacto</h3>
+              <p>Obrigado</p>
+            </div>
+            <div class="section">
+              <h3>💡 Soluções apresentadas</h3>
+              <p>Bom dia Waldino,
+
+Percebido — preferia um Tesla. Neste momento os nossos Tesla estão todos alugados, sem nenhum disponível para aluguer.
+
+O que temos pronto a operar: a Opel Mokka-e (2023, 100% elétri</p>
+            </div>
+            <div class="section">
+              <h3>💬 Últimas mensagens</h3>
+              <div class="msg-list"><div class="msg msg-lead"><span class="msg-label">👤 Lead 08:17:15</span><span class="msg-body">Obrigado</span></div><div class="msg msg-lead"><span class="msg-label">👤 Lead 08:17:12</span><span class="msg-body">Estava a procura de um Tesla</span></div><div class="msg msg-agent"><span class="msg-label">🤖 Agente 08:12:34</span><span class="msg-body">Boa tarde Waldino,
+
+Percebido — viatura elétrica com mais autonomia para operar na Grande Lisboa (Sintra está dentro da nossa zona, sem problema). Temos duas opções já prontas a operar:
+
+Opel Mokka-e </span></div><div class="msg msg-lead"><span class="msg-label">👤 Lead 08:11:06</span><span class="msg-body">Sim Lisboa 
+Vivo em Sintra</span></div><div class="msg msg-agent"><span class="msg-label">🤖 Agente 08:09:06</span><span class="msg-body">Percebido, Waldino — aluguer de viatura elétrica com mais autonomia para TVDE.
+
+Temos opções disponíveis já prontas a operar. Só uma confirmação: o aluguer é para operar na Grande Lisboa? Assim que co</span></div><div class="msg msg-lead"><span class="msg-label">👤 Lead 08:05:10</span><span class="msg-body">Bom dia 
+Eu aluguei uma viatura Tesla mas com pouca autonomia pretendo um outro carro 
+Quais são os carros que você tenhem ?
+Quais são as condições e valores</span></div><div class="msg msg-agent"><span class="msg-label">🤖 Agente 08:00:14</span><span class="msg-body">Bom dia Waldino! Obrigado pelo seu interesse na Vianta. Para lhe indicarmos a melhor opção: procura aluguer de viatura TVDE, já tem viatura e precisa de um slot, ou quer comprar uma viatura pronta a o</span></div><div class="msg msg-lead"><span class="msg-label">👤 Lead 07:58:24</span><span class="msg-body">Estou interessado</span></div></div>
+            </div>
+            <div class="no-issues">✅ Sem problemas detetados</div>
+          </div>
+        </div>
+
+<div class="suggestions-section">
+  <h2>🚀 Propostas de melhoria — Agente Comercial</h2>
+  
+        <div class="suggestion-card">
+          <h3>📊 Dashboard de qualidade semanal</h3>
+          <p>Criar um segundo relatório semanal com métricas agregadas: taxa de resposta, tempo médio de resposta, ofertas mais comuns, leads que avançaram para visita vs perdidos. Ajuda a identificar tendências antes de se tornarem problemas.</p>
+        </div>
+</div>
+
+<div class="footer">Gerado automaticamente • Vianta AI OS</div>
+</body>
+</html>

@@ -1,6 +1,7 @@
 export interface Carro {
   id: number;
   matricula: string | null;
+  marca?: string | null;
   marca_modelo: string | null;
   ano: string | number | null;
   combustivel: string | null;

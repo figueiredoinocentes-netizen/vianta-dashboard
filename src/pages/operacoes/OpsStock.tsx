@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { matchesSearch } from '@/lib/operacoes/constants';
+import { nomeCarro } from '@/lib/operacoes/identidadeViatura';
 import { useCarros } from '@/hooks/useOperacoes';
 import { useOps } from '@/components/operacoes/OpsContext';
 import { EmptyState, ErrorBox, OpsHeader, StatusSelect, hideCols } from '@/components/operacoes/shared';
@@ -47,7 +48,7 @@ export default function OpsStock() {
             <TableHeader>
               <TableRow>
                 <TableHead>Matrícula</TableHead>
-                <TableHead>Modelo</TableHead>
+                <TableHead>Carro</TableHead>
                 <TableHead>Ano</TableHead>
                 <TableHead>KMs</TableHead>
                 <TableHead>Proprietário</TableHead>
@@ -68,11 +69,7 @@ export default function OpsStock() {
                     onClick={() => openVehicle(v.id)}
                   >
                     <TableCell className="font-semibold">{v.matricula || '-'}</TableCell>
-                    <TableCell>
-                      {emPrep && '🔧 '}
-                      {emMaint && '🛠️ '}
-                      {v.marca_modelo || ''}
-                    </TableCell>
+                    <TableCell>{`${emPrep ? '🔧 ' : emMaint ? '🛠️ ' : ''}${nomeCarro(v) || '-'}`}</TableCell>
                     <TableCell>{v.ano || ''}</TableCell>
                     <TableCell>{v.kms_atuais || '-'}</TableCell>
                     <TableCell className="text-xs">{v.proprietario || ''}</TableCell>

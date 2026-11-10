@@ -27,6 +27,22 @@ export interface SnapState {
   ghl?: { ok?: boolean | null; status?: number } | null;
   integrations?: Record<string, { ok?: boolean | null; note?: string }>;
   alerts?: string[];
+  agente_comercial?: {
+    conversas_respondidas?: number;
+    followups_pendentes?: number;
+    followups?: { lead?: string; date?: string; channel?: string }[];
+    ultimo_relatorio?: string | null;
+    relatorios_total?: number;
+    ultima_execucao?: string | null;
+    ultimo_status?: string | null;
+    resumo_semanal?: {
+      leads_contactadas?: number;
+      convertidas?: number;
+      ocorrencias?: number;
+      pendentes?: number;
+      sugestoes?: number;
+    };
+  };
 }
 
 export type Status = 'ok' | 'warn' | 'err' | 'off';

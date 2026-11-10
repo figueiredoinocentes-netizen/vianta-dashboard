@@ -29,11 +29,14 @@ import {
   type FaturaCompraValores,
 } from '@/lib/faturaCompra';
 import { toNum } from '@/lib/operacoes/custos';
-import { useCentralWrites, useInvestidores, errorMessage } from '@/hooks/useOperacoes';
+import { useCentralWrites, useInvestidores, useCarros, errorMessage } from '@/hooks/useOperacoes';
+import { marcasRegistadas } from '@/lib/operacoes/identidadeViatura';
 import { Field, NativeSelect } from './shared';
 
 const EMPTY = {
+  marca: '',
   modelo: '',
+  versao: '',
   matricula: '',
   ano: '',
   combustivel: '',
@@ -71,6 +74,8 @@ export function NovaViaturaDialog({
     enabled: open,
   });
   const { data: investidores = [] } = useInvestidores();
+  const { data: carros = [] } = useCarros();
+  const marcas = marcasRegistadas(carros);
   const { create } = useCentralWrites('carros');
 
   const set = (k: keyof typeof EMPTY, v: string) => setForm((f) => ({ ...f, [k]: v }));
@@ -107,7 +112,9 @@ export function NovaViaturaDialog({
         : null;
       const rows = await create.mutateAsync({
         matricula: form.matricula || null,
+        marca: form.marca || null,
         marca_modelo: form.modelo || null,
+        versao: form.versao || null,
         ano: form.ano || null,
         combustivel: form.combustivel || null,
         kms_atuais: form.kms || null,
@@ -188,8 +195,15 @@ export function NovaViaturaDialog({
         </DialogHeader>
         <form onSubmit={onSubmit}>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Field label="Modelo" required className="sm:col-span-2">
+            <Field label="Marca" required>
+              <Input required list="marcas-registadas" value={form.marca} onChange={(e) => set('marca', e.target.value)} />
+              <datalist id="marcas-registadas">{marcas.map((marca) => <option key={marca} value={marca} />)}</datalist>
+            </Field>
+            <Field label="Modelo" required>
               <Input required value={form.modelo} onChange={(e) => set('modelo', e.target.value)} />
+            </Field>
+            <Field label="Versão">
+              <Input value={form.versao} onChange={(e) => set('versao', e.target.value)} />
             </Field>
             <Field label="Pasta da Drive (CARROS)" className="sm:col-span-2">
               <NativeSelect
