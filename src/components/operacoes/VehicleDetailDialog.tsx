@@ -41,6 +41,15 @@ import { DeclaracaoCirculacao } from './DeclaracaoCirculacao';
 import { FotosEditor } from './FotosEditor';
 import { DeleteConfirm, Field, NativeSelect } from './shared';
 import { AquisicaoViatura } from './AquisicaoViatura';
+import type { VehicleTab } from './OpsContext';
+import {
+  URL_VEICULOS_ELEGIVEIS_UBER,
+  camposObrigatorios,
+  exigeFicha,
+  faltamParaEstado,
+  mensagemCamposEmFalta,
+  type CampoObrigatorio,
+} from '@/lib/operacoes/estadoRequisitos';
 
 interface Form {
   modelo: string;
@@ -132,16 +141,18 @@ function matchFileForItem(item: string, files: DriveFile[] | undefined): DriveFi
 }
 
 export function VehicleDetailDialog({
-  carId,
+  carro: alvo,
   onClose,
 }: {
-  carId: number | null;
+  /** Viatura a abrir e, opcionalmente, o separador onde começar. */
+  carro: { id: number; tab?: VehicleTab } | null;
   onClose: () => void;
 }) {
-  const open = carId != null;
+  const open = alvo != null;
   const { data: carros = [] } = useCarros();
   const marcas = marcasRegistadas(carros);
-  const carro = carros.find((c) => c.id === carId) || null;
+  const carro = carros.find((c) => c.id === alvo?.id) || null;
+  const tabInicial = alvo?.tab || 'carac';
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -149,14 +160,32 @@ export function VehicleDetailDialog({
         className="max-h-[90vh] max-w-3xl overflow-y-auto"
         aria-describedby={undefined}
       >
-        {carro && <Body key={carro.id} carro={carro} marcas={marcas} onClose={onClose} />}
+        {carro && (
+          <Body
+            key={`${carro.id}-${tabInicial}`}
+            carro={carro}
+            marcas={marcas}
+            tabInicial={tabInicial}
+            onClose={onClose}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
 }
 
-function Body({ carro, marcas, onClose }: { carro: Carro; marcas: string[]; onClose: () => void }) {
-  const [tab, setTab] = useState<'carac' | 'ficha' | 'prep' | 'sinist'>('carac');
+function Body({
+  carro,
+  marcas,
+  tabInicial,
+  onClose,
+}: {
+  carro: Carro;
+  marcas: string[];
+  tabInicial: VehicleTab;
+  onClose: () => void;
+}) {
+  const [tab, setTab] = useState<VehicleTab>(tabInicial);
   const [form, setForm] = useState<Form>(() => formFromCarro(carro));
   const [saving, setSaving] = useState<'idle' | 'saving'>('idle');
   const [clienteOpen, setClienteOpen] = useState(false);
@@ -189,8 +218,41 @@ function Body({ carro, marcas, onClose }: { carro: Carro; marcas: string[]; onCl
 
   const isVenda = form.gestao === 'Venda';
 
+  // Ficha exigida para "Para Venda"/"Para Aluguer": os asteriscos e a validação do
+  // Guardar usam as mesmas regras (lib/operacoes/estadoRequisitos).
+  const valoresFicha = {
+    combustivel: form.combustivel,
+    cavalos: form.cavalos,
+    caixa: form.caixa,
+    bateria_kwh: form.bateriaKwh,
+    autonomia_km: form.autonomiaKm,
+    categorias_tvde: form.categoriasTvde,
+    garantia_viatura: form.garantiaViatura,
+    credito_120_meses: form.credito120,
+    credito_60_meses: form.credito60,
+    credito_48_meses: form.credito48,
+  };
+  const fichaExigida = exigeFicha(form.estado);
+  const faltamFicha = fichaExigida ? faltamParaEstado(valoresFicha, form.estado) : [];
+  const camposExigidos = new Set<string>(
+    (fichaExigida ? camposObrigatorios(valoresFicha) : []).map((c) => c.campo),
+  );
+  const obrigatorio = (campo: CampoObrigatorio['campo']) => camposExigidos.has(campo);
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
+
+    // Sem a ficha completa a viatura não passa a disponível (Para Venda/Para Aluguer).
+    const faltam = faltamParaEstado(valoresFicha, form.estado);
+    if (faltam.length) {
+      setTab('ficha');
+      toast.error(mensagemCamposEmFalta(faltam, form.estado), {
+        description: 'Preenche os campos assinalados com * e volta a guardar.',
+        duration: 9000,
+      });
+      return;
+    }
+
     const isInvestidor = form.proprietario === 'Investidor';
     const investidor = isInvestidor
       ? investidores.find((i) => String(i.id) === form.investidorId)
@@ -208,7 +270,6 @@ function Body({ carro, marcas, onClose }: { carro: Carro; marcas: string[]; onCl
       proprietario: isInvestidor ? (investidor ? investidor.nome : null) : 'VIANTA',
       investidor_id: investidor ? investidor.id : null,
       tipo_gestao: form.gestao || null,
-      estado: form.estado || null,
       preco_venda: isVenda ? form.precoVenda || null : null,
       preco_compra: form.precoCompra || null,
       valor_aluguer_semanal: !isVenda ? form.precoAluguer || null : null,
@@ -234,6 +295,9 @@ function Body({ carro, marcas, onClose }: { carro: Carro; marcas: string[]; onCl
       docs_link: form.docsLink || null,
       obs: form.obs || null,
       aquisicao: form.aquisicao || null,
+      // O estado fica sempre em último: as características são gravadas antes, para
+      // a validação do servidor (central.js) encontrar já a ficha completa.
+      estado: form.estado || null,
     };
 
     try {
@@ -471,10 +535,29 @@ function Body({ carro, marcas, onClose }: { carro: Carro; marcas: string[]; onCl
 
         {tab === 'ficha' && (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {fichaExigida && (
+              <div
+                className={cn(
+                  'rounded-lg border p-3 text-xs sm:col-span-2',
+                  faltamFicha.length
+                    ? 'border-amber-500/40 bg-amber-500/10 text-amber-300'
+                    : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300',
+                )}
+              >
+                {faltamFicha.length ? (
+                  <>
+                    Para passar a <strong>{form.estado}</strong> falta preencher:{' '}
+                    {faltamFicha.map((c) => c.label).join(', ')}.
+                  </>
+                ) : (
+                  <>Ficha completa — a viatura já pode passar a {form.estado}.</>
+                )}
+              </div>
+            )}
             <Field label="Cor">
               <Input value={form.cor} onChange={(e) => set('cor', e.target.value)} />
             </Field>
-            <Field label="Caixa">
+            <Field label="Caixa" required={obrigatorio('caixa')}>
               <NativeSelect value={form.caixa} onChange={(e) => set('caixa', e.target.value)}>
                 <option value="">Selecionar</option>
                 {[...CAIXAS, ...(form.caixa && !CAIXAS.includes(form.caixa as never) ? [form.caixa] : [])].map((c) => (
@@ -482,7 +565,7 @@ function Body({ carro, marcas, onClose }: { carro: Carro; marcas: string[]; onCl
                 ))}
               </NativeSelect>
             </Field>
-            <Field label="Cavalos (cv)">
+            <Field label="Cavalos (cv)" required={obrigatorio('cavalos')}>
               <Input value={form.cavalos} onChange={(e) => set('cavalos', e.target.value)} />
             </Field>
             <Field label="Volume da bagageira (L)">
@@ -491,7 +574,7 @@ function Body({ carro, marcas, onClose }: { carro: Carro; marcas: string[]; onCl
                 onChange={(e) => set('volumeBagageira', e.target.value)}
               />
             </Field>
-            <Field label="Bateria (kWh)">
+            <Field label="Bateria (kWh)" required={obrigatorio('bateria_kwh')}>
               <Input value={form.bateriaKwh} onChange={(e) => set('bateriaKwh', e.target.value)} />
             </Field>
             <Field label="Estado da bateria (%)">
@@ -500,19 +583,27 @@ function Body({ carro, marcas, onClose }: { carro: Carro; marcas: string[]; onCl
                 onChange={(e) => set('estadoBateriaPct', e.target.value)}
               />
             </Field>
-            <Field label="Autonomia (km)">
+            <Field label="Autonomia (km)" required={obrigatorio('autonomia_km')}>
               <Input value={form.autonomiaKm} onChange={(e) => set('autonomiaKm', e.target.value)} />
             </Field>
             <Field label="Caução (€)">
               <Input value={form.caucao} onChange={(e) => set('caucao', e.target.value)} />
             </Field>
-            <Field label="Categorias TVDE" className="sm:col-span-2">
+            <Field label="Categorias TVDE" className="sm:col-span-2" required={obrigatorio('categorias_tvde')}>
               <Input
                 value={form.categoriasTvde}
                 onChange={(e) => set('categoriasTvde', e.target.value)}
               />
+              <a
+                href={URL_VEICULOS_ELEGIVEIS_UBER}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 inline-block text-[11px] text-primary hover:underline"
+              >
+                Ver veículos elegíveis na Uber (Lisboa) ↗
+              </a>
             </Field>
-            <Field label="Garantia viatura">
+            <Field label="Garantia viatura" required={obrigatorio('garantia_viatura')}>
               <Input
                 value={form.garantiaViatura}
                 onChange={(e) => set('garantiaViatura', e.target.value)}
@@ -527,13 +618,13 @@ function Body({ carro, marcas, onClose }: { carro: Carro; marcas: string[]; onCl
             <div className="sm:col-span-2 mt-2 border-t border-border pt-3 text-xs font-medium text-muted-foreground">
               Simulação de crédito — prestação mensal (€)
             </div>
-            <Field label="120 meses (10 anos)">
+            <Field label="120 meses (10 anos)" required={obrigatorio('credito_120_meses')}>
               <Input value={form.credito120} onChange={(e) => set('credito120', e.target.value)} />
             </Field>
-            <Field label="60 meses (5 anos)">
+            <Field label="60 meses (5 anos)" required={obrigatorio('credito_60_meses')}>
               <Input value={form.credito60} onChange={(e) => set('credito60', e.target.value)} />
             </Field>
-            <Field label="48 meses (4 anos)">
+            <Field label="48 meses (4 anos)" required={obrigatorio('credito_48_meses')}>
               <Input value={form.credito48} onChange={(e) => set('credito48', e.target.value)} />
             </Field>
             <div className="sm:col-span-2">

@@ -65,6 +65,47 @@ function sbHeaders() {
   };
 }
 
+// ── Ficha obrigatória para "Para Venda" / "Para Aluguer" ─────────────────────
+// ⚠️ Manter em sincronia com src/lib/operacoes/estadoRequisitos.ts
+const ESTADOS_COM_FICHA = ['Para Venda', 'Para Aluguer'];
+const CAMPOS_FICHA = [
+  ['cavalos', 'Cavalos (cv)'],
+  ['caixa', 'Caixa'],
+  ['categorias_tvde', 'Categorias TVDE'],
+  ['garantia_viatura', 'Garantia viatura'],
+  ['credito_120_meses', 'Simulação de crédito — 120 meses'],
+  ['credito_60_meses', 'Simulação de crédito — 60 meses'],
+  ['credito_48_meses', 'Simulação de crédito — 48 meses'],
+];
+const CAMPOS_FICHA_ELETRICO = [
+  ['bateria_kwh', 'Bateria (kWh)'],
+  ['autonomia_km', 'Autonomia (km)'],
+];
+
+const preenchido = (v) => v != null && String(v).trim() !== '';
+const eEletrico = (r) =>
+  String((r && r.combustivel) || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .includes('eletric');
+
+/** Etiquetas dos campos da ficha que faltam preencher nesta viatura. */
+function camposFichaEmFalta(registo) {
+  const campos = eEletrico(registo)
+    ? CAMPOS_FICHA.concat(CAMPOS_FICHA_ELETRICO)
+    : CAMPOS_FICHA;
+  return campos.filter(([campo]) => !preenchido(registo && registo[campo])).map(([, label]) => label);
+}
+
+/** Mensagem de erro, ou null quando a viatura pode assumir o estado pedido. */
+function erroFichaEmFalta(registo, estado) {
+  if (!ESTADOS_COM_FICHA.includes(estado)) return null;
+  const faltam = camposFichaEmFalta(registo);
+  if (!faltam.length) return null;
+  return `Não é possível passar a "${estado}" sem preencher: ${faltam.join(', ')}.`;
+}
+
 export const handler = async (event) => {
   const origin = resolveOrigin(event);
 
@@ -99,6 +140,12 @@ export const handler = async (event) => {
     if (event.httpMethod === 'POST') {
       if (!event.body) return err('Body required for POST', 400, origin);
       const record = JSON.parse(event.body);
+      if (table === 'carros') {
+        for (const r of Array.isArray(record) ? record : [record]) {
+          const erro = erroFichaEmFalta(r, r && r.estado);
+          if (erro) return err(erro, 422, origin);
+        }
+      }
       const res = await fetch(baseUrl, { method: 'POST', headers, body: JSON.stringify(record) });
       if (!res.ok) return await supaErr(res, `POST ${table}`, origin);
       const data = await res.json();
@@ -110,6 +157,15 @@ export const handler = async (event) => {
       const { id, field, value } = JSON.parse(event.body);
       if (!id || !field) return err('PUT body must include id and field', 400, origin);
       const url = `${baseUrl}?id=eq.${encodeURIComponent(id)}`;
+      // Passar a viatura a disponível exige a ficha completa: valida-se contra a
+      // linha atual na base de dados, não apenas contra o que o frontend enviou.
+      if (table === 'carros' && field === 'estado' && ESTADOS_COM_FICHA.includes(value)) {
+        const atual = await fetch(`${url}&select=*`, { headers });
+        if (!atual.ok) return await supaErr(atual, `GET ${table} (validar estado)`, origin);
+        const [registo] = await atual.json();
+        const erro = erroFichaEmFalta(registo, value);
+        if (erro) return err(erro, 422, origin);
+      }
       const res = await fetch(url, { method: 'PATCH', headers, body: JSON.stringify({ [field]: value }) });
       if (!res.ok) return await supaErr(res, `PUT ${table}`, origin);
       return ok({ updated: true }, origin);

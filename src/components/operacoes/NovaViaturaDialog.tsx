@@ -29,6 +29,7 @@ import {
   type FaturaCompraValores,
 } from '@/lib/faturaCompra';
 import { toNum } from '@/lib/operacoes/custos';
+import { faltamParaEstado } from '@/lib/operacoes/estadoRequisitos';
 import { useCentralWrites, useInvestidores, useCarros, errorMessage } from '@/hooks/useOperacoes';
 import { marcasRegistadas } from '@/lib/operacoes/identidadeViatura';
 import { Field, NativeSelect } from './shared';
@@ -96,6 +97,14 @@ export function NovaViaturaDialog({
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (!form.aquisicao) return toast.error('Escolha se a viatura é de compra ou de consignação.');
+    // Uma viatura nova não tem ficha: só pode nascer em preparação e é lá que se
+    // preenchem as características exigidas para a disponibilizar.
+    if (faltamParaEstado({ combustivel: form.combustivel }, form.estado).length) {
+      return toast.error(
+        `Uma viatura nova não pode entrar diretamente em «${form.estado}». Cria-a em «Em Preparação» e preenche a Ficha comercial (características, categorias TVDE, garantia e simulações de crédito) antes de a disponibilizar.`,
+        { duration: 9000 },
+      );
+    }
     if (compra) {
       const erro = validarFaturaCompra(fc, fatura);
       if (erro) return toast.error(erro);

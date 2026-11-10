@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { OpsContext, type OpsContextValue } from '@/components/operacoes/OpsContext';
+import { OpsContext, type OpsContextValue, type VehicleTab } from '@/components/operacoes/OpsContext';
 import { NovaViaturaDialog } from '@/components/operacoes/NovaViaturaDialog';
 import { NovoItemDialog } from '@/components/operacoes/NovoItemDialog';
 import { InvestidorDialog } from '@/components/operacoes/InvestidorDialog';
@@ -15,7 +15,7 @@ import { useAutoTrabalhosPreparacao } from '@/hooks/useOperacoes';
 export default function OperacoesLayout() {
   useAutoTrabalhosPreparacao();
   const [search, setSearch] = useState('');
-  const [vehicleId, setVehicleId] = useState<number | null>(null);
+  const [vehicle, setVehicle] = useState<{ id: number; tab?: VehicleTab } | null>(null);
   const [novaViatura, setNovaViatura] = useState(false);
   const [novoItem, setNovoItem] = useState(false);
   const [investidor, setInvestidor] = useState<{ open: boolean; id?: number }>({ open: false });
@@ -24,7 +24,7 @@ export default function OperacoesLayout() {
     () => ({
       search,
       setSearch,
-      openVehicle: setVehicleId,
+      openVehicle: (id, tab) => setVehicle({ id, tab }),
       openNovaViatura: () => setNovaViatura(true),
       openNovoItem: () => setNovoItem(true),
       openInvestidor: (id) => setInvestidor({ open: true, id }),
@@ -37,7 +37,7 @@ export default function OperacoesLayout() {
       <DashboardLayout>
         <Outlet />
       </DashboardLayout>
-      <VehicleDetailDialog carId={vehicleId} onClose={() => setVehicleId(null)} />
+      <VehicleDetailDialog carro={vehicle} onClose={() => setVehicle(null)} />
       <NovaViaturaDialog open={novaViatura} onOpenChange={setNovaViatura} />
       <NovoItemDialog open={novoItem} onOpenChange={setNovoItem} />
       <InvestidorDialog
