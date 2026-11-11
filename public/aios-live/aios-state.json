@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-11T18:16:40+00:00",
+ "generated_at": "2026-11-11T18:49:47+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-11T18:13:41.110918+00:00",
+     "last_run_at": "2026-11-11T18:48:48.628166+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-11T18:17:39.992600+00:00",
+     "next_run_at": "2026-11-11T18:49:48.628166+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-11T18:05:40.999402+00:00",
+     "last_run_at": "2026-11-11T18:38:49.211919+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-11T18:26:40.011375+00:00",
+     "next_run_at": "2026-11-11T18:59:47.495028+00:00",
      "paused_at": null
     },
     {
@@ -148,9 +148,9 @@
      "name": "ChoiceCar — inserir novos serviços e avisar Pedro",
      "owner": "jarvis",
      "schedule": "every 1m",
-     "state": "scheduled",
-     "enabled": true,
-     "last_run_at": "2026-11-11T18:15:42.848689+00:00",
+     "state": "paused",
+     "enabled": false,
+     "last_run_at": "2026-11-11T18:46:19.830842+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -161,8 +161,8 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-11T18:16:42.848689+00:00",
-     "paused_at": null
+     "next_run_at": "2026-11-11T18:47:19.830842+00:00",
+     "paused_at": "2026-11-11T18:45:00.921964+00:00"
     },
     {
      "id": "13a4bd84ca7e",
@@ -544,7 +544,7 @@
   ],
   "ultimo_relatorio": "relatorio-agente-2026-11-11.html",
   "relatorios_total": 10,
-  "ultima_execucao": "2026-11-11T18:13:41.110918+00:00",
+  "ultima_execucao": "2026-11-11T18:48:48.628166+00:00",
   "ultimo_status": "ok",
   "resumo_semanal": {
    "leads_contactadas": 6,
