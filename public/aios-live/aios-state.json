@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-11T04:30:45+00:00",
+ "generated_at": "2026-11-11T05:03:45+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-11T04:30:47.184123+00:00",
+     "last_run_at": "2026-11-11T05:02:47.014834+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-11T04:31:47.184123+00:00",
+     "next_run_at": "2026-11-11T05:03:47.014834+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-11T04:19:47.777110+00:00",
+     "last_run_at": "2026-11-11T04:52:48.862549+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-11T04:40:45.013513+00:00",
+     "next_run_at": "2026-11-11T05:13:45.683038+00:00",
      "paused_at": null
     },
     {
@@ -150,7 +150,7 @@
      "schedule": "every 15m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-11T04:23:37.667024+00:00",
+     "last_run_at": "2026-11-11T04:56:23.057867+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -161,7 +161,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-11T04:38:37.667024+00:00",
+     "next_run_at": "2026-11-11T05:11:23.057867+00:00",
      "paused_at": null
     },
     {
@@ -539,10 +539,10 @@
   ],
   "ultimo_relatorio": "relatorio-agente-2026-11-10.html",
   "relatorios_total": 9,
-  "ultima_execucao": "2026-11-11T04:30:47.184123+00:00",
+  "ultima_execucao": "2026-11-11T05:02:47.014834+00:00",
   "ultimo_status": "ok",
   "resumo_semanal": {
-   "leads_contactadas": 9,
+   "leads_contactadas": 8,
    "convertidas": 0,
    "ocorrencias": 0,
    "pendentes": 5,
