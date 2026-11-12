@@ -113,7 +113,7 @@ export function TrabalhosViatura({ carro }: { carro: Carro }) {
           descricao: item,
         });
       }
-      if (decision === 'nao_necessario' && activeTask) {
+      if (decision !== 'necessario' && activeTask) {
         await updateCentralField('ocorrencias', activeTask.id, 'estado', 'Dispensado');
         await updateCentralField('ocorrencias', activeTask.id, 'resolvido_em', hoje());
       }
