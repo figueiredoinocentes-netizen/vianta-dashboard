@@ -1,5 +1,5 @@
 import type { Carro } from '@/lib/operacoes/types';
-import { splitMarcaModelo } from '@/lib/operacoes/identidadeViatura';
+import { nomeCarroPartes } from '@/lib/operacoes/identidadeViatura';
 import { cn } from '@/lib/utils';
 
 type Identidade = Pick<Carro, 'marca' | 'marca_modelo' | 'versao'>;
@@ -15,9 +15,8 @@ export function NomeViatura({
   fallback?: string;
 }) {
   if (!carro) return <span className={className}>{fallback}</span>;
-  const { marca, modelo } = splitMarcaModelo(carro);
+  const { marca, modelo, versao } = nomeCarroPartes(carro);
   const nome = [marca, modelo].filter(Boolean).join(' ') || fallback;
-  const versao = carro.versao?.trim();
 
   return (
     <span className={cn('inline-flex flex-wrap items-baseline gap-x-1', className)}>

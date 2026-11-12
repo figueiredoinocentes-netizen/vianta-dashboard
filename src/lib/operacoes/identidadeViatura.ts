@@ -26,10 +26,19 @@ export function splitMarcaModelo(carro: Pick<Carro, 'marca' | 'marca_modelo'>) {
 }
 
 export function nomeCarro(carro: Pick<Carro, 'marca' | 'marca_modelo' | 'versao'>) {
-  const identidade = splitMarcaModelo(carro);
-  return [identidade.marca, identidade.modelo, carro.versao?.trim()]
+  const identidade = nomeCarroPartes(carro);
+  return [identidade.marca, identidade.modelo, identidade.versao]
     .filter(Boolean)
     .join(' ');
+}
+
+/** Se a versão já estiver repetida no fim do modelo legado, remove-a só na apresentação. */
+export function nomeCarroPartes(carro: Pick<Carro, 'marca' | 'marca_modelo' | 'versao'>) {
+  const { marca, modelo: modeloOriginal } = splitMarcaModelo(carro);
+  const versao = carro.versao?.trim() || '';
+  const duplicada = versao && modeloOriginal.toLocaleLowerCase().endsWith(` ${versao}`.toLocaleLowerCase());
+  const modelo = duplicada ? modeloOriginal.slice(0, -(versao.length + 1)).trim() : modeloOriginal;
+  return { marca, modelo, versao };
 }
 
 export function marcasRegistadas(carros: Pick<Carro, 'marca' | 'marca_modelo'>[]) {

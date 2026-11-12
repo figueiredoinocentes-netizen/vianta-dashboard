@@ -18,4 +18,12 @@ describe('NomeViatura', () => {
     );
     expect(html).toContain('BYD ATTO 3');
   });
+
+  it('não repete a versão se ela já estiver no final do modelo', () => {
+    const html = renderToStaticMarkup(
+      <NomeViatura carro={{ marca: 'VW', marca_modelo: 'ID.5 Pro', versao: 'PRO' }} />,
+    );
+    expect(html).toContain('VW ID.5');
+    expect(html.match(/PRO/g)).toHaveLength(1);
+  });
 });
