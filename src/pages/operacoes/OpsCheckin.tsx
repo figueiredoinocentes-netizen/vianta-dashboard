@@ -23,6 +23,7 @@ import {
   useToggleChecklistItem,
 } from '@/hooks/useOperacoes';
 import { useOps } from '@/components/operacoes/OpsContext';
+import { NomeViatura } from '@/components/operacoes/NomeViatura';
 import { EmptyState, ErrorBox, OpsHeader } from '@/components/operacoes/shared';
 
 function PrevisaoBadge({ v }: { v: Carro }) {
@@ -166,7 +167,7 @@ export default function OpsCheckin() {
                 <div className="flex flex-1 flex-col gap-2 p-3.5">
                   <div>
                     <div className="font-display text-[15px] font-bold">
-                      {v.marca_modelo || 'Sem modelo'}
+                      <NomeViatura carro={v} fallback="Sem modelo" />
                     </div>
                     <div className="text-sm text-muted-foreground">
                       {v.matricula || 'Sem matrícula'} • {v.tipo_gestao || '-'}

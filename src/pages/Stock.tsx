@@ -10,6 +10,8 @@ import { cn } from '@/lib/utils';
 import { normalizeText } from '@/lib/operacoes/constants';
 import type { Carro } from '@/lib/operacoes/types';
 import { useCarros, useUpdateCarroField } from '@/hooks/useOperacoes';
+import { NomeViatura } from '@/components/operacoes/NomeViatura';
+import { nomeCarro } from '@/lib/operacoes/identidadeViatura';
 
 /**
  * Stock para o comercial (vista de chamada). Fonte única: tabela `carros` do
@@ -125,7 +127,7 @@ function urlProposta(v: Carro, gestao: Gestao) {
 }
 
 function resumoWhatsApp(v: Carro, gestao: Gestao) {
-  const titulo = [v.marca_modelo, v.versao].filter((x) => !vazio(x)).join(' ');
+  const titulo = nomeCarro(v);
   const specs = [v.ano, vazio(v.kms_atuais) ? null : `${v.kms_atuais} km`, v.combustivel, v.caixa, v.cor]
     .filter((x) => !vazio(x))
     .join(' · ');
@@ -244,9 +246,7 @@ function CartaoViatura({
       </div>
       <div className={cn('min-w-0 flex-1 space-y-0.5', disp !== 'pronto' && 'opacity-70')}>
         <div className="flex items-baseline justify-between gap-2">
-          <span className="line-clamp-1 font-display text-sm font-semibold text-foreground">
-            {v.marca_modelo || 'Sem modelo'}
-          </span>
+          <NomeViatura carro={v} fallback="Sem modelo" className="line-clamp-1 font-display text-sm font-semibold text-foreground" />
           <span className="shrink-0 text-sm font-semibold text-foreground">
             {precoPrincipal(v, gestao)}
           </span>
@@ -547,10 +547,10 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <h2 className="font-display text-lg font-bold leading-tight text-foreground">
-                {v.marca_modelo || 'Sem modelo'}
+                <NomeViatura carro={v} fallback="Sem modelo" />
               </h2>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                {[v.matricula, v.versao, v.cor, v.caixa].filter((x) => !vazio(x)).join(' · ') || '—'}
+                {[v.matricula, v.cor, v.caixa].filter((x) => !vazio(x)).join(' · ') || '—'}
               </p>
               <div className="mt-1.5">
                 <BadgeEstado v={v} />

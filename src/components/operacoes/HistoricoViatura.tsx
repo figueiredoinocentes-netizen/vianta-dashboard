@@ -3,6 +3,7 @@ import { useEstadosLog, useFinanceiro, useOcorrencias } from '@/hooks/useOperaco
 import { eur, semIva } from '@/lib/operacoes/custos';
 import { ORIGEM_PREP } from '@/lib/operacoes/trabalhos';
 import type { Carro } from '@/lib/operacoes/types';
+import { NomeViatura } from '@/components/operacoes/NomeViatura';
 
 function dataPt(value?: string | null) {
   if (!value) return 'Data não registada';
@@ -47,7 +48,7 @@ export function HistoricoViatura({ carro }: { carro: Carro }) {
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-semibold">Histórico de {carro.matricula || carro.marca_modelo || 'viatura'}</h3>
+      <h3 className="text-sm font-semibold">Histórico de <NomeViatura carro={carro} fallback="viatura" />{carro.matricula ? ` — ${carro.matricula}` : ''}</h3>
       <ol className="relative ml-2 space-y-0 border-l border-border">
         {eventos.map((evento) => (
           <li key={evento.key} className="relative pb-4 pl-5 last:pb-0">

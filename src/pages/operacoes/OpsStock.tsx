@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { matchesSearch } from '@/lib/operacoes/constants';
-import { nomeCarro } from '@/lib/operacoes/identidadeViatura';
+import { NomeViatura } from '@/components/operacoes/NomeViatura';
 import { useCarros } from '@/hooks/useOperacoes';
 import { useOps } from '@/components/operacoes/OpsContext';
 import { EmptyState, ErrorBox, OpsHeader, StatusSelect, hideCols } from '@/components/operacoes/shared';
@@ -79,7 +79,8 @@ export default function OpsStock() {
                     <TableCell className="font-semibold">{v.matricula || '-'}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5">
-                        <span>{`${emPrep ? '🔧 ' : emMaint ? '🛠️ ' : ''}${nomeCarro(v) || '-'}`}</span>
+                        {emPrep && <span>🔧</span>}{emMaint && <span>🛠️</span>}
+                        <NomeViatura carro={v} fallback="-" />
                         {!!faltam.length && (
                           <button
                             type="button"

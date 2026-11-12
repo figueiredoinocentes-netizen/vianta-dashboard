@@ -12,6 +12,8 @@ import type { Carro, Movimento } from '@/lib/operacoes/types';
 import { CENTROS_CUSTO, ePdf } from '@/lib/financeiro';
 import { errorMessage, useCentralWrites } from '@/hooks/useOperacoes';
 import { FaturaEmbed } from './FaturaPreview';
+import { nomeCarro } from '@/lib/operacoes/identidadeViatura';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const hoje = () => new Date().toISOString().slice(0, 10);
 const abs = (x: unknown) => (x == null || x === '' ? '' : String(Math.abs(toNum(x))).replace('.', ','));
@@ -214,14 +216,21 @@ export function FaturaDialog({
               <Input value={form.contraparte} onChange={(e) => set('contraparte', e.target.value)} />
             </Field>
             <Field label="Viatura (opcional)">
-              <NativeSelect value={form.carro_id} onChange={(e) => set('carro_id', e.target.value)}>
-                <option value="">— sem viatura —</option>
+              <Select value={form.carro_id || 'sem-viatura'} onValueChange={(value) => set('carro_id', value === 'sem-viatura' ? '' : value)}>
+                <SelectTrigger><SelectValue placeholder="— sem viatura —" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sem-viatura">— sem viatura —</SelectItem>
                 {carrosOrdenados.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {[c.matricula, c.marca_modelo, c.estado].filter(Boolean).join(' · ')} (#{c.id})
-                  </option>
+                  <SelectItem key={c.id} value={String(c.id)}>
+                    <span className="inline-flex items-baseline gap-x-1">
+                      <span>{[c.matricula, nomeCarro({ ...c, versao: null }), c.estado].filter(Boolean).join(' · ')}</span>
+                      {c.versao && <span className="text-xs font-light text-muted-foreground">{c.versao}</span>}
+                      <span className="text-muted-foreground">(#{c.id})</span>
+                    </span>
+                  </SelectItem>
                 ))}
-              </NativeSelect>
+                </SelectContent>
+              </Select>
             </Field>
             <Field label="Fatura original (PDF ou imagem)" className="sm:col-span-2">
               <Input

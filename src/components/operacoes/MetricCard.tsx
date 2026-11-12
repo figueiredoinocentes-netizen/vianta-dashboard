@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import type { Carro } from '@/lib/operacoes/types';
 import { useOps } from './OpsContext';
 import { StatusBadge } from './shared';
+import { NomeViatura } from './NomeViatura';
 
 /**
  * Card de métrica da Visão Geral. Regra geral: todos são clicáveis.
@@ -114,7 +115,7 @@ export function CarList({
           className="flex items-center justify-between gap-2 rounded-md border border-border px-2 py-1.5 text-left text-xs transition hover:border-primary"
         >
           <span className="min-w-0 truncate">
-            <span className="font-medium">{carro.matricula}</span> · {carro.marca_modelo}
+            <span className="font-medium">{carro.matricula}</span> · <NomeViatura carro={carro} />
             {carro.proprietario ? <span className="text-muted-foreground"> · {carro.proprietario}</span> : null}
           </span>
           <span className="flex shrink-0 items-center gap-2">
