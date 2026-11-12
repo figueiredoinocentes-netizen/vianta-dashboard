@@ -60,6 +60,8 @@ interface Form {
   matricula: string;
   ano: string;
   combustivel: string;
+  combustivelSecundario: string;
+  plugIn: string;
   kms: string;
   proprietario: string;
   investidorId: string;
@@ -106,6 +108,8 @@ function formFromCarro(v: Carro): Form {
     matricula: s(v.matricula),
     ano: s(v.ano),
     combustivel: s(v.combustivel),
+    combustivelSecundario: s(v.combustivel_secundario),
+    plugIn: v.plug_in == null ? '' : v.plug_in ? 'Sim' : 'Não',
     kms: s(v.kms_atuais),
     proprietario: v.investidor_id ? 'Investidor' : 'VIANTA',
     investidorId: v.investidor_id ? String(v.investidor_id) : '',
@@ -231,6 +235,8 @@ function Body({
   const valoresFicha = {
     tipo_gestao: form.gestao,
     combustivel: form.combustivel,
+    combustivel_secundario: form.combustivelSecundario,
+    plug_in: form.plugIn === '' ? null : form.plugIn === 'Sim',
     cavalos: form.cavalos,
     caixa: form.caixa,
     bateria_kwh: form.bateriaKwh,
@@ -273,12 +279,14 @@ function Body({
 
     setSaving('saving');
 
-    const updates: Record<string, string | number | null> = {
+    const updates: Record<string, string | number | boolean | null> = {
       marca: form.marca || null,
       marca_modelo: form.modelo || null,
       matricula: form.matricula || null,
       ano: form.ano || null,
       combustivel: form.combustivel || null,
+      combustivel_secundario: form.combustivelSecundario || null,
+      plug_in: form.combustivel === 'Híbrido' ? form.plugIn === 'Sim' : null,
       kms_atuais: form.kms || null,
       proprietario: isInvestidor ? (investidor ? investidor.nome : null) : 'VIANTA',
       investidor_id: investidor ? investidor.id : null,
@@ -430,6 +438,18 @@ function Body({
                     ))}
                   </NativeSelect>
                 </Field>
+                {form.combustivel === 'Híbrido' && <>
+                  <Field label="Segundo combustível" required={obrigatorio('combustivel_secundario' as CampoObrigatorio['campo'])}>
+                    <NativeSelect required={obrigatorio('combustivel_secundario' as CampoObrigatorio['campo'])} value={form.combustivelSecundario} onChange={(e) => set('combustivelSecundario', e.target.value)}>
+                      <option value="">Selecionar</option>{COMBUSTIVEIS.filter((c) => c !== 'Híbrido').map((c) => <option key={c}>{c}</option>)}
+                    </NativeSelect>
+                  </Field>
+                  <Field label="Plug-in?" required={obrigatorio('plug_in' as CampoObrigatorio['campo'])}>
+                    <NativeSelect required={obrigatorio('plug_in' as CampoObrigatorio['campo'])} value={form.plugIn} onChange={(e) => set('plugIn', e.target.value)}>
+                      <option value="">Selecionar</option><option>Sim</option><option>Não</option>
+                    </NativeSelect>
+                  </Field>
+                </>}
                 <Field label="KMs">
                   <Input value={form.kms} onChange={(e) => set('kms', e.target.value)} />
                 </Field>

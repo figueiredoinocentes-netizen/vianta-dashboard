@@ -85,6 +85,14 @@ describe('estadoRequisitos', () => {
     expect(labels(faltamParaEstado({ ...ALUGUER_COMPLETO, foto_url: '', fotos: [] }, 'Para Aluguer'))).toEqual(['Fotos da viatura']);
   });
 
+  it('exige segundo combustível e estado plug-in para híbridos antes de entrar em stock', () => {
+    const hibrido = { ...VENDA_COMPLETA, combustivel: 'Híbrido' };
+    expect(labels(faltamParaEstado(hibrido, 'Para Venda'))).toContain('Segundo combustível');
+    expect(labels(faltamParaEstado(hibrido, 'Para Venda'))).toContain('Plug-in (Sim/Não)');
+    expect(faltamParaEstado({ ...hibrido, combustivel_secundario: 'Gasolina', plug_in: false }, 'Para Venda')).toEqual([]);
+    expect(faltamParaEstado({ ...ALUGUER_COMPLETO, combustivel: 'Híbrido', combustivel_secundario: 'Gasolina', plug_in: true }, 'Para Aluguer')).toEqual([]);
+  });
+
   it('num elétrico exige bateria e autonomia em qualquer oferta', () => {
     const eletrico = { ...ALUGUER_COMPLETO, combustivel: 'Elétrico' };
     expect(labels(faltamParaEstado(eletrico, 'Para Aluguer'))).toEqual([
