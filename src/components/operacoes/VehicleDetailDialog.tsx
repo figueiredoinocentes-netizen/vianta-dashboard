@@ -23,6 +23,7 @@ import { valorSemIva } from '@/lib/financeiro';
 import type { Carro, DriveFile } from '@/lib/operacoes/types';
 import { imprimirFichaComercial } from '@/lib/operacoes/fichaComercial';
 import { splitMarcaModelo, marcasRegistadas } from '@/lib/operacoes/identidadeViatura';
+import { NomeViatura } from '@/components/operacoes/NomeViatura';
 import {
   useCarros,
   useCentralWrites,
@@ -346,7 +347,7 @@ function Body({
     <>
       <DialogHeader>
         <DialogTitle>
-          {(carro.marca ? `${carro.marca} ${splitMarcaModelo(carro).modelo}` : carro.marca_modelo) || 'Viatura'}{carro.matricula ? ` — ${carro.matricula}` : ''}
+          <NomeViatura carro={carro} fallback="Viatura" />{carro.matricula ? ` — ${carro.matricula}` : ''}
         </DialogTitle>
       </DialogHeader>
 

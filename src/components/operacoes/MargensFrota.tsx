@@ -7,6 +7,7 @@ import type { Carro } from '@/lib/operacoes/types';
 import { useFinanceiro, useOcorrencias } from '@/hooks/useOperacoes';
 import { useOps } from './OpsContext';
 import { StatusBadge } from './shared';
+import { NomeViatura } from './NomeViatura';
 
 type Filtro = 'todas' | 'Venda' | 'Aluguer' | 'vendidas';
 const FILTROS: [Filtro, string][] = [
@@ -131,7 +132,7 @@ export function MargensFrota({ carros }: { carros: Carro[] }) {
                 <TableRow key={c.id} className="cursor-pointer" onClick={() => openVehicle(c.id)}>
                   <TableCell>
                     <div className="font-semibold">{c.matricula || '-'}</div>
-                    <div className="text-xs text-muted-foreground">{c.marca_modelo}</div>
+                    <div className="text-xs text-muted-foreground"><NomeViatura carro={c} fallback="" /></div>
                   </TableCell>
                   <TableCell>
                     <StatusBadge estado={c.estado} />

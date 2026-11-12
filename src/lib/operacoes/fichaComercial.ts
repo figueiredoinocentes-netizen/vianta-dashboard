@@ -2,6 +2,7 @@
 // Layout pensado para meter no carro: o comercial leva o papel nas visitas.
 
 import type { Carro } from './types';
+import { splitMarcaModelo } from './identidadeViatura';
 
 const vazio = (v: unknown) => v == null || String(v).trim() === '';
 const txt = (v: unknown) => (vazio(v) ? '—' : String(v));
@@ -33,8 +34,9 @@ export function gerarFichaComercialHTML(carro: Carro): string {
   const temVenda = v.tipo_gestao === 'Venda' || v.tipo_gestao === 'Venda e Aluguer';
   const temAluguer = v.tipo_gestao === 'Aluguer' || v.tipo_gestao === 'Venda e Aluguer';
 
-  const modelo = v.marca_modelo || '';
-  const title = [modelo, v.versao].filter(Boolean).join(' ');
+  const identidade = splitMarcaModelo(v);
+  const title = [identidade.marca, identidade.modelo].filter(Boolean).join(' ');
+  const tituloVersao = v.versao ? `<span class="versao">${v.versao}</span>` : '';
   const subtitulo = [v.matricula, v.ano, v.combustivel, v.kms_atuais ? `${fmtNum(v.kms_atuais)} km` : null]
     .filter(Boolean).join(' · ');
 
@@ -66,7 +68,7 @@ export function gerarFichaComercialHTML(carro: Carro): string {
 
   // Especificações
   const specs =
-    linha('Marca / Modelo', v.marca_modelo) +
+    linha('Marca / Modelo', [identidade.marca, identidade.modelo].filter(Boolean).join(' ')) +
     linha('Versão', v.versao) +
     linha('Matrícula', v.matricula) +
     linha('Ano', v.ano) +
@@ -117,6 +119,7 @@ export function gerarFichaComercialHTML(carro: Carro): string {
 
   h1 { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 22pt;
     line-height: 1.1; color: var(--black); margin-bottom: 2pt; }
+  h1 .versao { font-family: 'DM Sans', sans-serif; font-size: 0.62em; font-weight: 300; color: var(--gray-600); }
   .subtitulo { font-size: 9pt; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gray-400); margin-bottom: 8pt; }
 
   .cabecalho-viatura { display: flex; gap: 8pt; margin-bottom: 10pt; align-items: flex-start; }
@@ -163,7 +166,7 @@ export function gerarFichaComercialHTML(carro: Carro): string {
   </div>
 
   <div class="conteudo">
-  <h1>${title}</h1>
+  <h1>${title} ${tituloVersao}</h1>
   <div class="subtitulo">${subtitulo}</div>
 
   <div class="cabecalho-viatura">
