@@ -87,10 +87,12 @@ describe('estadoRequisitos', () => {
 
   it('exige segundo combustível e estado plug-in para híbridos antes de entrar em stock', () => {
     const hibrido = { ...VENDA_COMPLETA, combustivel: 'Híbrido' };
-    expect(labels(faltamParaEstado(hibrido, 'Para Venda'))).toContain('Segundo combustível');
+    expect(labels(faltamParaEstado(hibrido, 'Para Venda'))).toContain('Combustível híbrido 1');
+    expect(labels(faltamParaEstado(hibrido, 'Para Venda'))).toContain('Combustível híbrido 2');
     expect(labels(faltamParaEstado(hibrido, 'Para Venda'))).toContain('Plug-in (Sim/Não)');
-    expect(faltamParaEstado({ ...hibrido, combustivel_secundario: 'Gasolina', plug_in: false }, 'Para Venda')).toEqual([]);
-    expect(faltamParaEstado({ ...ALUGUER_COMPLETO, combustivel: 'Híbrido', combustivel_secundario: 'Gasolina', plug_in: true }, 'Para Aluguer')).toEqual([]);
+    expect(faltamParaEstado({ ...hibrido, combustivel_principal: 'Gasolina', combustivel_secundario: 'Elétrico', plug_in: false }, 'Para Venda')).toEqual([]);
+    expect(labels(faltamParaEstado({ ...hibrido, combustivel_principal: 'Gasolina', combustivel_secundario: 'Gasolina', plug_in: true }, 'Para Venda'))).toContain('Combustível híbrido 2');
+    expect(faltamParaEstado({ ...ALUGUER_COMPLETO, combustivel: 'Híbrido', combustivel_principal: 'Gasóleo/Diesel', combustivel_secundario: 'Elétrico', plug_in: true }, 'Para Aluguer')).toEqual([]);
   });
 
   it('num elétrico exige bateria e autonomia em qualquer oferta', () => {

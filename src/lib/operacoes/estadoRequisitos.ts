@@ -20,6 +20,7 @@ export type ValoresFicha = {
   tipo_gestao?: unknown;
   combustivel?: unknown;
   combustivel_secundario?: unknown;
+  combustivel_principal?: unknown;
   plug_in?: unknown;
   cavalos?: unknown;
   caixa?: unknown;
@@ -92,7 +93,8 @@ export function camposObrigatorios(v: ValoresFicha, estado?: string | null): Cam
   );
   if (ofertas.size && normalizeText(String(v.combustivel ?? '')).includes('hibrid')) {
     campos.push(
-      { campo: 'combustivel_secundario', label: 'Segundo combustível' },
+      { campo: 'combustivel_principal', label: 'Combustível híbrido 1' },
+      { campo: 'combustivel_secundario', label: 'Combustível híbrido 2' },
       { campo: 'plug_in', label: 'Plug-in (Sim/Não)' },
     );
   }
@@ -102,6 +104,9 @@ export function camposObrigatorios(v: ValoresFicha, estado?: string | null): Cam
 /** Campos da ficha ainda por preencher. Pode ser usada no Stock mesmo antes de mudar o estado. */
 export function camposEmFalta(v: ValoresFicha, estado?: string | null): CampoObrigatorio[] {
   return camposObrigatorios(v, estado).filter((c) => {
+    if (c.campo === 'combustivel_secundario') {
+      return !preenchido(v.combustivel_secundario) || String(v.combustivel_secundario) === String(v.combustivel_principal);
+    }
     if (c.campo === 'fotos') {
       return !(Array.isArray(v.fotos) && v.fotos.some(preenchido)) && !preenchido(v.foto_url);
     }

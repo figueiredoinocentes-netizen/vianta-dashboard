@@ -42,6 +42,7 @@ const EMPTY = {
   ano: '',
   combustivel: '',
   combustivelSecundario: '',
+  combustivelPrincipal: '',
   plugIn: '',
   kms: '',
   proprietario: 'VIANTA',
@@ -101,7 +102,7 @@ export function NovaViaturaDialog({
     if (!form.aquisicao) return toast.error('Escolha se a viatura é de compra ou de consignação.');
     // Uma viatura nova não tem ficha: só pode nascer em preparação e é lá que se
     // preenchem as características exigidas para a disponibilizar.
-    if (faltamParaEstado({ combustivel: form.combustivel, combustivel_secundario: form.combustivelSecundario, plug_in: form.plugIn === '' ? null : form.plugIn === 'Sim' }, form.estado).length) {
+    if (faltamParaEstado({ combustivel: form.combustivel, combustivel_principal: form.combustivelPrincipal, combustivel_secundario: form.combustivelSecundario, plug_in: form.plugIn === '' ? null : form.plugIn === 'Sim' }, form.estado).length) {
       return toast.error(
         `Uma viatura nova não pode entrar diretamente em «${form.estado}». Cria-a em «Em Preparação» e preenche os campos obrigatórios da Ficha comercial antes de a disponibilizar.`,
         { duration: 9000 },
@@ -129,6 +130,7 @@ export function NovaViaturaDialog({
         ano: form.ano || null,
         combustivel: form.combustivel || null,
         combustivel_secundario: form.combustivelSecundario || null,
+        combustivel_principal: form.combustivelPrincipal || null,
         plug_in: form.combustivel === 'Híbrido' ? form.plugIn === 'Sim' : null,
         kms_atuais: form.kms || null,
         proprietario: isInvestidor ? (investidor ? investidor.nome : null) : 'VIANTA',
@@ -269,10 +271,16 @@ export function NovaViaturaDialog({
               </NativeSelect>
             </Field>
             {form.combustivel === 'Híbrido' && <>
-              <Field label="Segundo combustível" required>
-                <NativeSelect required value={form.combustivelSecundario} onChange={(e) => set('combustivelSecundario', e.target.value)}>
+              <Field label="Combustível híbrido 1" required>
+                <NativeSelect required value={form.combustivelPrincipal} onChange={(e) => set('combustivelPrincipal', e.target.value)}>
                   <option value="">Selecionar</option>
                   {COMBUSTIVEIS.filter((c) => c !== 'Híbrido').map((c) => <option key={c}>{c}</option>)}
+                </NativeSelect>
+              </Field>
+              <Field label="Combustível híbrido 2" required>
+                <NativeSelect required value={form.combustivelSecundario} onChange={(e) => set('combustivelSecundario', e.target.value)}>
+                  <option value="">Selecionar</option>
+                  {COMBUSTIVEIS.filter((c) => c !== 'Híbrido' && c !== form.combustivelPrincipal).map((c) => <option key={c}>{c}</option>)}
                 </NativeSelect>
               </Field>
               <Field label="Plug-in?" required>
