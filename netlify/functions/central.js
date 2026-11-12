@@ -127,7 +127,11 @@ function camposFichaEmFalta(registo, estado) {
     .map(([, label]) => label);
   const combustivel = String((registo && registo.combustivel) || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   if (combustivel.includes('hibrid')) {
-    if (!preenchido(registo && registo.combustivel_secundario)) faltam.push('Segundo combustível');
+    if (!preenchido(registo && registo.combustivel_principal)) faltam.push('Combustível híbrido 1');
+    if (!preenchido(registo && registo.combustivel_secundario)) faltam.push('Combustível híbrido 2');
+    if (preenchido(registo && registo.combustivel_principal) && registo.combustivel_principal === registo.combustivel_secundario) {
+      faltam.push('Escolha dois combustíveis diferentes');
+    }
     if (registo.plug_in !== true && registo.plug_in !== false) faltam.push('Plug-in (Sim/Não)');
   }
   return faltam;
