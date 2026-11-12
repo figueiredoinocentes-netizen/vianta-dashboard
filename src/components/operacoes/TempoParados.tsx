@@ -10,6 +10,7 @@ import type { Carro } from '@/lib/operacoes/types';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useOps } from './OpsContext';
+import { NomeViatura } from './NomeViatura';
 
 export { ESTADOS_PARADOS };
 
@@ -188,7 +189,7 @@ export function TempoParados({ carros }: { carros: Carro[] }) {
                 className="flex items-center justify-between gap-2 rounded-md border border-border px-2 py-1.5 text-left text-xs transition hover:border-primary"
               >
                 <span className="min-w-0 truncate">
-                  {carro?.matricula} · {carro?.marca_modelo}{' '}
+                  {carro?.matricula} · <NomeViatura carro={carro} />{' '}
                   <span className="text-muted-foreground">({p.motivo})</span>
                 </span>
                 <span className="shrink-0 font-semibold">{p.dias} d</span>

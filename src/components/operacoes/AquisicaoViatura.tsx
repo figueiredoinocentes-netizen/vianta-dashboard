@@ -15,6 +15,7 @@ import {
   type FaturaCompraValores,
 } from '@/lib/faturaCompra';
 import { Field, NativeSelect } from './shared';
+import { nomeCarro } from '@/lib/operacoes/identidadeViatura';
 
 const dataPt = (d: string | null) => (d ? d.slice(0, 10).split('-').reverse().join('/') : '');
 
@@ -55,7 +56,7 @@ export function AquisicaoViatura({
     try {
       const semIva = await registarFaturaCompra({
         carroId: carro.id,
-        descricao: `Compra da viatura ${[carro.matricula, carro.marca_modelo].filter(Boolean).join(' · ')}`,
+        descricao: `Compra da viatura ${[carro.matricula, nomeCarro(carro)].filter(Boolean).join(' · ')}`,
         valores,
         file: file!,
         gestao,

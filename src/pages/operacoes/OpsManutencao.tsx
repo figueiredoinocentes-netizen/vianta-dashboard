@@ -14,6 +14,7 @@ import { useAlterarEstado, useCarros, useOcorrencias } from '@/hooks/useOperacoe
 import { emAberto, ePreparacao, gravidadeClass } from '@/lib/operacoes/trabalhos';
 import { useOps } from '@/components/operacoes/OpsContext';
 import { EmptyState, ErrorBox, OpsHeader, StatusSelect, hideCols } from '@/components/operacoes/shared';
+import { NomeViatura } from '@/components/operacoes/NomeViatura';
 
 export default function OpsManutencao() {
   const { search, openVehicle, openNovaViatura } = useOps();
@@ -55,7 +56,7 @@ export default function OpsManutencao() {
                 )}
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-medium">
-                    {carro?.matricula} · {carro?.marca_modelo}
+                    {carro?.matricula} · <NomeViatura carro={carro} />
                   </div>
                   <div className="truncate text-xs text-muted-foreground">
                     {o.tipo}: {o.descricao || 'sem descrição'}
@@ -90,7 +91,7 @@ export default function OpsManutencao() {
               {lista.map((v) => (
                 <TableRow key={v.id} className="cursor-pointer" onClick={() => openVehicle(v.id)}>
                   <TableCell className="font-semibold">{v.matricula || '-'}</TableCell>
-                  <TableCell>{v.marca_modelo || ''}</TableCell>
+                  <TableCell><NomeViatura carro={v} fallback="" /></TableCell>
                   <TableCell className="text-xs">{v.proprietario || ''}</TableCell>
                   <TableCell>
                     <StatusSelect carro={v} />

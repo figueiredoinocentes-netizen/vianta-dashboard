@@ -31,7 +31,7 @@ import {
 import { toNum } from '@/lib/operacoes/custos';
 import { faltamParaEstado } from '@/lib/operacoes/estadoRequisitos';
 import { useCentralWrites, useInvestidores, useCarros, errorMessage } from '@/hooks/useOperacoes';
-import { marcasRegistadas } from '@/lib/operacoes/identidadeViatura';
+import { marcasRegistadas, nomeCarro } from '@/lib/operacoes/identidadeViatura';
 import { Field, NativeSelect } from './shared';
 
 const EMPTY = {
@@ -142,7 +142,7 @@ export function NovaViaturaDialog({
         try {
           await registarFaturaCompra({
             carroId: novoId ?? null,
-            descricao: `Compra da viatura ${[form.matricula, form.modelo].filter(Boolean).join(' · ')}`,
+            descricao: `Compra da viatura ${[form.matricula, nomeCarro({ marca: form.marca, marca_modelo: form.modelo, versao: form.versao })].filter(Boolean).join(' · ')}`,
             valores: fc,
             file: fatura!,
             gestao: form.gestao,
