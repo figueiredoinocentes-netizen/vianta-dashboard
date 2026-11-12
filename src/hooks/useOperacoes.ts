@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -21,7 +20,6 @@ import type {
   EstadoLog,
 } from '@/lib/operacoes/types';
 
-import { ORIGEM_PREP, itensPreparacao, tipoDoItem } from '@/lib/operacoes/trabalhos';
 import { faltamParaEstado, mensagemCamposEmFalta } from '@/lib/operacoes/estadoRequisitos';
 
 const KEY = 'central';
@@ -119,48 +117,4 @@ export function useToggleChecklistItem() {
     done[item] = !done[item];
     return update(carro, 'checklist_prep', done);
   };
-}
-
-// Viaturas com a criação dos trabalhos de preparação em curso / que já falharam nesta sessão.
-const preparacaoEmCurso = new Set<number>();
-const preparacaoFalhou = new Set<number>();
-
-/**
- * Quando uma viatura está "Em Preparação" e ainda não tem trabalhos de preparação,
- * cria-os a partir dos itens "A Fazer" da checklist (já feitos na checklist antiga ficam "Feito").
- */
-export function useAutoTrabalhosPreparacao() {
-  const qc = useQueryClient();
-  const { data: carros } = useCarros();
-  const { data: ocorrencias, isSuccess } = useOcorrencias();
-
-  useEffect(() => {
-    if (!carros || !ocorrencias || !isSuccess) return;
-    for (const c of carros) {
-      if (c.estado !== 'Em Preparação') continue;
-      if (preparacaoEmCurso.has(c.id) || preparacaoFalhou.has(c.id)) continue;
-      if (ocorrencias.some((o) => o.carro_id === c.id && o.origem === ORIGEM_PREP)) continue;
-      const itens = itensPreparacao(c);
-      if (!itens.length) continue;
-      const feitos = c.checklist_prep || {};
-      const hoje = new Date().toISOString().slice(0, 10);
-      preparacaoEmCurso.add(c.id);
-      createCentral(
-        'ocorrencias',
-        itens.map((item) => ({
-          carro_id: c.id,
-          origem: ORIGEM_PREP,
-          item,
-          tipo: tipoDoItem(item),
-          descricao: item,
-          gravidade: 'Baixa',
-          estado: feitos[item] ? 'Feito' : 'Por fazer',
-          resolvido_em: feitos[item] ? hoje : null,
-        })),
-      )
-        .then(() => qc.invalidateQueries({ queryKey: [KEY, 'ocorrencias'] }))
-        .catch(() => preparacaoFalhou.add(c.id))
-        .finally(() => preparacaoEmCurso.delete(c.id));
-    }
-  }, [carros, ocorrencias, isSuccess, qc]);
 }

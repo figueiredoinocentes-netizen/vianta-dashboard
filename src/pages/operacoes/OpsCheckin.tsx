@@ -49,7 +49,7 @@ function MissingTags({ v }: { v: Carro }) {
   const { data: ocorrencias = [] } = useOcorrencias();
   const done = v.checklist_prep || {};
   const docs = (getChecklistGroups(v).Documentos || []).filter((item) => !done[item]);
-  const trabalhos = ocorrencias.filter((o) => o.carro_id === v.id && ePreparacao(o) && emAberto(o));
+  const trabalhos = ocorrencias.filter((o) => o.carro_id === v.id && ePreparacao(o) && !o.item && emAberto(o));
 
   const marcarFeito = async (e: React.MouseEvent, o: Ocorrencia) => {
     e.stopPropagation();
