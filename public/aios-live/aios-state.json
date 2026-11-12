@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-12T09:35:50+00:00",
+ "generated_at": "2026-11-12T10:08:51+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -17,7 +17,7 @@
      "schedule": "every day at 10:00",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-11T10:00:19.844159+00:00",
+     "last_run_at": "2026-11-12T10:00:54.069290+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "ghl_daily_report.py",
@@ -25,7 +25,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-12T10:00:00+00:00",
+     "next_run_at": "2026-11-13T10:00:00+00:00",
      "paused_at": null
     },
     {
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-12T09:34:51.975913+00:00",
+     "last_run_at": "2026-11-12T10:08:53.739534+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-12T09:35:51.975913+00:00",
+     "next_run_at": "2026-11-12T10:09:53.739534+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-12T09:24:54.184365+00:00",
+     "last_run_at": "2026-11-12T09:57:54.515283+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-12T09:45:50.550793+00:00",
+     "next_run_at": "2026-11-12T10:18:51.637705+00:00",
      "paused_at": null
     },
     {
@@ -228,7 +228,7 @@
      "schedule": "every day at 10:00",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-11T10:01:12.608688+00:00",
+     "last_run_at": "2026-11-12T10:01:51.249418+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -236,7 +236,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-12T10:00:00+00:00",
+     "next_run_at": "2026-11-13T10:00:00+00:00",
      "paused_at": null
     },
     {
@@ -542,9 +542,9 @@
     "channel": "INSTAGRAM"
    }
   ],
-  "ultimo_relatorio": "relatorio-agente-2026-11-11.html",
-  "relatorios_total": 10,
-  "ultima_execucao": "2026-11-12T09:34:51.975913+00:00",
+  "ultimo_relatorio": "relatorio-agente-2026-11-12.html",
+  "relatorios_total": 11,
+  "ultima_execucao": "2026-11-12T10:08:53.739534+00:00",
   "ultimo_status": "ok",
   "resumo_semanal": {
    "leads_contactadas": 6,
