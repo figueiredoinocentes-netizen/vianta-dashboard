@@ -16,7 +16,7 @@ export interface Carro {
   cliente_id: number | null;
   data_previsao_pronto: string | null;
   foto_url: string | null;
-  checklist_prep: Record<string, boolean> | null;
+  checklist_prep: Record<string, boolean | string> | null;
   // Ficha comercial (colunas a criar com supabase/migrations/*_carros_ficha_comercial.sql).
   // Até a migração correr no Supabase estes campos vêm indefinidos.
   versao?: string | null;
@@ -40,6 +40,8 @@ export interface Carro {
   fotos?: string[] | null;
   obs?: string | null;
   preco_compra?: string | number | null;
+  data_compra?: string | null;
+  data_venda?: string | null;
   /** 'Compra' (fatura de compra no Financeiro) | 'Consignação'. Viaturas antigas: null. */
   aquisicao?: string | null;
 }

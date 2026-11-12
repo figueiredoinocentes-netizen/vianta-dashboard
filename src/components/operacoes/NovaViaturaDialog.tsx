@@ -133,6 +133,7 @@ export function NovaViaturaDialog({
         estado: form.estado || null,
         preco_venda: form.precoVenda || null,
         preco_compra: compra ? String(semIva) : form.precoCompra || null,
+        data_compra: compra ? fc.data || null : null,
         aquisicao: form.aquisicao,
         valor_aluguer_semanal: form.precoAluguer || null,
       });

@@ -41,6 +41,7 @@ import { DeclaracaoCirculacao } from './DeclaracaoCirculacao';
 import { FotosEditor } from './FotosEditor';
 import { DeleteConfirm, Field, NativeSelect } from './shared';
 import { AquisicaoViatura } from './AquisicaoViatura';
+import { HistoricoViatura } from './HistoricoViatura';
 import type { VehicleTab } from './OpsContext';
 import {
   URL_VEICULOS_ELEGIVEIS_UBER,
@@ -65,6 +66,8 @@ interface Form {
   estado: string;
   precoVenda: string;
   precoCompra: string;
+  dataCompra: string;
+  dataVenda: string;
   precoAluguer: string;
   motoristaAtual: string;
   clienteId: string;
@@ -109,6 +112,8 @@ function formFromCarro(v: Carro): Form {
     estado: v.estado || 'Alugado',
     precoVenda: s(v.preco_venda),
     precoCompra: s(v.preco_compra),
+    dataCompra: s(v.data_compra),
+    dataVenda: s(v.data_venda),
     precoAluguer: s(v.valor_aluguer_semanal),
     motoristaAtual: s(v.motorista_atual),
     clienteId: v.cliente_id ? String(v.cliente_id) : '',
@@ -279,6 +284,8 @@ function Body({
       tipo_gestao: form.gestao || null,
       preco_venda: form.precoVenda || null,
       preco_compra: form.precoCompra || null,
+      data_compra: form.dataCompra || null,
+      data_venda: form.dataVenda || null,
       valor_aluguer_semanal: form.precoAluguer || null,
       motorista_atual: form.estado === 'Em Preparação' ? null : form.motoristaAtual || null,
       cliente_id: form.estado === 'Vendido' && form.clienteId ? Number(form.clienteId) : null,
@@ -350,6 +357,7 @@ function Body({
             ['ficha', 'Ficha comercial'],
             ['prep', 'Tarefas'],
             ['sinist', 'Sinistros'],
+            ['historico', 'Histórico'],
           ] as const
         ).map(([id, label]) => (
           <button
@@ -358,6 +366,7 @@ function Body({
             onClick={() => setTab(id)}
             className={cn(
               'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+              id === 'historico' && 'ml-auto',
               tab === id ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground',
             )}
           >
@@ -480,6 +489,15 @@ function Body({
                 onChange={(e) => set('precoCompra', e.target.value)}
               />
             </Field>
+
+            <Field label="Data de compra">
+              <Input type="date" value={form.dataCompra} onChange={(e) => set('dataCompra', e.target.value)} />
+            </Field>
+            {form.estado === 'Vendido' && (
+              <Field label="Data de venda">
+                <Input type="date" value={form.dataVenda} onChange={(e) => set('dataVenda', e.target.value)} />
+              </Field>
+            )}
 
             {form.estado !== 'Em Preparação' && (
               <Field label="Motorista Atual" className="sm:col-span-2">
@@ -686,6 +704,7 @@ function Body({
         )}
 
         {tab === 'sinist' && <SinistrosViatura carro={carro} />}
+        {tab === 'historico' && <HistoricoViatura carro={carro} />}
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-2">
           <DeleteConfirm
