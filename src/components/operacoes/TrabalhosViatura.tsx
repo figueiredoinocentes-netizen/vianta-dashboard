@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { updateCentralField, uploadFoto } from '@/lib/operacoes/central';
 import { eur, semIva } from '@/lib/operacoes/custos';
+import { getChecklistGroups } from '@/lib/operacoes/constants';
 import {
   ESTADOS_TRABALHO,
   GRAVIDADES,
@@ -14,7 +15,9 @@ import {
   categoriaDoTrabalho,
   concluido,
   ePreparacao,
+  emAberto,
   gravidadeClass,
+  tipoDoItem,
 } from '@/lib/operacoes/trabalhos';
 import type { Carro, Ocorrencia } from '@/lib/operacoes/types';
 import {
@@ -23,6 +26,7 @@ import {
   useFinanceiro,
   useOcorrencias,
   useRefreshOperacoes,
+  useUpdateCarroField,
 } from '@/hooks/useOperacoes';
 import { CustosTrabalho } from './CustosTrabalho';
 import { NovoMovimento } from './NovoMovimento';
@@ -39,6 +43,7 @@ export function TrabalhosViatura({ carro }: { carro: Carro }) {
   const { data: movs = [] } = useFinanceiro();
   const { create, remove } = useCentralWrites('ocorrencias');
   const createMov = useCentralWrites('financeiro').create;
+  const updateCarro = useUpdateCarroField();
   const refresh = useRefreshOperacoes();
   const [adding, setAdding] = useState(false);
   const [costFor, setCostFor] = useState<number | null>(null);
@@ -54,7 +59,8 @@ export function TrabalhosViatura({ carro }: { carro: Carro }) {
   const lista = useMemo(
     () =>
       todas
-        .filter((o) => o.carro_id === carro.id)
+        // Registos antigos criados automaticamente são checklist, não trabalho executado.
+        .filter((o) => o.carro_id === carro.id && !(ePreparacao(o) && o.item))
         .sort((a, b) => {
           const fim = (o: Ocorrencia) => (concluido(o) ? 1 : 0);
           const org = (o: Ocorrencia) => (ePreparacao(o) ? 1 : 0);
@@ -89,6 +95,38 @@ export function TrabalhosViatura({ carro }: { carro: Carro }) {
     }
   }
 
+  const checklistItems = getChecklistGroups(carro)['A Fazer'] || [];
+
+  async function decidirChecklist(item: string, decision: string) {
+    const activeTask = todas.find(
+      (o) => o.carro_id === carro.id && ePreparacao(o) && !o.item && o.descricao === item && emAberto(o),
+    );
+    try {
+      if (decision === 'necessario' && !activeTask) {
+        await create.mutateAsync({
+          carro_id: carro.id,
+          origem: ORIGEM_PREP,
+          tipo: tipoDoItem(item),
+          gravidade: 'Baixa',
+          estado: 'Por fazer',
+          data: hoje(),
+          descricao: item,
+        });
+      }
+      if (decision === 'nao_necessario' && activeTask) {
+        await updateCentralField('ocorrencias', activeTask.id, 'estado', 'Dispensado');
+        await updateCentralField('ocorrencias', activeTask.id, 'resolvido_em', hoje());
+      }
+      const checklist = { ...(carro.checklist_prep || {}), [item]: decision };
+      const ok = await updateCarro(carro, 'checklist_prep', checklist);
+      if (!ok) return;
+      refresh();
+      toast.success(decision === 'necessario' ? 'Tarefa de preparação registada' : 'Checklist atualizada');
+    } catch (e) {
+      toast.error(`Erro ao atualizar a checklist: ${errorMessage(e)}`);
+    }
+  }
+
   async function addFotos(o: Ocorrencia, files: File[]) {
     if (!files.length) return;
     try {
@@ -118,6 +156,36 @@ export function TrabalhosViatura({ carro }: { carro: Carro }) {
         )}
       </div>
 
+      {!!checklistItems.length && (
+        <section className="rounded-lg border border-border bg-card p-3">
+          <div className="mb-2 text-xs font-semibold">Checklist de verificação</div>
+          <div className="mb-2 text-[11px] text-muted-foreground">
+            Confirma cada ponto. Só «Necessário» cria uma tarefa real.
+          </div>
+          <div className="space-y-2">
+            {checklistItems.map((item) => {
+              const saved = carro.checklist_prep?.[item];
+              const value = typeof saved === 'string' ? saved : 'por_confirmar';
+              return (
+                <div key={item} className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-sm">{item}</span>
+                  <NativeSelect
+                    className="h-8 w-auto min-w-44 text-xs"
+                    value={value}
+                    disabled={create.isPending}
+                    onChange={(e) => void decidirChecklist(item, e.target.value)}
+                  >
+                    <option value="por_confirmar">Por confirmar</option>
+                    <option value="necessario">Necessário — criar tarefa</option>
+                    <option value="nao_necessario">Não necessário</option>
+                  </NativeSelect>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       {adding && (
         <NovoTrabalho
           carro={carro}
@@ -137,8 +205,7 @@ export function TrabalhosViatura({ carro }: { carro: Carro }) {
         <p className="text-sm text-muted-foreground">A carregar…</p>
       ) : !lista.length ? (
         <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-          Sem trabalhos nem ocorrências nesta viatura.
-          {carro.estado === 'Em Preparação' && ' Os itens da preparação são criados automaticamente.'}
+          Sem trabalhos nem ocorrências reais nesta viatura.
         </p>
       ) : (
         lista.map((o) => {
