@@ -19,6 +19,8 @@ export const URL_VEICULOS_ELEGIVEIS_UBER =
 export type ValoresFicha = {
   tipo_gestao?: unknown;
   combustivel?: unknown;
+  combustivel_secundario?: unknown;
+  plug_in?: unknown;
   cavalos?: unknown;
   caixa?: unknown;
   bateria_kwh?: unknown;
@@ -83,11 +85,18 @@ export function camposObrigatorios(v: ValoresFicha, estado?: string | null): Cam
   const eletrico = eEletrico(v);
   const ofertas = ofertasExigidas(v, estado);
   if (!ofertas.size) return [];
-  return CAMPOS_OBRIGATORIOS.filter(
+  const campos = CAMPOS_OBRIGATORIOS.filter(
     (c) =>
       (!c.apenasEletricos || eletrico) &&
       (!c.oferta || ofertas.has(c.oferta)),
   );
+  if (ofertas.size && normalizeText(String(v.combustivel ?? '')).includes('hibrid')) {
+    campos.push(
+      { campo: 'combustivel_secundario', label: 'Segundo combustível' },
+      { campo: 'plug_in', label: 'Plug-in (Sim/Não)' },
+    );
+  }
+  return campos;
 }
 
 /** Campos da ficha ainda por preencher. Pode ser usada no Stock mesmo antes de mudar o estado. */

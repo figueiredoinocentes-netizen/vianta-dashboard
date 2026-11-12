@@ -114,7 +114,7 @@ function camposFichaEmFalta(registo, estado) {
   if (ofertas.includes('venda')) campos = campos.concat(CAMPOS_FICHA_VENDA);
   if (ofertas.includes('aluguer')) campos = campos.concat(CAMPOS_FICHA_ALUGUER);
   if (eEletrico(registo)) campos = campos.concat(CAMPOS_FICHA_ELETRICO);
-  return campos
+  const faltam = campos
     .filter(([campo]) => {
       if (campo === 'fotos') {
         return !(
@@ -125,6 +125,12 @@ function camposFichaEmFalta(registo, estado) {
       return !preenchido(registo && registo[campo]);
     })
     .map(([, label]) => label);
+  const combustivel = String((registo && registo.combustivel) || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (combustivel.includes('hibrid')) {
+    if (!preenchido(registo && registo.combustivel_secundario)) faltam.push('Segundo combustível');
+    if (registo.plug_in !== true && registo.plug_in !== false) faltam.push('Plug-in (Sim/Não)');
+  }
+  return faltam;
 }
 
 /** Mensagem de erro, ou null quando a viatura pode assumir o estado pedido. */
