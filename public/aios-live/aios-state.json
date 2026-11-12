@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-10T14:38:22+00:00",
+ "generated_at": "2026-11-12T11:46:02+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -7,7 +7,7 @@
    "desc": "gateway Telegram \"Vianta Jarvis\" · delegate_task para bots",
    "gateway": {
     "up": true,
-    "pid": "908664"
+    "pid": "993658"
    },
    "crons": [
     {
@@ -17,7 +17,7 @@
      "schedule": "every day at 10:00",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T10:00:06.611518+00:00",
+     "last_run_at": "2026-11-12T10:00:54.069290+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "ghl_daily_report.py",
@@ -25,7 +25,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-11T10:00:00+00:00",
+     "next_run_at": "2026-11-13T10:00:00+00:00",
      "paused_at": null
     },
     {
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T14:37:25.187098+00:00",
+     "last_run_at": "2026-11-12T11:46:06.177513+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-10T14:38:25.187098+00:00",
+     "next_run_at": "2026-11-12T11:47:06.177513+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T14:27:23.950148+00:00",
+     "last_run_at": "2026-11-12T11:35:27.171905+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-10T14:48:22.720741+00:00",
+     "next_run_at": "2026-11-12T11:56:00.528221+00:00",
      "paused_at": null
     },
     {
@@ -145,12 +145,12 @@
     },
     {
      "id": "35a6e0fec9d7",
-     "name": "[bot:agente-turismo] ChoiceCar auto-planeamento",
-     "owner": "agente-turismo",
-     "schedule": "every 15m",
-     "state": "scheduled",
-     "enabled": true,
-     "last_run_at": "2026-11-10T14:35:34.005805+00:00",
+     "name": "ChoiceCar — inserir novos serviços e avisar Pedro",
+     "owner": "jarvis",
+     "schedule": "every 1m",
+     "state": "paused",
+     "enabled": false,
+     "last_run_at": "2026-11-11T18:46:19.830842+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -161,8 +161,8 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-10T14:50:34.005805+00:00",
-     "paused_at": null
+     "next_run_at": "2026-11-11T18:47:19.830842+00:00",
+     "paused_at": "2026-11-11T18:45:00.921964+00:00"
     },
     {
      "id": "13a4bd84ca7e",
@@ -228,7 +228,7 @@
      "schedule": "every day at 10:00",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T10:18:19.864593+00:00",
+     "last_run_at": "2026-11-12T10:01:51.249418+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -236,7 +236,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-11T10:00:00+00:00",
+     "next_run_at": "2026-11-13T10:00:00+00:00",
      "paused_at": null
     },
     {
@@ -246,7 +246,7 @@
      "schedule": "every day at 08:00",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T10:35:25.783540+00:00",
+     "last_run_at": "2026-11-12T08:00:46.565565+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -256,7 +256,7 @@
      ],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-11T08:00:00+00:00",
+     "next_run_at": "2026-11-13T08:00:00+00:00",
      "paused_at": null
     },
     {
@@ -266,7 +266,7 @@
      "schedule": "every day at 7:30am",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-10T10:19:46.704617+00:00",
+     "last_run_at": "2026-11-12T07:31:21.684030+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -274,7 +274,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-11T07:30:00+00:00",
+     "next_run_at": "2026-11-13T07:30:00+00:00",
      "paused_at": null
     },
     {
@@ -352,7 +352,7 @@
   },
   "jarvis": {
    "up": true,
-   "pid": "908664"
+   "pid": "993658"
   },
   "media-buyer": {
    "up": false,
@@ -360,6 +360,11 @@
   }
  },
  "skills": [
+  {
+   "name": "drive-document-mirroring",
+   "description": "Use when mirroring human-edited Drive docs locally.",
+   "tags": []
+  },
   {
    "name": "email-inbox-monitor",
    "description": "Use when monitoring inbox for planning email arrival.",
@@ -403,6 +408,11 @@
   {
    "name": "vianta-cron-operations",
    "description": "Use when managing Hermes crons. Operate and verify safely.",
+   "tags": []
+  },
+  {
+   "name": "vianta-declaracao-circulacao",
+   "description": "Use when creating Vianta circulation declarations.",
    "tags": []
   },
   {
@@ -532,12 +542,12 @@
     "channel": "INSTAGRAM"
    }
   ],
-  "ultimo_relatorio": "relatorio-agente-2026-11-10.html",
-  "relatorios_total": 9,
-  "ultima_execucao": "2026-11-10T14:37:25.187098+00:00",
+  "ultimo_relatorio": "relatorio-agente-2026-11-12.html",
+  "relatorios_total": 11,
+  "ultima_execucao": "2026-11-12T11:46:06.177513+00:00",
   "ultimo_status": "ok",
   "resumo_semanal": {
-   "leads_contactadas": 9,
+   "leads_contactadas": 6,
    "convertidas": 0,
    "ocorrencias": 0,
    "pendentes": 5,
@@ -710,6 +720,12 @@
     "meta": "192 registos"
    },
    {
+    "id": "skill-drive-document-mirroring",
+    "label": "drive-document-mirroring",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
     "id": "skill-email-inbox-monitor",
     "label": "email-inbox-monitor",
     "type": "skill",
@@ -760,6 +776,12 @@
    {
     "id": "skill-vianta-cron-operations",
     "label": "vianta-cron-operations",
+    "type": "skill",
+    "group": "skills"
+   },
+   {
+    "id": "skill-vianta-declaracao-circulacao",
+    "label": "vianta-declaracao-circulacao",
     "type": "skill",
     "group": "skills"
    },
@@ -1006,6 +1028,12 @@
    },
    {
     "source": "agente-comercial",
+    "target": "skill-drive-document-mirroring",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
     "target": "skill-email-inbox-monitor",
     "label": "usa",
     "dashed": true
@@ -1055,6 +1083,12 @@
    {
     "source": "agente-comercial",
     "target": "skill-vianta-cron-operations",
+    "label": "usa",
+    "dashed": true
+   },
+   {
+    "source": "agente-comercial",
+    "target": "skill-vianta-declaracao-circulacao",
     "label": "usa",
     "dashed": true
    },
