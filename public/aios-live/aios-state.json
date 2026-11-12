@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-12T11:46:02+00:00",
+ "generated_at": "2026-11-12T12:51:11+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -7,7 +7,7 @@
    "desc": "gateway Telegram \"Vianta Jarvis\" · delegate_task para bots",
    "gateway": {
     "up": true,
-    "pid": "993658"
+    "pid": "1001737"
    },
    "crons": [
     {
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-12T11:46:06.177513+00:00",
+     "last_run_at": "2026-11-12T12:51:13.174989+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-12T11:47:06.177513+00:00",
+     "next_run_at": "2026-11-12T12:52:13.174989+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-12T11:35:27.171905+00:00",
+     "last_run_at": "2026-11-12T12:40:34.029078+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-12T11:56:00.528221+00:00",
+     "next_run_at": "2026-11-12T13:01:11.359356+00:00",
      "paused_at": null
     },
     {
@@ -352,7 +352,7 @@
   },
   "jarvis": {
    "up": true,
-   "pid": "993658"
+   "pid": "1001737"
   },
   "media-buyer": {
    "up": false,
@@ -544,10 +544,10 @@
   ],
   "ultimo_relatorio": "relatorio-agente-2026-11-12.html",
   "relatorios_total": 11,
-  "ultima_execucao": "2026-11-12T11:46:06.177513+00:00",
+  "ultima_execucao": "2026-11-12T12:51:13.174989+00:00",
   "ultimo_status": "ok",
   "resumo_semanal": {
-   "leads_contactadas": 6,
+   "leads_contactadas": 5,
    "convertidas": 0,
    "ocorrencias": 0,
    "pendentes": 5,
