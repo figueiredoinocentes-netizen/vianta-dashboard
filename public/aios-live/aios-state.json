@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-13T00:31:28+00:00",
+ "generated_at": "2026-11-13T01:04:28+00:00",
  "profiles": [
   {
    "name": "jarvis",
@@ -35,7 +35,7 @@
      "schedule": "every 1m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-13T00:29:29.529048+00:00",
+     "last_run_at": "2026-11-13T01:03:30.348970+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": null,
@@ -45,7 +45,7 @@
      ],
      "monitor_script": "ghl_inbound_monitor.py",
      "failure_streak": 0,
-     "next_run_at": "2026-11-13T00:32:27.954168+00:00",
+     "next_run_at": "2026-11-13T01:04:30.348970+00:00",
      "paused_at": null
     },
     {
@@ -96,7 +96,7 @@
      "schedule": "every 10m",
      "state": "scheduled",
      "enabled": true,
-     "last_run_at": "2026-11-13T00:20:30.920616+00:00",
+     "last_run_at": "2026-11-13T00:53:31.806739+00:00",
      "last_status": "ok",
      "last_error": "",
      "script": "aios_snapshot.py",
@@ -104,7 +104,7 @@
      "skills": [],
      "monitor_script": null,
      "failure_streak": 0,
-     "next_run_at": "2026-11-13T00:41:27.970482+00:00",
+     "next_run_at": "2026-11-13T01:14:28.639336+00:00",
      "paused_at": null
     },
     {
@@ -549,7 +549,7 @@
   ],
   "ultimo_relatorio": "relatorio-agente-2026-11-12.html",
   "relatorios_total": 11,
-  "ultima_execucao": "2026-11-13T00:31:30.460082+00:00",
+  "ultima_execucao": "2026-11-13T01:03:30.348970+00:00",
   "ultimo_status": "ok",
   "resumo_semanal": {
    "leads_contactadas": 5,
