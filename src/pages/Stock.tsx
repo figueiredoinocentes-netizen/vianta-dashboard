@@ -9,9 +9,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { normalizeText } from '@/lib/operacoes/constants';
 import type { Carro } from '@/lib/operacoes/types';
-import { useCarros, useUpdateCarroField } from '@/hooks/useOperacoes';
+import { useAlterarEstado, useCarros, useUpdateCarroField } from '@/hooks/useOperacoes';
 import { NomeViatura } from '@/components/operacoes/NomeViatura';
 import { nomeCarro } from '@/lib/operacoes/identidadeViatura';
+import { ESTADOS_EDITAVEIS_VENDA, indisponivelParaOferta, visivelNoStockComercial } from '@/lib/operacoes/stockComercial';
 
 /**
  * Stock para o comercial (vista de chamada). Fonte única: tabela `carros` do
@@ -23,25 +24,22 @@ import { nomeCarro } from '@/lib/operacoes/identidadeViatura';
  */
 
 type Gestao = 'Venda' | 'Aluguer';
-type Disponibilidade = 'pronto' | 'preparacao' | 'manutencao';
-
-const ESTADOS_STOCK = ['Para Venda', 'Para Aluguer', 'Para Venda e Aluguer', 'Em Preparação', 'Manutenção'];
-
-const pertenceA = (v: Carro, gestao: Gestao) =>
-  v.tipo_gestao === gestao || v.tipo_gestao === 'Venda e Aluguer';
+type Disponibilidade = 'pronto' | 'preparacao' | 'manutencao' | 'reservado';
 
 function disponibilidade(v: Carro): Disponibilidade {
+  if (v.estado === 'Acordo Verbal') return 'reservado';
   if (v.estado === 'Em Preparação') return 'preparacao';
   if (v.estado === 'Manutenção') return 'manutencao';
   return 'pronto';
 }
 
-const ORDEM: Record<Disponibilidade, number> = { pronto: 0, preparacao: 1, manutencao: 2 };
+const ORDEM: Record<Disponibilidade, number> = { pronto: 0, preparacao: 1, manutencao: 2, reservado: 3 };
 
 const BADGE: Record<Disponibilidade, string> = {
   pronto: 'bg-emerald-500/15 text-emerald-300',
   preparacao: 'bg-indigo-500/15 text-indigo-300',
   manutencao: 'bg-amber-500/15 text-amber-300',
+  reservado: 'bg-yellow-500/15 text-yellow-200',
 };
 
 const vazio = (v: unknown) => v == null || String(v).trim() === '';
@@ -202,10 +200,37 @@ function BadgeEstado({ v }: { v: Carro }) {
   const disp = disponibilidade(v);
   const quando = dataPt(v.data_previsao_pronto);
   return (
-    <span className={cn('inline-block rounded px-2 py-0.5 text-[11px] font-medium', BADGE[disp])}>
+    <span
+      title={indisponivelParaOferta(v.estado) ? 'Reservada — não apresentar a outros clientes' : undefined}
+      className={cn('inline-block rounded px-2 py-0.5 text-[11px] font-medium', BADGE[disp])}
+    >
       {v.estado}
-      {disp !== 'pronto' && quando ? ` · pronto a ${quando}` : ''}
+      {indisponivelParaOferta(v.estado) ? ' · reservada' : disp !== 'pronto' && quando ? ` · pronto a ${quando}` : ''}
     </span>
+  );
+}
+
+function EstadoComercial({ carro }: { carro: Carro }) {
+  const alterar = useAlterarEstado();
+  return (
+    <label className="flex max-w-xs flex-col gap-1 text-xs text-muted-foreground">
+      Estado da viatura
+      <select
+        aria-label={`Estado da viatura ${carro.matricula || carro.marca_modelo || ''}`}
+        value={carro.estado || ''}
+        onClick={(e) => e.stopPropagation()}
+        onChange={async (e) => {
+          const novo = e.target.value;
+          if (!(await alterar(carro, novo))) e.target.value = carro.estado || '';
+        }}
+        className="h-9 rounded-md border border-border bg-background px-2 text-sm text-foreground"
+      >
+        {carro.estado && !(ESTADOS_EDITAVEIS_VENDA as readonly string[]).includes(carro.estado) && (
+          <option value={carro.estado} disabled>{carro.estado}</option>
+        )}
+        {ESTADOS_EDITAVEIS_VENDA.map((estado) => <option key={estado} value={estado}>{estado}</option>)}
+      </select>
+    </label>
   );
 }
 
@@ -408,6 +433,7 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
   const [aGuardarCredito, setAGuardarCredito] = useState(false);
   const updateCarro = useUpdateCarroField();
   const disp = disponibilidade(v);
+  const reservada = indisponivelParaOferta(v.estado);
 
   useEffect(() => {
     setFoto(0);
@@ -553,8 +579,13 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
                 {[v.matricula, v.cor, v.caixa].filter((x) => !vazio(x)).join(' · ') || '—'}
               </p>
               <div className="mt-1.5">
-                <BadgeEstado v={v} />
+                {gestao === 'Venda' ? <EstadoComercial carro={v} /> : <BadgeEstado v={v} />}
               </div>
+              {reservada && (
+                <div className="mt-2 rounded-md border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-xs text-yellow-200">
+                  Acordo verbal — não apresentar nem enviar proposta desta viatura a outros clientes.
+                </div>
+              )}
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-primary/80">
                   Categorias TVDE
@@ -575,17 +606,23 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
               </div>
             </div>
             <div className="flex shrink-0 flex-wrap justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={copiar}>
+              <Button variant="outline" size="sm" onClick={copiar} disabled={reservada}>
                 <Copy /> Copiar resumo
               </Button>
-              <Button variant="outline" size="sm" onClick={partilharFotos} disabled={aPartilhar || !fotos.length}>
+              <Button variant="outline" size="sm" onClick={partilharFotos} disabled={reservada || aPartilhar || !fotos.length}>
                 <Images /> {aPartilhar ? 'A preparar…' : 'Fotos'}
               </Button>
-              <Button size="sm" asChild>
-                <a href={urlProposta(v, gestao)} target="_blank" rel="noopener noreferrer">
-                  <FileText /> Criar proposta
-                </a>
-              </Button>
+              {reservada ? (
+                <Button size="sm" disabled title="Não apresentar esta viatura a outros clientes">
+                  <FileText /> Reservada
+                </Button>
+              ) : (
+                <Button size="sm" asChild>
+                  <a href={urlProposta(v, gestao)} target="_blank" rel="noopener noreferrer">
+                    <FileText /> Criar proposta
+                  </a>
+                </Button>
+              )}
             </div>
           </div>
 
@@ -797,12 +834,15 @@ const Stock = () => {
   const [fichaAberta, setFichaAberta] = useState(false);
   const desktop = useDesktop();
 
-  const stock = useMemo(() => carros.filter((v) => ESTADOS_STOCK.includes(v.estado || '')), [carros]);
+  const stock = useMemo(
+    () => carros.filter((v) => visivelNoStockComercial(v, 'Venda') || visivelNoStockComercial(v, 'Aluguer')),
+    [carros],
+  );
 
   const contagens = useMemo(
     () => ({
-      Venda: stock.filter((v) => pertenceA(v, 'Venda')).length,
-      Aluguer: stock.filter((v) => pertenceA(v, 'Aluguer')).length,
+      Venda: stock.filter((v) => visivelNoStockComercial(v, 'Venda')).length,
+      Aluguer: stock.filter((v) => visivelNoStockComercial(v, 'Aluguer')).length,
     }),
     [stock],
   );
@@ -812,7 +852,7 @@ const Stock = () => {
   const [combs, setCombs] = useState<string[]>([]);
   const [cats, setCats] = useState<string[]>([]);
 
-  const doTipo = useMemo(() => stock.filter((v) => pertenceA(v, gestao)), [stock, gestao]);
+  const doTipo = useMemo(() => stock.filter((v) => visivelNoStockComercial(v, gestao)), [stock, gestao]);
 
   // Opções dos filtros: só o que existe nas viaturas do separador atual.
   const combustiveis = useMemo(
