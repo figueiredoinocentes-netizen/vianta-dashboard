@@ -50,6 +50,7 @@ import {
   camposObrigatorios,
   exigeFicha,
   faltamParaEstado,
+  hibridoTemEletrico,
   mensagemCamposEmFalta,
   type CampoObrigatorio,
 } from '@/lib/operacoes/estadoRequisitos';
@@ -231,6 +232,7 @@ function Body({
 
   const temVenda = form.gestao === 'Venda' || form.gestao === 'Venda e Aluguer';
   const temAluguer = form.gestao === 'Aluguer' || form.gestao === 'Venda e Aluguer';
+  const plugInAplicavel = form.combustivel === 'Híbrido' && hibridoTemEletrico({ combustivel_principal: form.combustivelPrincipal, combustivel_secundario: form.combustivelSecundario });
 
   // Ficha exigida para "Para Venda"/"Para Aluguer": os asteriscos e a validação do
   // Guardar usam as mesmas regras (lib/operacoes/estadoRequisitos).
@@ -239,7 +241,7 @@ function Body({
     combustivel: form.combustivel,
     combustivel_secundario: form.combustivelSecundario,
     combustivel_principal: form.combustivelPrincipal,
-    plug_in: form.plugIn === '' ? null : form.plugIn === 'Sim',
+    plug_in: plugInAplicavel && form.plugIn !== '' ? form.plugIn === 'Sim' : null,
     cavalos: form.cavalos,
     caixa: form.caixa,
     bateria_kwh: form.bateriaKwh,
@@ -290,7 +292,7 @@ function Body({
       combustivel: form.combustivel || null,
       combustivel_secundario: form.combustivelSecundario || null,
       combustivel_principal: form.combustivelPrincipal || null,
-      plug_in: form.combustivel === 'Híbrido' ? form.plugIn === 'Sim' : null,
+      plug_in: plugInAplicavel && form.plugIn !== '' ? form.plugIn === 'Sim' : null,
       kms_atuais: form.kms || null,
       proprietario: isInvestidor ? (investidor ? investidor.nome : null) : 'VIANTA',
       investidor_id: investidor ? investidor.id : null,
@@ -453,11 +455,11 @@ function Body({
                       <option value="">Selecionar</option>{COMBUSTIVEIS.filter((c) => c !== 'Híbrido' && c !== form.combustivelPrincipal).map((c) => <option key={c}>{c}</option>)}
                     </NativeSelect>
                   </Field>
-                  <Field label="Plug-in?" required={obrigatorio('plug_in' as CampoObrigatorio['campo'])}>
+                  {plugInAplicavel && <Field label="Plug-in?" required={obrigatorio('plug_in' as CampoObrigatorio['campo'])}>
                     <NativeSelect required={obrigatorio('plug_in' as CampoObrigatorio['campo'])} value={form.plugIn} onChange={(e) => set('plugIn', e.target.value)}>
                       <option value="">Selecionar</option><option>Sim</option><option>Não</option>
                     </NativeSelect>
-                  </Field>
+                  </Field>}
                 </>}
                 <Field label="KMs">
                   <Input value={form.kms} onChange={(e) => set('kms', e.target.value)} />

@@ -68,6 +68,11 @@ const preenchido = (v: unknown) => v != null && String(v).trim() !== '';
 export const eEletrico = (v: ValoresFicha): boolean =>
   normalizeText(String(v.combustivel ?? '')).includes('eletric');
 
+export const hibridoTemEletrico = (v: ValoresFicha): boolean =>
+  [v.combustivel_principal, v.combustivel_secundario].some((combustivel) =>
+    normalizeText(String(combustivel ?? '')).includes('eletric'),
+  );
+
 export const exigeFicha = (estado: string | null | undefined): boolean =>
   !!estado && (ESTADOS_FICHA_OBRIGATORIA as readonly string[]).includes(estado);
 
@@ -95,8 +100,8 @@ export function camposObrigatorios(v: ValoresFicha, estado?: string | null): Cam
     campos.push(
       { campo: 'combustivel_principal', label: 'Combustível híbrido 1' },
       { campo: 'combustivel_secundario', label: 'Combustível híbrido 2' },
-      { campo: 'plug_in', label: 'Plug-in (Sim/Não)' },
     );
+    if (hibridoTemEletrico(v)) campos.push({ campo: 'plug_in', label: 'Plug-in (Sim/Não)' });
   }
   return campos;
 }

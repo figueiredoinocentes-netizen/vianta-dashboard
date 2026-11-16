@@ -132,7 +132,11 @@ function camposFichaEmFalta(registo, estado) {
     if (preenchido(registo && registo.combustivel_principal) && registo.combustivel_principal === registo.combustivel_secundario) {
       faltam.push('Escolha dois combustíveis diferentes');
     }
-    if (registo.plug_in !== true && registo.plug_in !== false) faltam.push('Plug-in (Sim/Não)');
+    const combustiveisHibridos = [registo.combustivel_principal, registo.combustivel_secundario]
+      .map((v) => String(v || '').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, ''));
+    if (combustiveisHibridos.some((v) => v.includes('eletric')) && registo.plug_in !== true && registo.plug_in !== false) {
+      faltam.push('Plug-in (Sim/Não)');
+    }
   }
   return faltam;
 }
