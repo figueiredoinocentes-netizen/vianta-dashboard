@@ -509,7 +509,7 @@ function Body({
             </Field>
             <Field label="Estado">
               <NativeSelect value={form.estado} onChange={(e) => set('estado', e.target.value)}>
-                {STATUSES.map((st) => (
+                {STATUSES.filter((st) => st !== 'Acordo Verbal' || (form.gestao !== 'Aluguer' && form.gestao !== 'Slot')).map((st) => (
                   <option key={st}>{st}</option>
                 ))}
               </NativeSelect>

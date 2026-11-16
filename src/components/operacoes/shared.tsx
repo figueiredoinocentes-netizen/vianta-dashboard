@@ -129,7 +129,7 @@ export function StatusSelect({ carro }: { carro: Carro }) {
       )}
     >
       {!carro.estado && <option value="">—</option>}
-      {STATUSES.map((s) => (
+      {STATUSES.filter((s) => s !== 'Acordo Verbal' || (carro.tipo_gestao !== 'Aluguer' && carro.tipo_gestao !== 'Slot')).map((s) => (
         <option key={s} value={s} className="bg-card text-foreground">
           {s}
         </option>
