@@ -89,9 +89,11 @@ describe('estadoRequisitos', () => {
     const hibrido = { ...VENDA_COMPLETA, combustivel: 'Híbrido' };
     expect(labels(faltamParaEstado(hibrido, 'Para Venda'))).toContain('Combustível híbrido 1');
     expect(labels(faltamParaEstado(hibrido, 'Para Venda'))).toContain('Combustível híbrido 2');
-    expect(labels(faltamParaEstado(hibrido, 'Para Venda'))).toContain('Plug-in (Sim/Não)');
+    expect(labels(faltamParaEstado(hibrido, 'Para Venda'))).not.toContain('Plug-in (Sim/Não)');
     expect(faltamParaEstado({ ...hibrido, combustivel_principal: 'Gasolina', combustivel_secundario: 'Elétrico', plug_in: false }, 'Para Venda')).toEqual([]);
-    expect(labels(faltamParaEstado({ ...hibrido, combustivel_principal: 'Gasolina', combustivel_secundario: 'Gasolina', plug_in: true }, 'Para Venda'))).toContain('Combustível híbrido 2');
+    expect(faltamParaEstado({ ...hibrido, combustivel_principal: 'Gasóleo/Diesel', combustivel_secundario: 'Gasolina', plug_in: null }, 'Para Venda')).toEqual([]);
+    expect(faltamParaEstado({ ...hibrido, combustivel_principal: 'Gasolina', combustivel_secundario: 'Gasolina', plug_in: true }, 'Para Venda')).toEqual(expect.arrayContaining([expect.objectContaining({ label: 'Combustível híbrido 2' })]));
+    expect(labels(faltamParaEstado({ ...hibrido, combustivel_principal: 'Gasolina', combustivel_secundario: 'Elétrico', plug_in: null }, 'Para Venda'))).toContain('Plug-in (Sim/Não)');
     expect(faltamParaEstado({ ...ALUGUER_COMPLETO, combustivel: 'Híbrido', combustivel_principal: 'Gasóleo/Diesel', combustivel_secundario: 'Elétrico', plug_in: true }, 'Para Aluguer')).toEqual([]);
   });
 

@@ -29,7 +29,7 @@ import {
   type FaturaCompraValores,
 } from '@/lib/faturaCompra';
 import { toNum } from '@/lib/operacoes/custos';
-import { faltamParaEstado } from '@/lib/operacoes/estadoRequisitos';
+import { faltamParaEstado, hibridoTemEletrico } from '@/lib/operacoes/estadoRequisitos';
 import { useCentralWrites, useInvestidores, useCarros, errorMessage } from '@/hooks/useOperacoes';
 import { marcasRegistadas, nomeCarro } from '@/lib/operacoes/identidadeViatura';
 import { Field, NativeSelect } from './shared';
@@ -85,6 +85,7 @@ export function NovaViaturaDialog({
   const set = (k: keyof typeof EMPTY, v: string) => setForm((f) => ({ ...f, [k]: v }));
   const busy = status !== 'idle';
   const compra = form.aquisicao === 'Compra';
+  const plugInAplicavel = form.combustivel === 'Híbrido' && hibridoTemEletrico({ combustivel_principal: form.combustivelPrincipal, combustivel_secundario: form.combustivelSecundario });
 
   // Sugere a pasta pela matrícula escrita (enquanto o utilizador não escolher uma à mão).
   useEffect(() => {
@@ -102,7 +103,7 @@ export function NovaViaturaDialog({
     if (!form.aquisicao) return toast.error('Escolha se a viatura é de compra ou de consignação.');
     // Uma viatura nova não tem ficha: só pode nascer em preparação e é lá que se
     // preenchem as características exigidas para a disponibilizar.
-    if (faltamParaEstado({ combustivel: form.combustivel, combustivel_principal: form.combustivelPrincipal, combustivel_secundario: form.combustivelSecundario, plug_in: form.plugIn === '' ? null : form.plugIn === 'Sim' }, form.estado).length) {
+    if (faltamParaEstado({ combustivel: form.combustivel, combustivel_principal: form.combustivelPrincipal, combustivel_secundario: form.combustivelSecundario, plug_in: plugInAplicavel && form.plugIn !== '' ? form.plugIn === 'Sim' : null }, form.estado).length) {
       return toast.error(
         `Uma viatura nova não pode entrar diretamente em «${form.estado}». Cria-a em «Em Preparação» e preenche os campos obrigatórios da Ficha comercial antes de a disponibilizar.`,
         { duration: 9000 },
@@ -131,7 +132,7 @@ export function NovaViaturaDialog({
         combustivel: form.combustivel || null,
         combustivel_secundario: form.combustivelSecundario || null,
         combustivel_principal: form.combustivelPrincipal || null,
-        plug_in: form.combustivel === 'Híbrido' ? form.plugIn === 'Sim' : null,
+        plug_in: plugInAplicavel && form.plugIn !== '' ? form.plugIn === 'Sim' : null,
         kms_atuais: form.kms || null,
         proprietario: isInvestidor ? (investidor ? investidor.nome : null) : 'VIANTA',
         investidor_id: investidor ? investidor.id : null,
@@ -283,11 +284,11 @@ export function NovaViaturaDialog({
                   {COMBUSTIVEIS.filter((c) => c !== 'Híbrido' && c !== form.combustivelPrincipal).map((c) => <option key={c}>{c}</option>)}
                 </NativeSelect>
               </Field>
-              <Field label="Plug-in?" required>
+              {plugInAplicavel && <Field label="Plug-in?" required>
                 <NativeSelect required value={form.plugIn} onChange={(e) => set('plugIn', e.target.value)}>
                   <option value="">Selecionar</option><option>Sim</option><option>Não</option>
                 </NativeSelect>
-              </Field>
+              </Field>}
             </>}
             <Field label="KMs">
               <Input type="number" value={form.kms} onChange={(e) => set('kms', e.target.value)} />
