@@ -94,6 +94,13 @@ describe('StatusSelect — ficha obrigatória', () => {
     expect(updateCentralField).toHaveBeenCalledWith('carros', 1, 'estado', 'Para Venda');
   });
 
+  it('mostra Acordo Verbal apenas em viaturas de venda', () => {
+    const venda = montar(carro({ tipo_gestao: 'Venda' }));
+    expect(Array.from(venda.options).some((option) => option.value === 'Acordo Verbal')).toBe(true);
+    const aluguer = montar(carro({ tipo_gestao: 'Aluguer' }));
+    expect(Array.from(aluguer.options).some((option) => option.value === 'Acordo Verbal')).toBe(false);
+  });
+
   it('não interfere com estados que não exigem ficha', async () => {
     const select = montar(carro({}));
     fireEvent.change(select, { target: { value: 'Manutenção' } });

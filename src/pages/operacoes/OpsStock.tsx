@@ -16,7 +16,7 @@ import { useOps } from '@/components/operacoes/OpsContext';
 import { EmptyState, ErrorBox, OpsHeader, StatusSelect, hideCols } from '@/components/operacoes/shared';
 import { camposEmFalta } from '@/lib/operacoes/estadoRequisitos';
 
-const STOCK_STATES = ['Para Venda', 'Para Aluguer', 'Para Venda e Aluguer', 'Manutenção', 'Em Preparação'];
+const STOCK_STATES = ['Para Venda', 'Acordo Verbal', 'Para Aluguer', 'Para Venda e Aluguer', 'Manutenção', 'Em Preparação'];
 
 export default function OpsStock() {
   const { search, openVehicle, openNovaViatura } = useOps();

@@ -3,6 +3,7 @@ import type { Carro } from './types';
 export const STATUSES = [
   'Alugado',
   'Para Venda',
+  'Acordo Verbal',
   'Para Aluguer',
   'Para Venda e Aluguer',
   'Em Preparação',
@@ -29,6 +30,7 @@ export const CATEGORIAS_ARMAZEM = [
 export const BADGE_CLASS: Record<string, string> = {
   Alugado: 'bg-[#064e3b] text-[#6ee7b7]',
   'Para Venda': 'bg-[#1e3a5f] text-[#93c5fd]',
+  'Acordo Verbal': 'bg-[#713f12] text-[#fde68a]',
   Inativo: 'bg-[#3d2e00] text-[#fde68a]',
   Manutenção: 'bg-[#78350f] text-[#fbbf24]',
   Vendido: 'bg-[#1f2937] text-[#9ca3af]',
