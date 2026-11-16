@@ -5,6 +5,9 @@ export interface Carro {
   marca_modelo: string | null;
   ano: string | number | null;
   combustivel: string | null;
+  combustivel_secundario?: string | null;
+  combustivel_principal?: string | null;
+  plug_in?: boolean | null;
   kms_atuais: string | number | null;
   proprietario: string | null;
   investidor_id: number | null;

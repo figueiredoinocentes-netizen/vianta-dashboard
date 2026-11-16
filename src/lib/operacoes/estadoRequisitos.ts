@@ -19,6 +19,9 @@ export const URL_VEICULOS_ELEGIVEIS_UBER =
 export type ValoresFicha = {
   tipo_gestao?: unknown;
   combustivel?: unknown;
+  combustivel_secundario?: unknown;
+  combustivel_principal?: unknown;
+  plug_in?: unknown;
   cavalos?: unknown;
   caixa?: unknown;
   bateria_kwh?: unknown;
@@ -65,6 +68,11 @@ const preenchido = (v: unknown) => v != null && String(v).trim() !== '';
 export const eEletrico = (v: ValoresFicha): boolean =>
   normalizeText(String(v.combustivel ?? '')).includes('eletric');
 
+export const hibridoTemEletrico = (v: ValoresFicha): boolean =>
+  [v.combustivel_principal, v.combustivel_secundario].some((combustivel) =>
+    normalizeText(String(combustivel ?? '')).includes('eletric'),
+  );
+
 export const exigeFicha = (estado: string | null | undefined): boolean =>
   !!estado && (ESTADOS_FICHA_OBRIGATORIA as readonly string[]).includes(estado);
 
@@ -83,16 +91,27 @@ export function camposObrigatorios(v: ValoresFicha, estado?: string | null): Cam
   const eletrico = eEletrico(v);
   const ofertas = ofertasExigidas(v, estado);
   if (!ofertas.size) return [];
-  return CAMPOS_OBRIGATORIOS.filter(
+  const campos = CAMPOS_OBRIGATORIOS.filter(
     (c) =>
       (!c.apenasEletricos || eletrico) &&
       (!c.oferta || ofertas.has(c.oferta)),
   );
+  if (ofertas.size && normalizeText(String(v.combustivel ?? '')).includes('hibrid')) {
+    campos.push(
+      { campo: 'combustivel_principal', label: 'Combustível híbrido 1' },
+      { campo: 'combustivel_secundario', label: 'Combustível híbrido 2' },
+    );
+    if (hibridoTemEletrico(v)) campos.push({ campo: 'plug_in', label: 'Plug-in (Sim/Não)' });
+  }
+  return campos;
 }
 
 /** Campos da ficha ainda por preencher. Pode ser usada no Stock mesmo antes de mudar o estado. */
 export function camposEmFalta(v: ValoresFicha, estado?: string | null): CampoObrigatorio[] {
   return camposObrigatorios(v, estado).filter((c) => {
+    if (c.campo === 'combustivel_secundario') {
+      return !preenchido(v.combustivel_secundario) || String(v.combustivel_secundario) === String(v.combustivel_principal);
+    }
     if (c.campo === 'fotos') {
       return !(Array.isArray(v.fotos) && v.fotos.some(preenchido)) && !preenchido(v.foto_url);
     }
