@@ -826,9 +826,26 @@ function useDesktop() {
   return ok;
 }
 
+const gestaoFromUrl = (): Gestao =>
+  new URLSearchParams(window.location.search).get('tipo')?.toLowerCase() === 'aluguer' ? 'Aluguer' : 'Venda';
+
 const Stock = () => {
   const { data: carros = [], isLoading, isError } = useCarros();
-  const [gestao, setGestao] = useState<Gestao>('Venda');
+  const [gestao, setGestao] = useState<Gestao>(gestaoFromUrl);
+
+  useEffect(() => {
+    const syncGestao = () => setGestao(gestaoFromUrl());
+    window.addEventListener('popstate', syncGestao);
+    return () => window.removeEventListener('popstate', syncGestao);
+  }, []);
+
+  const mudarGestao = (novaGestao: Gestao) => {
+    setGestao(novaGestao);
+    const url = new URL(window.location.href);
+    if (novaGestao === 'Aluguer') url.searchParams.set('tipo', 'aluguer');
+    else url.searchParams.delete('tipo');
+    window.history.replaceState({}, '', url);
+  };
   const [search, setSearch] = useState('');
   const [selecionadoId, setSelecionadoId] = useState<number | null>(null);
   const [fichaAberta, setFichaAberta] = useState(false);
@@ -923,7 +940,7 @@ const Stock = () => {
                 key={g}
                 type="button"
                 onClick={() => {
-                  setGestao(g);
+                  mudarGestao(g);
                   limparFiltros();
                 }}
                 className={cn(
