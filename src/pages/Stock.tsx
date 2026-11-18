@@ -842,8 +842,7 @@ const Stock = () => {
   const mudarGestao = (novaGestao: Gestao) => {
     setGestao(novaGestao);
     const url = new URL(window.location.href);
-    if (novaGestao === 'Aluguer') url.searchParams.set('tipo', 'aluguer');
-    else url.searchParams.delete('tipo');
+    url.searchParams.set('tipo', novaGestao === 'Aluguer' ? 'aluguer' : 'venda');
     window.history.replaceState({}, '', url);
   };
   const [search, setSearch] = useState('');
