@@ -179,7 +179,7 @@ const Dashboard = () => {
                 />
                 <KPICard
                   title="Investimento"
-                  value={`€${data.kpis.investimentoTotal.toLocaleString()}`}
+                  value={`€${data.kpis.investimentoTotal.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   icon={<DollarSign className="h-4 w-4" />}
                   delay={0.05}
                   tooltip="Soma total do investimento em tráfego pago, equipa comercial e referências. Clica para ver o detalhe."
