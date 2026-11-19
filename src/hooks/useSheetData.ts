@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useSourceMapping, getTipo } from '@/hooks/useSourceMapping';
+import { allocateOfferAdSpend } from '@/lib/dashboard/adSpendAllocation';
 import type { SourceMapping } from '@/types/dashboard';
 import type {
   FilterState, Driver, InvestmentEntry,
@@ -265,11 +266,10 @@ function computeData(raw: RawSheetData, filters: FilterState, sourceMappings: So
 
   if (filters.offerTypes.length > 0) {
     const offerCampaigns = filters.offerTypes.flatMap(t => OFFER_CAMPAIGN_MAP[t] || []);
-    const offerAds = filteredInvestment.filter(e => offerCampaigns.includes(e.campanha));
-    const adsTotal = offerAds.reduce((s, e) => s + e.valor, 0);
 
     const offerDriversFB = allDriversPeriodFB.filter(d => filters.offerTypes.includes(d.tipoOferta as any));
     const ratio = totalDriversFBAll > 0 ? offerDriversFB.length / totalDriversFBAll : 0;
+    const { adsTotal, adsCampaigns } = allocateOfferAdSpend(filteredInvestment, offerCampaigns, ratio);
     const comercialProporcional = comercialTotal * ratio;
 
     // Referrals for selected offers
@@ -280,15 +280,11 @@ function computeData(raw: RawSheetData, filters: FilterState, sourceMappings: So
 
     investimentoTotal = adsTotal + comercialProporcional + referenciasTotal;
 
-    const adsByCampaign = new Map<string, number>();
-    offerAds.forEach(e => adsByCampaign.set(e.campanha, (adsByCampaign.get(e.campanha) || 0) + e.valor));
-
     const fbFirstConversions = filtered.filter(d => getTipo(d.fonte, sourceMappings) === 'Paid Media' && isFirstConversion(d, firstConversions)).length;
     const paidDriversCount = fbFirstConversions + offerRefDrivers.length;
 
-    const offerLabel = filters.offerTypes.join(', ');
     cacBreakdownData = {
-      adsCampaigns: Array.from(adsByCampaign.entries()).map(([campanha, valor]) => ({ campanha, valor })),
+      adsCampaigns,
       adsTotal,
       comercialTotal,
       comercialProporcional,
@@ -301,7 +297,7 @@ function computeData(raw: RawSheetData, filters: FilterState, sourceMappings: So
       investimentoTotal,
       paidDrivers: paidDriversCount,
       cacMedio: paidDriversCount > 0 ? investimentoTotal / paidDriversCount : 0,
-      formulaDescricao: `(Ads ${offerLabel} + Comercial × ${offerDriversFB.length}/${totalDriversFBAll} + Referências) ÷ ${paidDriversCount} primeiras conversões (FB + Ref)`,
+      formulaDescricao: `(Ads da oferta + campanhas partilhadas alocadas por quota de leads + Comercial proporcional + Referências) ÷ ${paidDriversCount} primeiras conversões (FB + Ref)`,
     };
   } else {
     // Referrals across all offers
