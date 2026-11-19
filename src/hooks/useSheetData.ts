@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useSourceMapping, getTipo } from '@/hooks/useSourceMapping';
 import { allocateOfferAdSpend } from '@/lib/dashboard/adSpendAllocation';
+import { salesToDrivers, type SupabaseSale } from '@/lib/dashboard/salesToDrivers';
 import type { SourceMapping } from '@/types/dashboard';
 import type {
   FilterState, Driver, InvestmentEntry,
@@ -87,22 +88,40 @@ async function fetchInvestmentFromAdSpend(): Promise<InvestmentEntry[]> {
 }
 
 async function fetchSheetData(): Promise<RawSheetData> {
-  // 1. Try legacy edge function for drivers data
   let drivers: Driver[] = [];
   let fontes: string[] = [];
+  let loadedSupabaseSales = false;
+
+  // Prefer the authoritative sales/contract table; use the old sheet only if the bridge fails.
   try {
-    const { data, error } = await supabase.functions.invoke('fetch-sheets-data');
-    if (!error && data?.drivers) {
-      drivers = data.drivers as Driver[];
-      fontes = data.fontes || [];
+    const res = await fetch('/.netlify/functions/vendas-data');
+    if (res.ok) {
+      const json = await res.json();
+      if (Array.isArray(json.vendas)) {
+        loadedSupabaseSales = true;
+        drivers = salesToDrivers(json.vendas as SupabaseSale[]);
+        fontes = Array.isArray(json.fontes) ? json.fontes : [];
+      }
+    } else {
+      console.warn('vendas-data function failed:', res.status);
     }
-  } catch (e) {
-    console.warn('fetch-sheets-data edge function unavailable, using fallback');
+  } catch (err) {
+    console.warn('Failed to fetch Supabase sales data; trying legacy source:', err);
   }
 
-  // 2. Get ad spend from Supabase meta_spend_daily via Netlify function
-  const metaSpendEntries = await fetchInvestmentFromAdSpend();
+  if (!loadedSupabaseSales) {
+    try {
+      const { data, error } = await supabase.functions.invoke('fetch-sheets-data');
+      if (!error && data?.drivers) {
+        drivers = data.drivers as Driver[];
+        fontes = data.fontes || [];
+      }
+    } catch (e) {
+      console.warn('fetch-sheets-data edge function unavailable');
+    }
+  }
 
+  const metaSpendEntries = await fetchInvestmentFromAdSpend();
   return { drivers, investmentEntries: metaSpendEntries, fontes };
 }
 
