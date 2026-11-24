@@ -11,6 +11,8 @@ export type FaturaCompraValores = {
   iva: string;
   /** '' = automático pelo tipo de gestão */
   centro: string;
+  /** compra a particular: não há fatura para anexar */
+  particular?: boolean;
 };
 
 export const FATURA_COMPRA_VAZIA: FaturaCompraValores = {
@@ -30,8 +32,8 @@ export const centroPorGestao = (gestao?: string | null) => (gestao === 'Venda' ?
 
 /** Valida; devolve a mensagem de erro ou null. */
 export function validarFaturaCompra(v: FaturaCompraValores, file: File | null): string | null {
-  if (!file) return 'Anexe a fatura de compra da viatura.';
-  if (file.size > MAX_FATURA_MB * 1024 * 1024) return `A fatura tem mais de ${MAX_FATURA_MB} MB.`;
+  if (!file && !v.particular) return 'Anexe a fatura de compra da viatura.';
+  if (file && file.size > MAX_FATURA_MB * 1024 * 1024) return `A fatura tem mais de ${MAX_FATURA_MB} MB.`;
   if (!Math.abs(toNum(v.semIva))) return 'Indique o valor s/ IVA da fatura de compra.';
   return null;
 }
@@ -41,7 +43,7 @@ export async function registarFaturaCompra(args: {
   carroId: number | null;
   descricao: string;
   valores: FaturaCompraValores;
-  file: File;
+  file: File | null;
   gestao?: string | null;
   /** caminho já guardado (Nova Viatura guarda o ficheiro antes de criar o carro) */
   ficheiro?: string;
@@ -50,21 +52,21 @@ export async function registarFaturaCompra(args: {
   const semIva = Math.abs(toNum(v.semIva));
   const iva = v.iva.trim() ? Math.abs(toNum(v.iva)) : 0;
   const data = v.data || hoje();
-  const ficheiro = args.ficheiro ?? (await uploadFatura(args.file, data));
+  const ficheiro = args.ficheiro ?? (args.file ? await uploadFatura(args.file, data) : null);
   await createCentral('financeiro', {
     tipo: 'Compra',
     carro_id: args.carroId,
     n_documento: v.num.trim() || null,
     data,
     descricao: args.descricao,
-    contraparte: v.fornecedor.trim() || null,
+    contraparte: v.fornecedor.trim() || (v.particular ? 'Particular' : null),
     centro_custo: v.centro || centroPorGestao(args.gestao),
     categoria: 'Compra de viatura',
     valor_sem_iva: -semIva,
     iva: -iva,
     valor: -round2(semIva + iva),
     ficheiro,
-    ficheiro_nome: args.file.name,
+    ficheiro_nome: args.file?.name ?? null,
   });
   return semIva;
 }
