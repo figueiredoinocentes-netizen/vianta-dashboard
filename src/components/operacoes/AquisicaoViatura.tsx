@@ -58,7 +58,7 @@ export function AquisicaoViatura({
         carroId: carro.id,
         descricao: `Compra da viatura ${[carro.matricula, nomeCarro(carro)].filter(Boolean).join(' · ')}`,
         valores,
-        file: file!,
+        file,
         gestao,
       });
       await update(carro, 'preco_compra', String(semIva));

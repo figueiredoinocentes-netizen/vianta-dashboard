@@ -145,13 +145,13 @@ export function NovaViaturaDialog({
         valor_aluguer_semanal: form.precoAluguer || null,
       });
       const novoId = rows[0]?.id;
-      if (compra && ficheiro) {
+      if (compra && (ficheiro || fc.particular)) {
         try {
           await registarFaturaCompra({
             carroId: novoId ?? null,
             descricao: `Compra da viatura ${[form.matricula, nomeCarro({ marca: form.marca, marca_modelo: form.modelo, versao: form.versao })].filter(Boolean).join(' · ')}`,
             valores: fc,
-            file: fatura!,
+            file: fatura,
             gestao: form.gestao,
             ficheiro,
           });

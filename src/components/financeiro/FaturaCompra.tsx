@@ -25,9 +25,22 @@ export function CamposFaturaCompra({
         if (e.key === 'Enter' && (e.target as HTMLElement).tagName === 'INPUT') e.preventDefault();
       }}
     >
-      <Field label="Fatura (PDF ou imagem)" required className="sm:col-span-2">
-        <Input type="file" accept="application/pdf,image/*" onChange={(e) => onFile(e.target.files?.[0] || null)} />
-      </Field>
+      <label className="flex items-center gap-2 text-sm sm:col-span-2">
+        <input
+          type="checkbox"
+          checked={!!valores.particular}
+          onChange={(e) => {
+            onChange({ ...valores, particular: e.target.checked });
+            if (e.target.checked) onFile(null);
+          }}
+        />
+        Compra a particular (sem fatura)
+      </label>
+      {!valores.particular && (
+        <Field label="Fatura (PDF ou imagem)" required className="sm:col-span-2">
+          <Input type="file" accept="application/pdf,image/*" onChange={(e) => onFile(e.target.files?.[0] || null)} />
+        </Field>
+      )}
       <Field label="Nº documento">
         <Input value={valores.num} onChange={(e) => set('num', e.target.value)} placeholder="ex.: FT 2026/123" />
       </Field>
@@ -56,7 +69,9 @@ export function CamposFaturaCompra({
         </NativeSelect>
       </Field>
       <p className="text-[11px] text-muted-foreground sm:col-span-2">
-        O valor s/ IVA passa a ser o preço de compra da viatura.
+        {valores.particular
+          ? 'Fica registada no Financeiro sem documento. O valor passa a ser o preço de compra da viatura.'
+          : 'O valor s/ IVA passa a ser o preço de compra da viatura.'}
       </p>
     </div>
   );
