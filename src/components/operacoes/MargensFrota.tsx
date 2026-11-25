@@ -59,7 +59,8 @@ export function MargensFrota({ carros }: { carros: Carro[] }) {
         <div>
           <div className="text-sm font-semibold">Margens por viatura</div>
           <div className="text-[11px] text-muted-foreground">
-            Valores sem IVA. Venda: preço de venda − compra − custos. Aluguer: receitas − custos.
+            Valores sem IVA. Venda: preço de venda − compra − custos. Aluguer: receitas − custos. Viaturas de
+            investidor: parte da Vianta, depois da comissão do investidor.
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -145,6 +146,12 @@ export function MargensFrota({ carros }: { carros: Carro[] }) {
                     className={'text-right font-semibold ' + (r.margem < 0 ? 'text-destructive' : 'text-emerald-500')}
                   >
                     {eur(r.margem)}
+                    {r.faltaPct && (
+                      <div className="text-[10px] font-normal text-amber-500">falta % investidor</div>
+                    )}
+                    {r.investidor && r.pctInvestidor != null && (
+                      <div className="text-[10px] font-normal text-muted-foreground">após {r.pctInvestidor}% investidor</div>
+                    )}
                     {c.tipo_gestao === 'Venda' && !r.vendido && (
                       <div className="text-[10px] font-normal text-muted-foreground">prevista</div>
                     )}

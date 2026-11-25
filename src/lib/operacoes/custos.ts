@@ -66,6 +66,17 @@ export function divisaoMargem(margem: number, pct: number) {
   return { investidor, vianta: Math.round((margem - investidor) * 100) / 100 };
 }
 
+/** A viatura é de um investidor (não da Vianta). */
+export const temInvestidor = (carro: Carro) =>
+  carro.investidor_id != null || (!!carro.proprietario && carro.proprietario !== 'VIANTA');
+
+/** % da margem bruta s/ IVA do investidor (0-100) ou `null` se não está preenchida. */
+export function pctInvestidor(carro: Carro): number | null {
+  if (carro.pct_investidor == null || carro.pct_investidor === '') return null;
+  const n = toNum(carro.pct_investidor);
+  return n >= 0 && n <= 100 ? n : null;
+}
+
 export function resumoCarro(carro: Carro, movs: Movimento[]) {
   // A fatura de compra (tipo 'Compra') é o preço de compra: não conta como custo.
   const custos = -movs
@@ -78,8 +89,19 @@ export function resumoCarro(carro: Carro, movs: Movimento[]) {
   const vendido = carro.estado === 'Vendido';
   // Venda: preço de venda (registado ou o da ficha) − compra − custos.
   const receitaVenda = venda ? Math.max(venda, receitas) : receitas;
-  const margem = carro.tipo_gestao === 'Venda' ? receitaVenda - compra - custos : receitas - custos;
+  const margemBruta = carro.tipo_gestao === 'Venda' ? receitaVenda - compra - custos : receitas - custos;
+  // Viatura de investidor: a margem do carro é a parte da Vianta, depois da comissão do investidor.
+  // Sem a % preenchida fica a margem bruta, assinalada com `faltaPct`.
+  const investidor = temInvestidor(carro);
+  const pct = investidor ? pctInvestidor(carro) : null;
+  const comissao = pct != null ? divisaoMargem(margemBruta, pct).investidor : 0;
+  const margem = pct != null ? divisaoMargem(margemBruta, pct).vianta : margemBruta;
   return {
+    margemBruta,
+    investidor,
+    pctInvestidor: pct,
+    comissaoInvestidor: comissao,
+    faltaPct: investidor && pct == null,
     custos,
     receitas,
     receita: carro.tipo_gestao === 'Venda' ? receitaVenda : receitas,

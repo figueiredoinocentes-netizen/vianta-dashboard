@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useCentralWrites, useFinanceiro, useUpdateCarroField } from '@/hooks/useOperacoes';
+import { useCentralWrites, useFinanceiro } from '@/hooks/useOperacoes';
 import { NovoMovimento } from './NovoMovimento';
-import { divisaoMargem, eur, ivaVenda, precoCompraFatura, precoVendaSemIva, resumoCarro, toNum } from '@/lib/operacoes/custos';
+import { eur, ivaVenda, precoCompraFatura, precoVendaSemIva, resumoCarro, toNum } from '@/lib/operacoes/custos';
 import type { Carro, Movimento } from '@/lib/operacoes/types';
 
 const dataPt = (d: string | null) => (d ? d.slice(0, 10).split('-').reverse().join('/') : '—');
@@ -87,70 +86,32 @@ function Linha({ label, cIva, sIva, nota }: { label: string; cIva: string; sIva:
   );
 }
 
-/** Margem bruta s/ IVA e, nas viaturas de investidor, a divisão pela % do investidor. */
-function MargemViatura({ carro, margem, deInvestidor }: { carro: Carro; margem: number; deInvestidor: boolean }) {
-  const update = useUpdateCarroField();
-  const guardado = carro.pct_investidor == null || carro.pct_investidor === '' ? '' : String(carro.pct_investidor);
-  const [pct, setPct] = useState(guardado);
-  const pctNum = pct === '' ? null : toNum(pct);
-  const valido = pctNum == null || (pctNum >= 0 && pctNum <= 100);
-
-  async function guardar() {
-    if (!valido) return toast.error('A percentagem tem de estar entre 0 e 100.');
-    if (String(pctNum ?? '') === guardado) return;
-    const ok = await update(carro, 'pct_investidor', pctNum);
-    if (ok) toast.success('Percentagem do investidor guardada');
-  }
-
-  const d = pctNum != null && valido ? divisaoMargem(margem, pctNum) : null;
+/** Margem do carro: bruta s/ IVA e, nas viaturas de investidor, a comissão e a parte da Vianta. */
+function MargemViatura({ r }: { r: ReturnType<typeof resumoCarro> }) {
   const tom = (n: number) => (n < 0 ? 'text-destructive' : 'text-emerald-500');
-
   return (
     <section className="space-y-1 rounded-lg border border-border p-3">
-      <div className="flex items-baseline justify-between text-sm font-semibold">
+      <div className="flex items-baseline justify-between text-xs">
         <span>Margem bruta (s/ IVA)</span>
-        <span className={tom(margem)}>{eur(margem)}</span>
+        <span className={tom(r.margemBruta)}>{eur(r.margemBruta)}</span>
       </div>
       <div className="text-[11px] text-muted-foreground">Venda s/ IVA − compra s/ IVA − custos s/ IVA</div>
-      {deInvestidor && (
-        <div className="space-y-1 pt-2">
-          <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-            <label htmlFor={`pct-inv-${carro.id}`}>Ganho do investidor (% da margem)</label>
-            <div className="flex items-center gap-1">
-              <Input
-                id={`pct-inv-${carro.id}`}
-                inputMode="decimal"
-                className="h-8 w-20 text-right"
-                value={pct}
-                placeholder="—"
-                onChange={(e) => setPct(e.target.value)}
-                onBlur={() => void guardar()}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    void guardar();
-                  }
-                }}
-              />
-              <span>%</span>
-            </div>
-          </div>
-          {d ? (
-            <>
-              <div className="flex justify-between text-xs">
-                <span>Investidor ({pctNum}%)</span>
-                <span className={tom(d.investidor)}>{eur(d.investidor)}</span>
-              </div>
-              <div className="flex justify-between text-xs font-semibold">
-                <span>Vianta ({Math.round((100 - (pctNum ?? 0)) * 100) / 100}%)</span>
-                <span className={tom(d.vianta)}>{eur(d.vianta)}</span>
-              </div>
-            </>
-          ) : (
-            <p className="text-[11px] text-amber-500">Indique a % do investidor para ver a divisão.</p>
-          )}
+      {r.investidor && r.pctInvestidor != null && (
+        <div className="flex justify-between text-xs">
+          <span>Comissão do investidor ({r.pctInvestidor}%)</span>
+          <span>− {eur(r.comissaoInvestidor)}</span>
         </div>
       )}
+      {r.faltaPct && (
+        <p className="text-[11px] text-amber-500">
+          Falta a comissão do investidor (Características → Comissão do investidor). Até lá a margem do carro é a
+          margem bruta.
+        </p>
+      )}
+      <div className="flex items-baseline justify-between border-t border-border pt-1 text-sm font-semibold">
+        <span>Margem do carro{r.investidor ? ' (Vianta)' : ''}</span>
+        <span className={tom(r.margem)}>{eur(r.margem)}</span>
+      </div>
     </section>
   );
 }
@@ -210,9 +171,8 @@ export function ContasViatura({ carro }: { carro: Carro }) {
 
   const proprietario =
     carro.proprietario && carro.proprietario !== 'VIANTA' ? `Investidor (${carro.proprietario})` : carro.proprietario || '—';
-  const deInvestidor = carro.investidor_id != null || (!!carro.proprietario && carro.proprietario !== 'VIANTA');
   const consignacao = carro.aquisicao === 'Consignação';
-  const margem = resumoCarro(carro, ms).margem;
+  const resumo = resumoCarro(carro, ms);
 
   return (
     <div className="space-y-5">
@@ -300,7 +260,7 @@ export function ContasViatura({ carro }: { carro: Carro }) {
       </div>
       <Linhas titulo="Proveitos (venda, aluguer, slot e outros)" movs={proveitos} vazio="Sem proveitos registados." />
 
-      <MargemViatura key={`${carro.id}-${carro.pct_investidor ?? ''}`} carro={carro} margem={margem} deInvestidor={deInvestidor} />
+      <MargemViatura r={resumo} />
     </div>
   );
 }

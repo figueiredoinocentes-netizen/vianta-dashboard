@@ -68,6 +68,7 @@ interface Form {
   kms: string;
   proprietario: string;
   investidorId: string;
+  pctInvestidor: string;
   gestao: string;
   estado: string;
   precoVenda: string;
@@ -118,6 +119,7 @@ function formFromCarro(v: Carro): Form {
     kms: s(v.kms_atuais),
     proprietario: v.investidor_id ? 'Investidor' : 'VIANTA',
     investidorId: v.investidor_id ? String(v.investidor_id) : '',
+    pctInvestidor: v.pct_investidor == null ? '' : String(v.pct_investidor),
     gestao: v.tipo_gestao || 'Aluguer',
     estado: v.estado || 'Alugado',
     precoVenda: s(v.preco_venda),
@@ -283,6 +285,13 @@ function Body({
     }
 
     const isInvestidor = form.proprietario === 'Investidor';
+    // Viatura de investidor: a comissão (% da margem bruta s/ IVA) é obrigatória.
+    const pctNum = form.pctInvestidor.trim() === '' ? null : toNum(form.pctInvestidor);
+    if (isInvestidor && (pctNum == null || pctNum < 0 || pctNum > 100)) {
+      setTab('carac');
+      toast.error('Indique a comissão do investidor (% da margem bruta s/ IVA, entre 0 e 100).');
+      return;
+    }
     const investidor = isInvestidor
       ? investidores.find((i) => String(i.id) === form.investidorId)
       : null;
@@ -301,6 +310,7 @@ function Body({
       kms_atuais: form.kms || null,
       proprietario: isInvestidor ? (investidor ? investidor.nome : null) : 'VIANTA',
       investidor_id: investidor ? investidor.id : null,
+      pct_investidor: isInvestidor ? pctNum : null,
       tipo_gestao: form.gestao || null,
       preco_venda: form.precoVenda || null,
       iva_venda: form.ivaVenda === '' ? null : Number(form.ivaVenda),
@@ -505,6 +515,16 @@ function Body({
                       </option>
                     ))}
                 </NativeSelect>
+              </Field>
+            )}
+            {form.proprietario === 'Investidor' && (
+              <Field label="Comissão do investidor (% da margem bruta s/ IVA)" className="sm:col-span-2" required>
+                <Input
+                  inputMode="decimal"
+                  placeholder="ex.: 30"
+                  value={form.pctInvestidor}
+                  onChange={(e) => set('pctInvestidor', e.target.value)}
+                />
               </Field>
             )}
             <Field label="Tipo Gestão">

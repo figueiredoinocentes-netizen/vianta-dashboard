@@ -57,3 +57,23 @@ describe('divisão da margem com o investidor', () => {
     expect(divisaoMargem(1000, 0)).toEqual({ investidor: 0, vianta: 1000 });
   });
 });
+
+describe('margem do carro com investidor', () => {
+  const vendido = { ...carro, preco_venda: '24600', iva_venda: 23 } as Carro;
+  it('sem investidor a margem é a bruta', () => {
+    const r = resumoCarro({ ...vendido, proprietario: 'VIANTA', investidor_id: null } as Carro, []);
+    expect(r.margem).toBe(5000);
+    expect(r.faltaPct).toBe(false);
+  });
+  it('com investidor e 30% a margem é a parte da Vianta', () => {
+    const r = resumoCarro({ ...vendido, proprietario: 'X', investidor_id: 7, pct_investidor: 30 } as Carro, []);
+    expect(r.margemBruta).toBe(5000);
+    expect(r.comissaoInvestidor).toBe(1500);
+    expect(r.margem).toBe(3500);
+  });
+  it('com investidor sem % assinala falta e usa a bruta', () => {
+    const r = resumoCarro({ ...vendido, proprietario: 'X', investidor_id: 7, pct_investidor: null } as Carro, []);
+    expect(r.faltaPct).toBe(true);
+    expect(r.margem).toBe(5000);
+  });
+});
