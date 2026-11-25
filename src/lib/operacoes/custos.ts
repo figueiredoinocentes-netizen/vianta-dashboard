@@ -92,8 +92,9 @@ export function resumoCarro(carro: Carro, movs: Movimento[]) {
   // Com a taxa de IVA escolhida na ficha usa o preço s/ IVA; sem ela, o preço da ficha tal como está.
   const venda = carro.tipo_gestao === 'Venda' ? precoVendaSemIva(carro) ?? toNum(carro.preco_venda) : 0;
   const vendido = carro.estado === 'Vendido';
-  // Venda: preço de venda (registado ou o da ficha) − compra − custos.
-  const receitaVenda = venda ? Math.max(venda, receitas) : receitas;
+  // Venda: com venda registada no Financeiro (tipo 'Venda') vale o registado; sem ela, o preço da ficha.
+  const temVendaRegistada = movs.some((m) => m.tipo === 'Venda');
+  const receitaVenda = temVendaRegistada ? receitas : venda ? Math.max(venda, receitas) : receitas;
   const margemBruta = carro.tipo_gestao === 'Venda' ? receitaVenda - compra - custos : receitas - custos;
   // Viatura de investidor: a margem do carro é a parte da Vianta, depois da comissão do investidor.
   // Sem a % preenchida fica a margem bruta, assinalada com `faltaPct`.

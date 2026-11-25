@@ -77,3 +77,12 @@ describe('margem do carro com investidor', () => {
     expect(r.margem).toBe(5000);
   });
 });
+
+describe('margem com venda registada no Financeiro', () => {
+  it('usa a venda registada mesmo abaixo do preço da ficha', () => {
+    const c = { ...carro, preco_venda: '24600', iva_venda: 23, proprietario: 'VIANTA', investidor_id: null } as Carro;
+    const r = resumoCarro(c, [mov({ tipo: 'Venda', valor: 22140, valor_sem_iva: 18000 })]);
+    expect(r.receita).toBe(18000);
+    expect(r.margem).toBe(18000 - 15000);
+  });
+});

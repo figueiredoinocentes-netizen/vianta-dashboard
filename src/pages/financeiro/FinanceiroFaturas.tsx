@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { EmptyState, ErrorBox, NativeSelect, hideCols } from '@/components/operacoes/shared';
 import { FaturaDialog } from '@/components/financeiro/FaturaDialog';
+import { VendasViaturas } from '@/components/financeiro/VendasViaturas';
 import { FaturaThumb, FaturaViewer } from '@/components/financeiro/FaturaPreview';
 import { useCarros, useFinanceiro, useRefreshOperacoes } from '@/hooks/useOperacoes';
 import { eur } from '@/lib/operacoes/custos';
@@ -86,6 +87,8 @@ export default function FinanceiroFaturas() {
             </Button>
           </div>
         </div>
+
+        <VendasViaturas />
 
         {/* Totais por centro de custo (clicar filtra) */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">

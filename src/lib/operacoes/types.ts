@@ -124,6 +124,11 @@ export interface Movimento {
   /** Caminho do ficheiro original da fatura no bucket privado `faturas` (Supabase Storage). */
   ficheiro?: string | null;
   ficheiro_nome?: string | null;
+  /** Vendas: ID da lead no GHL (coluna ID da aba RAW_LEADS da DB Leads Log). */
+  ghl_lead_id?: string | null;
+  /** Vendas: 'provisorio' (registada no fecho do negócio) | 'validado' (fatura associada). */
+  estado_validacao?: string | null;
+  validado_em?: string | null;
 }
 
 /** Dano, avaria ou aviso numa viatura, com fotos (tabela `ocorrencias`). */

@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useCentralWrites, useFinanceiro } from '@/hooks/useOperacoes';
 import { NovoMovimento } from './NovoMovimento';
+import { RegistarVenda } from './RegistarVenda';
 import { eur, ivaVenda, precoCompraFatura, precoVendaSemIva, resumoCarro, toNum } from '@/lib/operacoes/custos';
 import type { Carro, Movimento } from '@/lib/operacoes/types';
 
@@ -46,6 +47,15 @@ function Linhas({ titulo, movs, vazio }: { titulo: string; movs: Movimento[]; va
                   <td className="py-1 pr-2 align-top whitespace-nowrap">{dataPt(m.data)}</td>
                   <td className="py-1 pr-2 align-top">
                     {[m.categoria || m.tipo, m.descricao || m.contraparte].filter(Boolean).join(' · ') || '—'}
+                    {m.tipo === 'Venda' && m.contraparte && m.descricao && (
+                      <span className="text-muted-foreground"> · {m.contraparte}</span>
+                    )}
+                    {m.estado_validacao === 'provisorio' && (
+                      <span className="ml-1 rounded bg-amber-500/15 px-1 text-[10px] text-amber-500">provisória</span>
+                    )}
+                    {m.estado_validacao === 'validado' && (
+                      <span className="ml-1 rounded bg-emerald-500/15 px-1 text-[10px] text-emerald-500">validada</span>
+                    )}
                   </td>
                   <td className="py-1 text-right align-top whitespace-nowrap">{eur(v.total)}</td>
                   <td className="py-1 text-right align-top whitespace-nowrap">
@@ -130,6 +140,7 @@ export function ContasViatura({ carro }: { carro: Carro }) {
   const { data: movs = [], isLoading } = useFinanceiro();
   const { create } = useCentralWrites('financeiro');
   const [aRegistar, setARegistar] = useState(false);
+  const [aVender, setAVender] = useState(false);
   if (isLoading) return <p className="py-6 text-sm text-muted-foreground">A carregar contas…</p>;
 
   const ms = movs.filter((m) => m.carro_id === carro.id);
@@ -194,6 +205,18 @@ export function ContasViatura({ carro }: { carro: Carro }) {
         </p>
       )}
 
+      {!faturasVenda.length && (carro.tipo_gestao || '').includes('Venda') && (
+        aVender ? (
+          <RegistarVenda carro={carro} onFechar={() => setAVender(false)} />
+        ) : (
+          <div className="flex justify-end">
+            <Button type="button" size="sm" variant="outline" onClick={() => setAVender(true)}>
+              Registar venda
+            </Button>
+          </div>
+        )
+      )}
+
       <section className="space-y-1">
         <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 text-[11px] font-medium text-muted-foreground">
           <div />
@@ -202,7 +225,7 @@ export function ContasViatura({ carro }: { carro: Carro }) {
         </div>
         {faturasVenda.length ? (
           <Linha
-            label="Venda (fatura de venda)"
+            label="Venda registada (Financeiro)"
             cIva={eur(vendaFatura.total)}
             sIva={eur(vendaFatura.semIva)}
             nota={vendaFatura.soTotal ? 'Há faturas só com o total registado' : undefined}
