@@ -101,7 +101,33 @@ export function ContasViatura({ carro }: { carro: Carro }) {
   const faturasCompra = ms.filter((m) => m.tipo === 'Compra');
   const faturasVenda = ms.filter((m) => m.tipo === 'Venda');
   const custos = ms.filter((m) => toNum(m.valor) < 0 && m.tipo !== 'Compra');
-  const proveitos = ms.filter((m) => toNum(m.valor) > 0 && m.tipo !== 'Venda');
+  // A venda conta como proveito: as faturas de venda, ou, sem fatura, o preço da ficha
+  // de uma viatura já vendida (s/ IVA pela taxa escolhida na ficha).
+  const vendaDaFicha: Movimento[] =
+    !faturasVenda.length && carro.estado === 'Vendido' && toNum(carro.preco_venda) > 0
+      ? [
+          {
+            id: -carro.id,
+            carro_id: carro.id,
+            data: carro.data_venda || null,
+            tipo: 'Venda',
+            categoria: 'Venda da viatura',
+            descricao: 'preço da ficha (sem fatura de venda)',
+            contraparte: null,
+            valor: toNum(carro.preco_venda),
+            valor_sem_iva: precoVendaSemIva(carro),
+            iva: null,
+            kms: null,
+            comprovativo: null,
+            obs: null,
+          } as Movimento,
+        ]
+      : [];
+  const proveitos = [
+    ...faturasVenda,
+    ...vendaDaFicha,
+    ...ms.filter((m) => toNum(m.valor) > 0 && m.tipo !== 'Venda'),
+  ];
   const compraFatura = precoCompraFatura(ms);
 
   const vendaFatura = faturasVenda.reduce(
@@ -202,7 +228,7 @@ export function ContasViatura({ carro }: { carro: Carro }) {
         )}
         <Linhas titulo="Custos" movs={custos} vazio="Sem custos registados no Financeiro." />
       </div>
-      <Linhas titulo="Proveitos (aluguer, slot e outros)" movs={proveitos} vazio="Sem proveitos registados no Financeiro." />
+      <Linhas titulo="Proveitos (venda, aluguer, slot e outros)" movs={proveitos} vazio="Sem proveitos registados." />
     </div>
   );
 }
