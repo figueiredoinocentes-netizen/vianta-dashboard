@@ -10,7 +10,8 @@ import { AlertTriangle, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 
 const cancelled = (m: Movimento) => (m.descricao || '').startsWith('[ANULADA]');
 const isSaft = (m: Movimento) => (m.n_documento || '').startsWith('SAFT ');
-const isSaftRevenue = (m: Movimento) => isSaft(m) && !cancelled(m) && toNum(m.valor) > 0;
+// As vendas de viaturas (tipo 'Venda') não entram: a receita vem do documento SAF-T importado.
+const isSaftRevenue = (m: Movimento) => isSaft(m) && m.tipo !== 'Venda' && !cancelled(m) && toNum(m.valor) > 0;
 const isCost = (m: Movimento) => !isSaft(m) && (toNum(m.valor) < 0 || (toNum(m.valor) === 0 && (m.tipo === 'Custo' || m.tipo === 'Despesa')));
 const periodDate = (m: Movimento) => (m.data || '').slice(0, 10);
 const monthLabel = (ym: string) => nomeMes(ym).replace(/ de /, ' ').replace(/^./, (c) => c.toUpperCase());

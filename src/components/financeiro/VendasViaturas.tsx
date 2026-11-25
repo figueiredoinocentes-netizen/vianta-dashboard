@@ -12,18 +12,60 @@ import { nomeCarro } from '@/lib/operacoes/identidadeViatura';
 const dataPt = (d: string | null) => (d ? d.slice(0, 10).split('-').reverse().join('/') : '—');
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
+const MARCA_ASSOCIADA = 'Associada à venda';
+
+/** Faturas já registadas no Financeiro que podem ser a fatura de venda: sem viatura, não negativas. */
+function candidatas(movs: Movimento[], venda: Movimento): Movimento[] {
+  const alvo = venda.data ? Date.parse(venda.data) : Date.now();
+  return movs
+    .filter(
+      (x) =>
+        x.id !== venda.id &&
+        x.tipo !== 'Venda' &&
+        x.carro_id == null &&
+        toNum(x.valor) >= 0 &&
+        !(x.descricao || '').startsWith('[ANULADA]') &&
+        !(x.obs || '').startsWith(MARCA_ASSOCIADA) &&
+        !!(x.ficheiro || x.n_documento),
+    )
+    .sort((a, b) => Math.abs(Date.parse(a.data || '') - alvo) - Math.abs(Date.parse(b.data || '') - alvo));
+}
+
+/** Nº do documento: o registado, ou o que vier no início da descrição (ex.: "FCT 2026.124 - …"). */
+const numeroDe = (x: Movimento) =>
+  x.n_documento || (x.descricao || '').split(' - ')[0].trim() || (x.ficheiro_nome || '').replace(/\.[a-z0-9]+$/i, '');
+
 /** Formulário de validação: associa a fatura de venda ao movimento provisório e fecha-o. */
-function Validar({ m, onFechar }: { m: Movimento; onFechar: () => void }) {
+function Validar({ m, movs, onFechar }: { m: Movimento; movs: Movimento[]; onFechar: () => void }) {
   const refresh = useRefreshOperacoes();
   const [num, setNum] = useState(m.n_documento || '');
   const [total, setTotal] = useState(String(m.valor ?? ''));
   const [semIva, setSemIva] = useState(m.valor_sem_iva == null ? '' : String(m.valor_sem_iva));
   const [file, setFile] = useState<File | null>(null);
+  const [existente, setExistente] = useState<Movimento | null>(null);
+  const [escolher, setEscolher] = useState(false);
+  const [procura, setProcura] = useState('');
   const [aGuardar, setAGuardar] = useState(false);
+
+  const lista = useMemo(() => {
+    const q = procura.trim().toLowerCase();
+    return candidatas(movs, m)
+      .filter((x) => !q || [x.n_documento, x.descricao, x.contraparte, x.ficheiro_nome].some((c) => String(c || '').toLowerCase().includes(q)))
+      .slice(0, 10);
+  }, [movs, m, procura]);
+
+  function usar(x: Movimento) {
+    setExistente(x);
+    setEscolher(false);
+    setFile(null);
+    setNum(numeroDe(x));
+    if (toNum(x.valor) > 0) setTotal(String(x.valor));
+    if (x.valor_sem_iva != null && toNum(x.valor_sem_iva) > 0) setSemIva(String(x.valor_sem_iva));
+  }
 
   async function validar() {
     if (!num.trim()) return toast.error('Indique o nº da fatura de venda.');
-    if (!file && !m.ficheiro) return toast.error('Anexe a fatura de venda (PDF).');
+    if (!file && !existente?.ficheiro && !m.ficheiro) return toast.error('Anexe a fatura de venda (PDF) ou escolha uma já registada.');
     if (file && file.size > MAX_FATURA_MB * 1024 * 1024) return toast.error(`A fatura tem mais de ${MAX_FATURA_MB} MB.`);
     const t = round2(toNum(total));
     const s = round2(toNum(semIva));
@@ -39,9 +81,16 @@ function Validar({ m, onFechar }: { m: Movimento; onFechar: () => void }) {
       if (file) {
         campos.push(['ficheiro', await uploadFatura(file, m.data || undefined)]);
         campos.push(['ficheiro_nome', file.name]);
+      } else if (existente?.ficheiro) {
+        campos.push(['ficheiro', existente.ficheiro], ['ficheiro_nome', existente.ficheiro_nome || null]);
       }
       campos.push(['validado_em', new Date().toISOString()], ['estado_validacao', 'validado']);
       for (const [campo, valor] of campos) await updateCentralField('financeiro', m.id, campo, valor);
+      // A fatura escolhida fica no Financeiro (não se apaga), marcada como associada a esta venda.
+      if (existente) {
+        const nota = `${MARCA_ASSOCIADA} (movimento ${m.id})`;
+        await updateCentralField('financeiro', existente.id, 'obs', existente.obs ? `${nota} · ${existente.obs}` : nota);
+      }
       refresh();
       toast.success('Venda validada com a fatura');
       onFechar();
@@ -53,12 +102,62 @@ function Validar({ m, onFechar }: { m: Movimento; onFechar: () => void }) {
   }
 
   return (
-    <div className="mt-2 grid gap-2 rounded-md border border-primary/40 p-2 sm:grid-cols-4">
-      <Input placeholder="Nº da fatura" value={num} onChange={(e) => setNum(e.target.value)} />
-      <Input inputMode="decimal" placeholder="Total c/ IVA" value={total} onChange={(e) => setTotal(e.target.value)} />
-      <Input inputMode="decimal" placeholder="Valor s/ IVA" value={semIva} onChange={(e) => setSemIva(e.target.value)} />
-      <Input type="file" accept="application/pdf,image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-      <div className="flex justify-end gap-2 sm:col-span-4">
+    <div className="mt-2 space-y-2 rounded-md border border-primary/40 p-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="text-[11px] text-muted-foreground">
+          {existente ? (
+            <>
+              Fatura já registada: <b className="text-foreground">{existente.descricao || existente.n_documento}</b>{' '}
+              <button type="button" className="text-primary hover:underline" onClick={() => setExistente(null)}>
+                (trocar)
+              </button>
+            </>
+          ) : (
+            'Associe a fatura de venda: escolha uma já registada no Financeiro ou anexe o PDF.'
+          )}
+        </span>
+        {!existente && (
+          <Button type="button" variant="outline" size="sm" onClick={() => setEscolher((v) => !v)}>
+            Escolher fatura já registada
+          </Button>
+        )}
+      </div>
+      {escolher && !existente && (
+        <div className="space-y-1">
+          <Input placeholder="Procurar por nº, cliente ou descrição" value={procura} onChange={(e) => setProcura(e.target.value)} />
+          <div className="max-h-56 overflow-y-auto rounded-md border border-border">
+            {!lista.length ? (
+              <p className="p-2 text-[11px] text-muted-foreground">Nenhuma fatura encontrada.</p>
+            ) : (
+              lista.map((x) => (
+                <button
+                  key={x.id}
+                  type="button"
+                  onClick={() => usar(x)}
+                  className="block w-full border-b border-border/50 px-2 py-1.5 text-left text-[11px] last:border-0 hover:bg-muted"
+                >
+                  <span className="font-medium">{x.descricao || x.n_documento || x.ficheiro_nome}</span>
+                  <span className="text-muted-foreground">
+                    {' '}
+                    · {dataPt(x.data)}
+                    {toNum(x.valor) > 0 ? ` · ${eur(toNum(x.valor))}` : ' · sem valor'}
+                    {x.ficheiro ? ' · PDF' : ''}
+                  </span>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+      <div className="grid gap-2 sm:grid-cols-4">
+        <Input placeholder="Nº da fatura" value={num} onChange={(e) => setNum(e.target.value)} />
+        <Input inputMode="decimal" placeholder="Total c/ IVA" value={total} onChange={(e) => setTotal(e.target.value)} />
+        <Input inputMode="decimal" placeholder="Valor s/ IVA" value={semIva} onChange={(e) => setSemIva(e.target.value)} />
+        {!existente?.ficheiro && (
+          <Input type="file" accept="application/pdf,image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+        )}
+      </div>
+      <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" size="sm" onClick={onFechar}>
           Cancelar
         </Button>
@@ -163,7 +262,7 @@ export function VendasViaturas() {
                     </Button>
                   )}
                 </div>
-                {aValidar === m.id && <Validar m={m} onFechar={() => setAValidar(null)} />}
+                {aValidar === m.id && <Validar m={m} movs={movs} onFechar={() => setAValidar(null)} />}
               </div>
             );
           })}
