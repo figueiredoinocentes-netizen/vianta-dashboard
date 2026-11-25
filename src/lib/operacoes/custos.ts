@@ -60,6 +60,12 @@ export function precoVendaSemIva(carro: Carro): number | null {
   return Math.round((toNum(carro.preco_venda) / (1 + iva / 100)) * 100) / 100;
 }
 
+/** Divide a margem bruta s/ IVA entre investidor (`pct` %) e Vianta (o resto). */
+export function divisaoMargem(margem: number, pct: number) {
+  const investidor = Math.round(margem * pct) / 100;
+  return { investidor, vianta: Math.round((margem - investidor) * 100) / 100 };
+}
+
 export function resumoCarro(carro: Carro, movs: Movimento[]) {
   // A fatura de compra (tipo 'Compra') é o preço de compra: não conta como custo.
   const custos = -movs

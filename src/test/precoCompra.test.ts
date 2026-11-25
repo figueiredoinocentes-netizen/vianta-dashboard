@@ -49,3 +49,11 @@ describe('preço de venda s/ IVA a partir da taxa escolhida na ficha', () => {
     expect(r.margem).toBe(20000 - 15000);
   });
 });
+
+describe('divisão da margem com o investidor', () => {
+  it('30% para o investidor, o resto para a Vianta', async () => {
+    const { divisaoMargem } = await import('@/lib/operacoes/custos');
+    expect(divisaoMargem(2848.46, 30)).toEqual({ investidor: 854.54, vianta: 1993.92 });
+    expect(divisaoMargem(1000, 0)).toEqual({ investidor: 0, vianta: 1000 });
+  });
+});
