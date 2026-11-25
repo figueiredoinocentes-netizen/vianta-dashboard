@@ -48,7 +48,7 @@ export function MargensFrota({ carros }: { carros: Carro[] }) {
       compra: t.compra + x.r.compra,
       custos: t.custos + x.r.custos,
       receita: t.receita + x.r.receita,
-      margem: t.margem + x.r.margem,
+      margem: t.margem + (x.r.faltaPct ? 0 : x.r.margem),
     }),
     { compra: 0, custos: 0, receita: 0, margem: 0 },
   );
@@ -59,7 +59,8 @@ export function MargensFrota({ carros }: { carros: Carro[] }) {
         <div>
           <div className="text-sm font-semibold">Margens por viatura</div>
           <div className="text-[11px] text-muted-foreground">
-            Valores sem IVA. Venda: preço de venda − compra − custos. Aluguer: receitas − custos.
+            Margem bruta = o que fica para a Vianta, s/ IVA. Venda: preço de venda − compra − custos. Aluguer:
+            receitas − custos. Viaturas de investidor: depois da comissão do investidor.
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -92,7 +93,7 @@ export function MargensFrota({ carros }: { carros: Carro[] }) {
         <Total label="Investido (compra)" value={eur(tot.compra)} />
         <Total label="Custos" value={eur(tot.custos)} />
         <Total label="Receitas" value={eur(tot.receita)} />
-        <Total label="Margem" value={eur(tot.margem)} tone={tot.margem < 0 ? 'neg' : 'pos'} />
+        <Total label="Margem bruta" value={eur(tot.margem)} tone={tot.margem < 0 ? 'neg' : 'pos'} />
       </div>
 
       {isLoading ? (
@@ -122,7 +123,7 @@ export function MargensFrota({ carros }: { carros: Carro[] }) {
                   onClick={() => setAsc((a) => !a)}
                   title="Ordenar"
                 >
-                  Margem {asc ? '▲' : '▼'}
+                  Margem bruta {asc ? '▲' : '▼'}
                 </TableHead>
                 <TableHead className="text-right">%</TableHead>
               </TableRow>
@@ -144,13 +145,19 @@ export function MargensFrota({ carros }: { carros: Carro[] }) {
                   <TableCell
                     className={'text-right font-semibold ' + (r.margem < 0 ? 'text-destructive' : 'text-emerald-500')}
                   >
-                    {eur(r.margem)}
+                    {r.faltaPct ? '—' : eur(r.margem)}
+                    {r.faltaPct && (
+                      <div className="text-[10px] font-normal text-amber-500">falta % investidor</div>
+                    )}
+                    {r.investidor && r.pctInvestidor != null && (
+                      <div className="text-[10px] font-normal text-muted-foreground">após {r.pctInvestidor}% investidor</div>
+                    )}
                     {c.tipo_gestao === 'Venda' && !r.vendido && (
                       <div className="text-[10px] font-normal text-muted-foreground">prevista</div>
                     )}
                   </TableCell>
                   <TableCell className="text-right text-xs text-muted-foreground">
-                    {r.receita ? `${Math.round((r.margem / r.receita) * 100)}%` : '—'}
+                    {r.receita && !r.faltaPct ? `${Math.round((r.margem / r.receita) * 100)}%` : '—'}
                   </TableCell>
                 </TableRow>
               ))}

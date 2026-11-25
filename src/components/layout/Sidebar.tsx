@@ -45,7 +45,7 @@ const operacoesItems = [
 ];
 
 const financeiroItems = [
-  { to: '/financeiro', label: 'Faturas de Custos', icon: Receipt, end: true },
+  { to: '/financeiro', label: 'Movimentos', icon: Receipt, end: true },
   { to: '/financeiro/pl', label: 'P&L', icon: ChartNoAxesCombined },
 ];
 

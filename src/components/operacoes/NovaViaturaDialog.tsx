@@ -47,6 +47,7 @@ const EMPTY = {
   kms: '',
   proprietario: 'VIANTA',
   investidorId: '',
+  pctInvestidor: '',
   gestao: 'Aluguer',
   estado: 'Em Preparação',
   precoVenda: '',
@@ -101,6 +102,9 @@ export function NovaViaturaDialog({
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (!form.aquisicao) return toast.error('Escolha se a viatura é de compra ou de consignação.');
+    const pctNum = form.pctInvestidor.trim() === '' ? null : toNum(form.pctInvestidor);
+    if (form.proprietario === 'Investidor' && (pctNum == null || pctNum < 0 || pctNum > 100))
+      return toast.error('Indique a comissão do investidor (% da margem bruta s/ IVA, entre 0 e 100).');
     // Uma viatura nova não tem ficha: só pode nascer em preparação e é lá que se
     // preenchem as características exigidas para a disponibilizar.
     if (faltamParaEstado({ combustivel: form.combustivel, combustivel_principal: form.combustivelPrincipal, combustivel_secundario: form.combustivelSecundario, plug_in: plugInAplicavel && form.plugIn !== '' ? form.plugIn === 'Sim' : null }, form.estado).length) {
@@ -136,6 +140,7 @@ export function NovaViaturaDialog({
         kms_atuais: form.kms || null,
         proprietario: isInvestidor ? (investidor ? investidor.nome : null) : 'VIANTA',
         investidor_id: investidor ? investidor.id : null,
+        pct_investidor: isInvestidor ? (form.pctInvestidor.trim() === '' ? null : toNum(form.pctInvestidor)) : null,
         tipo_gestao: form.gestao || null,
         estado: form.estado || null,
         preco_venda: form.precoVenda || null,
@@ -332,6 +337,16 @@ export function NovaViaturaDialog({
                       </option>
                     ))}
                 </NativeSelect>
+              </Field>
+            )}
+            {form.proprietario === 'Investidor' && (
+              <Field label="Comissão do investidor (% da margem bruta s/ IVA)" className="sm:col-span-2" required>
+                <Input
+                  inputMode="decimal"
+                  placeholder="ex.: 30"
+                  value={form.pctInvestidor}
+                  onChange={(e) => set('pctInvestidor', e.target.value)}
+                />
               </Field>
             )}
             <Field label="Tipo Gestão">

@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 
 /** Separadores do pop-up da viatura. */
-export type VehicleTab = 'carac' | 'ficha' | 'prep' | 'sinist' | 'historico';
+export type VehicleTab = 'carac' | 'ficha' | 'custos' | 'docs' | 'checklist' | 'sinist' | 'historico';
 
 /** Estado partilhado entre as páginas da Operações e os seus pop-ups. */
 export interface OpsContextValue {

@@ -25,6 +25,13 @@ export const TIPOS_COM_GRAVIDADE: readonly string[] = ['Dano', 'Avaria', 'Aviso'
 export const GRAVIDADES = ['Baixa', 'Média', 'Alta'] as const;
 export const ESTADOS_TRABALHO = ['Por fazer', 'Em curso', 'Feito', 'Dispensado'] as const;
 
+/**
+ * Tarefas/trabalhos (tabela `ocorrencias`) desligados no front end desde 2026-11-25.
+ * A tabela fica intacta; os custos passam a registar-se na aba Custos da viatura.
+ * Mudar para `true` volta a mostrar as tarefas.
+ */
+export const TAREFAS_ATIVAS = false;
+
 export const ORIGEM_PREP = 'Preparacao';
 export const ORIGEM_OCORR = 'Ocorrencia';
 

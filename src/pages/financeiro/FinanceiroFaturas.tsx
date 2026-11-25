@@ -7,14 +7,32 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { EmptyState, ErrorBox, NativeSelect, hideCols } from '@/components/operacoes/shared';
 import { FaturaDialog } from '@/components/financeiro/FaturaDialog';
+import { VendasViaturas } from '@/components/financeiro/VendasViaturas';
 import { FaturaThumb, FaturaViewer } from '@/components/financeiro/FaturaPreview';
 import { useCarros, useFinanceiro, useRefreshOperacoes } from '@/hooks/useOperacoes';
-import { eur } from '@/lib/operacoes/custos';
+import { eur, toNum } from '@/lib/operacoes/custos';
 import type { Movimento } from '@/lib/operacoes/types';
 import { CENTROS_CUSTO, eCusto, mesDe, naturezasSugeridas, nomeMes, valorSemIva } from '@/lib/financeiro';
 import { cn } from '@/lib/utils';
 
 const SEM_CENTRO = '__sem__';
+
+type TipoFiltro = 'custos' | 'vendas' | 'todos';
+const TIPOS: [TipoFiltro, string][] = [
+  ['custos', 'Custos'],
+  ['vendas', 'Vendas'],
+  ['todos', 'Todos'],
+];
+const eVenda = (m: Movimento) => m.tipo === 'Venda';
+// Faturas de venda emitidas pela Vianta (importadas do SAF-T), exceto as já associadas a uma venda de viatura
+// (essas aparecem pela própria venda, para não contar duas vezes).
+const eFaturaVenda = (m: Movimento) =>
+  (m.n_documento || '').startsWith('SAFT ') &&
+  m.tipo !== 'Venda' &&
+  toNum(m.valor) > 0 &&
+  !(m.obs || '').startsWith('Associada à venda');
+const eAnulada = (m: Movimento) => (m.descricao || '').startsWith('[ANULADA]');
+const eReceita = (m: Movimento) => eVenda(m) || eFaturaVenda(m);
 
 const dataPt = (d: string | null) => (d ? d.slice(0, 10).split('-').reverse().join('/') : '');
 
@@ -23,6 +41,7 @@ export default function FinanceiroFaturas() {
   const { data: carros = [] } = useCarros();
   const refresh = useRefreshOperacoes();
 
+  const [tipo, setTipo] = useState<TipoFiltro>('custos');
   const [search, setSearch] = useState('');
   const [centro, setCentro] = useState('');
   const [natureza, setNatureza] = useState('');
@@ -39,9 +58,23 @@ export default function FinanceiroFaturas() {
     [movs],
   );
   const naturezas = useMemo(() => naturezasSugeridas(movs), [movs]);
-  const meses = useMemo(() => [...new Set(custos.map((m) => mesDe(m.data)).filter(Boolean))], [custos]);
+  // Vendas e recebimentos (vendas de viaturas + faturas de venda SAF-T): mostradas no filtro Vendas / Todos.
+  const vendas = useMemo(
+    () => movs.filter(eReceita).sort((a, b) => (b.data || '').localeCompare(a.data || '') || b.id - a.id),
+    [movs],
+  );
+  const base = useMemo(
+    () =>
+      tipo === 'custos'
+        ? custos
+        : tipo === 'vendas'
+          ? vendas
+          : [...custos, ...vendas].sort((a, b) => (b.data || '').localeCompare(a.data || '') || b.id - a.id),
+    [tipo, custos, vendas],
+  );
+  const meses = useMemo(() => [...new Set(base.map((m) => mesDe(m.data)).filter(Boolean))].sort().reverse(), [base]);
 
-  const lista = custos.filter((m) => {
+  const lista = base.filter((m) => {
     if (centro === SEM_CENTRO ? !!m.centro_custo : centro && m.centro_custo !== centro) return false;
     if (natureza && m.categoria !== natureza) return false;
     if (mes && mesDe(m.data) !== mes) return false;
@@ -65,7 +98,8 @@ export default function FinanceiroFaturas() {
     }
     return t;
   }, [custos, natureza, mes]);
-  const totalLista = lista.reduce((a, m) => a + valorSemIva(m).valor, 0);
+  const totalCustosLista = lista.filter((m) => !eReceita(m)).reduce((a, m) => a + valorSemIva(m).valor, 0);
+  const totalVendasLista = lista.filter((m) => eReceita(m) && !eAnulada(m)).reduce((a, m) => a + valorSemIva(m).valor, 0);
 
   const abrir = (mov: Movimento | null) => setDialog({ open: true, mov });
 
@@ -74,8 +108,8 @@ export default function FinanceiroFaturas() {
       <div className="mb-4 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="font-display text-2xl font-bold text-foreground">Financeiro</h1>
-            <p className="text-sm text-muted-foreground">Faturas de custos • {lista.length} registos</p>
+            <h1 className="font-display text-2xl font-bold text-foreground">Movimentos</h1>
+            <p className="text-sm text-muted-foreground">Custos e vendas • {lista.length} registos</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={refresh}>
@@ -87,7 +121,25 @@ export default function FinanceiroFaturas() {
           </div>
         </div>
 
-        {/* Totais por centro de custo (clicar filtra) */}
+        <VendasViaturas />
+
+        <div className="flex gap-1 rounded-lg bg-muted/40 p-1 w-fit">
+          {TIPOS.map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setTipo(id)}
+              className={cn(
+                'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+                tipo === id ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Totais de custos por centro de custo (clicar filtra) */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {[...CENTROS_CUSTO, SEM_CENTRO].map((c) => (
             <button
@@ -155,7 +207,7 @@ export default function FinanceiroFaturas() {
       ) : isLoading ? (
         <Skeleton className="h-64 rounded-xl" />
       ) : !lista.length ? (
-        <EmptyState icon="🧾" text="Nenhuma fatura de custo" />
+        <EmptyState icon="🧾" text="Nenhum movimento" />
       ) : (
         <div className={`rounded-xl border border-border bg-card ${hideCols(1, 5, 7, 8)}`}>
           <Table>
@@ -166,8 +218,8 @@ export default function FinanceiroFaturas() {
                 <TableHead>Descrição do serviço / produto</TableHead>
                 <TableHead className="text-right">Valor s/ IVA</TableHead>
                 <TableHead>Centro de custo</TableHead>
-                <TableHead>Natureza do custo</TableHead>
-                <TableHead>Fornecedor</TableHead>
+                <TableHead>{tipo === 'custos' ? 'Natureza do custo' : 'Natureza'}</TableHead>
+                <TableHead>{tipo === 'custos' ? 'Fornecedor' : tipo === 'vendas' ? 'Cliente' : 'Fornecedor / cliente'}</TableHead>
                 <TableHead>Viatura</TableHead>
                 <TableHead>Fatura</TableHead>
               </TableRow>
@@ -177,11 +229,31 @@ export default function FinanceiroFaturas() {
                 const v = valorSemIva(m);
                 const carro = m.carro_id != null ? carroPorId.get(m.carro_id) : undefined;
                 return (
-                  <TableRow key={m.id} className="cursor-pointer" onClick={() => abrir(m)}>
+                  <TableRow
+                    key={m.id}
+                    className={eVenda(m) ? '' : 'cursor-pointer'}
+                    onClick={() => !eVenda(m) && abrir(m)}
+                    title={eVenda(m) ? 'Venda de viatura: edita-se na ficha da viatura (aba Custos) e valida-se no quadro Vendas de viaturas' : undefined}
+                  >
                     <TableCell className="font-medium">{m.n_documento || '—'}</TableCell>
                     <TableCell className="whitespace-nowrap">{dataPt(m.data)}</TableCell>
-                    <TableCell>{m.descricao || ''}</TableCell>
-                    <TableCell className="whitespace-nowrap text-right font-semibold">
+                    <TableCell>
+                      {m.descricao || ''}
+                      {eVenda(m) && (
+                        <span
+                          className={cn(
+                            'ml-1 rounded px-1 text-[10px]',
+                            m.estado_validacao === 'validado' ? 'bg-emerald-500/15 text-emerald-500' : 'bg-amber-500/15 text-amber-500',
+                          )}
+                        >
+                          {m.estado_validacao === 'validado' ? 'venda validada' : 'venda provisória'}
+                        </span>
+                      )}
+                      {eFaturaVenda(m) && eAnulada(m) && (
+                        <span className="ml-1 rounded bg-rose-500/15 px-1 text-[10px] text-rose-500">anulada</span>
+                      )}
+                    </TableCell>
+                    <TableCell className={cn('whitespace-nowrap text-right font-semibold', eReceita(m) && !eAnulada(m) && 'text-emerald-500', eAnulada(m) && 'text-muted-foreground line-through')}>
                       {eur(v.valor)}
                       {v.soTotal && (
                         <span className="ml-1 text-[10px] font-normal text-amber-500" title="Só foi registado o total c/ IVA">
@@ -218,8 +290,18 @@ export default function FinanceiroFaturas() {
             </TableBody>
           </Table>
           <div className="flex justify-end gap-2 border-t border-border px-4 py-3 text-sm">
-            <span className="text-muted-foreground">Total s/ IVA ({lista.length}):</span>
-            <span className="font-bold text-foreground">{eur(totalLista)}</span>
+            {tipo !== 'vendas' && (
+              <>
+                <span className="text-muted-foreground">Custos s/ IVA:</span>
+                <span className="font-bold text-foreground">{eur(totalCustosLista)}</span>
+              </>
+            )}
+            {tipo !== 'custos' && (
+              <>
+                <span className="ml-4 text-muted-foreground">Vendas s/ IVA:</span>
+                <span className="font-bold text-emerald-500">{eur(totalVendasLista)}</span>
+              </>
+            )}
           </div>
         </div>
       )}
