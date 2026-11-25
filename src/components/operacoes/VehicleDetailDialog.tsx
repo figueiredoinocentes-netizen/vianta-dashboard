@@ -18,7 +18,7 @@ import {
   normalizeText,
 } from '@/lib/operacoes/constants';
 import { apagarFaturaFicheiro, deleteCentral, listDriveFiles, uploadDriveDoc } from '@/lib/operacoes/central';
-import { eur } from '@/lib/operacoes/custos';
+import { eur, precoCompraFatura, toNum } from '@/lib/operacoes/custos';
 import { valorSemIva } from '@/lib/financeiro';
 import type { Carro, DriveFile } from '@/lib/operacoes/types';
 import { imprimirFichaComercial } from '@/lib/operacoes/fichaComercial';
@@ -36,13 +36,14 @@ import {
   errorMessage,
 } from '@/hooks/useOperacoes';
 import { ClienteDialog } from './ClienteDialog';
-import { TrabalhosViatura } from './TrabalhosViatura';
+import { ChecklistViatura } from './ChecklistViatura';
 import { SinistrosViatura } from './SinistrosViatura';
 import { DeclaracaoCirculacao } from './DeclaracaoCirculacao';
 import { FotosEditor } from './FotosEditor';
 import { DeleteConfirm, Field, NativeSelect } from './shared';
 import { AquisicaoViatura } from './AquisicaoViatura';
 import { HistoricoViatura } from './HistoricoViatura';
+import { ContasViatura } from './ContasViatura';
 import type { VehicleTab } from './OpsContext';
 import {
   URL_VEICULOS_ELEGIVEIS_UBER,
@@ -70,6 +71,7 @@ interface Form {
   gestao: string;
   estado: string;
   precoVenda: string;
+  ivaVenda: string;
   precoCompra: string;
   dataCompra: string;
   dataVenda: string;
@@ -119,6 +121,7 @@ function formFromCarro(v: Carro): Form {
     gestao: v.tipo_gestao || 'Aluguer',
     estado: v.estado || 'Alugado',
     precoVenda: s(v.preco_venda),
+    ivaVenda: s(v.iva_venda),
     precoCompra: s(v.preco_compra),
     dataCompra: s(v.data_compra),
     dataVenda: s(v.data_venda),
@@ -213,6 +216,8 @@ function Body({
   const { data: movs = [] } = useFinanceiro();
   // Faturas / movimentos do Financeiro ligados a esta viatura (ex.: fatura de compra).
   const movsCarro = movs.filter((m) => m.carro_id === carro.id);
+  // Com fatura de compra, o preço de compra é o da fatura: não se escreve à mão.
+  const compraFatura = precoCompraFatura(movsCarro);
 
   const set = (k: keyof Form, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -298,7 +303,8 @@ function Body({
       investidor_id: investidor ? investidor.id : null,
       tipo_gestao: form.gestao || null,
       preco_venda: form.precoVenda || null,
-      preco_compra: form.precoCompra || null,
+      iva_venda: form.ivaVenda === '' ? null : Number(form.ivaVenda),
+      preco_compra: compraFatura != null ? String(compraFatura) : form.precoCompra || null,
       data_compra: form.dataCompra || null,
       data_venda: form.dataVenda || null,
       valor_aluguer_semanal: form.precoAluguer || null,
@@ -370,7 +376,9 @@ function Body({
           [
             ['carac', 'Características'],
             ['ficha', 'Ficha comercial'],
-            ['prep', 'Tarefas'],
+            ['custos', 'Custos'],
+            ['docs', 'Documentos'],
+            ['checklist', 'Checklist'],
             ['sinist', 'Sinistros'],
             ['historico', 'Histórico'],
           ] as const
@@ -514,12 +522,19 @@ function Body({
                 ))}
               </NativeSelect>
             </Field>
-            <Field label="Preço de compra (€, s/ IVA)" className="sm:col-span-2">
-              <Input
-                inputMode="decimal"
-                value={form.precoCompra}
-                onChange={(e) => set('precoCompra', e.target.value)}
-              />
+            <Field
+              label={compraFatura != null ? 'Preço de compra (€, s/ IVA) · da fatura de compra' : 'Preço de compra (€, s/ IVA)'}
+              className="sm:col-span-2"
+            >
+              {compraFatura != null ? (
+                <Input value={eur(compraFatura)} readOnly disabled title="Vem da fatura de compra registada no Financeiro" />
+              ) : (
+                <Input
+                  inputMode="decimal"
+                  value={form.precoCompra}
+                  onChange={(e) => set('precoCompra', e.target.value)}
+                />
+              )}
             </Field>
 
             <Field label="Data de compra">
@@ -685,12 +700,24 @@ function Body({
                 <div className="sm:col-span-2 mt-2 border-t border-border pt-3 text-xs font-medium text-muted-foreground">
                   Venda e simulação de crédito — prestação mensal (€)
                 </div>
-                <Field label="Preço Venda (€)" className="sm:col-span-2" required={obrigatorio('preco_venda')}>
+                <Field label="Preço Venda (€, c/ IVA)" required={obrigatorio('preco_venda')}>
                   <Input
                     inputMode="decimal"
                     value={form.precoVenda}
                     onChange={(e) => set('precoVenda', e.target.value)}
                   />
+                </Field>
+                <Field label="IVA da venda">
+                  <NativeSelect value={form.ivaVenda} onChange={(e) => set('ivaVenda', e.target.value)}>
+                    <option value="">— por definir —</option>
+                    <option value="23">23%</option>
+                    <option value="0">0%</option>
+                  </NativeSelect>
+                  {form.ivaVenda !== '' && toNum(form.precoVenda) > 0 && (
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      s/ IVA: {eur(toNum(form.precoVenda) / (1 + Number(form.ivaVenda) / 100))}
+                    </p>
+                  )}
                 </Field>
                 <Field label="120 meses (10 anos)" required={obrigatorio('credito_120_meses')}>
                   <Input value={form.credito120} onChange={(e) => set('credito120', e.target.value)} />
@@ -721,7 +748,8 @@ function Body({
           </div>
         )}
 
-        {tab === 'prep' && (
+        {tab === 'docs' && <DocumentosEditor carro={carro} />}
+        {tab === 'checklist' && (
           <div className="space-y-4">
             <Field label="Previsão de pronto">
               <Input
@@ -730,12 +758,12 @@ function Body({
                 onChange={(e) => set('previsaoPronto', e.target.value)}
               />
             </Field>
-            <DocumentosEditor carro={carro} />
-            <TrabalhosViatura carro={carro} />
+            <ChecklistViatura carro={carro} />
           </div>
         )}
 
         {tab === 'sinist' && <SinistrosViatura carro={carro} />}
+        {tab === 'custos' && <ContasViatura carro={carro} />}
         {tab === 'historico' && <HistoricoViatura carro={carro} />}
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-2">

@@ -11,7 +11,7 @@ import {
 import type { Carro } from '@/lib/operacoes/types';
 import { toast } from 'sonner';
 import { updateCentralField } from '@/lib/operacoes/central';
-import { ePreparacao, emAberto } from '@/lib/operacoes/trabalhos';
+import { TAREFAS_ATIVAS, ePreparacao, emAberto } from '@/lib/operacoes/trabalhos';
 import { faltamParaEstado } from '@/lib/operacoes/estadoRequisitos';
 import type { Ocorrencia } from '@/lib/operacoes/types';
 import {
@@ -50,7 +50,9 @@ function MissingTags({ v }: { v: Carro }) {
   const { data: ocorrencias = [] } = useOcorrencias();
   const done = v.checklist_prep || {};
   const docs = (getChecklistGroups(v).Documentos || []).filter((item) => !done[item]);
-  const trabalhos = ocorrencias.filter((o) => o.carro_id === v.id && ePreparacao(o) && !o.item && emAberto(o));
+  const trabalhos = TAREFAS_ATIVAS
+    ? ocorrencias.filter((o) => o.carro_id === v.id && ePreparacao(o) && !o.item && emAberto(o))
+    : [];
 
   const marcarFeito = async (e: React.MouseEvent, o: Ocorrencia) => {
     e.stopPropagation();
@@ -139,7 +141,9 @@ export default function OpsCheckin() {
         <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
           {lista.map((v) => {
             const missing = getMissingItems(v);
-            const abertos = ocorrencias.filter((o) => o.carro_id === v.id && ePreparacao(o) && emAberto(o));
+            const abertos = TAREFAS_ATIVAS
+              ? ocorrencias.filter((o) => o.carro_id === v.id && ePreparacao(o) && emAberto(o))
+              : [];
             return (
               <div
                 key={v.id}

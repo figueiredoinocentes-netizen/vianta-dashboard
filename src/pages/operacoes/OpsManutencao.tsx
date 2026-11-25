@@ -11,7 +11,7 @@ import {
 import { destinoDepoisDePreparacao, matchesSearch } from '@/lib/operacoes/constants';
 import { faltamParaEstado } from '@/lib/operacoes/estadoRequisitos';
 import { useAlterarEstado, useCarros, useOcorrencias } from '@/hooks/useOperacoes';
-import { emAberto, ePreparacao, gravidadeClass } from '@/lib/operacoes/trabalhos';
+import { TAREFAS_ATIVAS, emAberto, ePreparacao, gravidadeClass } from '@/lib/operacoes/trabalhos';
 import { useOps } from '@/components/operacoes/OpsContext';
 import { EmptyState, ErrorBox, OpsHeader, StatusSelect, hideCols } from '@/components/operacoes/shared';
 import { NomeViatura } from '@/components/operacoes/NomeViatura';
@@ -21,7 +21,7 @@ export default function OpsManutencao() {
   const { data: carros = [], isLoading, isError } = useCarros();
   const alterar = useAlterarEstado();
   const { data: ocorrencias = [] } = useOcorrencias();
-  const pendentes = ocorrencias
+  const pendentes = (TAREFAS_ATIVAS ? ocorrencias : [])
     .filter((o) => emAberto(o) && !ePreparacao(o))
     .map((o) => ({ o, carro: carros.find((c) => c.id === o.carro_id) }))
     .filter((x) => x.carro && matchesSearch(search, x.carro))

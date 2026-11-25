@@ -43,6 +43,8 @@ export interface Carro {
   fotos?: string[] | null;
   obs?: string | null;
   preco_compra?: string | number | null;
+  /** Taxa de IVA da venda: 0 ou 23. `preco_venda` é c/ IVA. Null = por definir. */
+  iva_venda?: number | string | null;
   data_compra?: string | null;
   data_venda?: string | null;
   /** 'Compra' (fatura de compra no Financeiro) | 'Consignação'. Viaturas antigas: null. */

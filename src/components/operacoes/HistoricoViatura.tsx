@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useEstadosLog, useFinanceiro, useOcorrencias } from '@/hooks/useOperacoes';
 import { eur, semIva } from '@/lib/operacoes/custos';
-import { ORIGEM_PREP } from '@/lib/operacoes/trabalhos';
+import { ORIGEM_PREP, TAREFAS_ATIVAS } from '@/lib/operacoes/trabalhos';
 import type { Carro } from '@/lib/operacoes/types';
 import { NomeViatura } from '@/components/operacoes/NomeViatura';
 
@@ -28,7 +28,7 @@ export function HistoricoViatura({ carro }: { carro: Carro }) {
         detail: e.ate ? `Até ${dataPt(e.ate)}` : 'Estado atual',
       });
     }
-    for (const o of ocorrencias.filter((x) => x.carro_id === carro.id && !(x.origem === ORIGEM_PREP && x.item))) {
+    for (const o of (TAREFAS_ATIVAS ? ocorrencias : []).filter((x) => x.carro_id === carro.id && !(x.origem === ORIGEM_PREP && x.item))) {
       const custos = financeiro.filter((m) => m.ocorrencia_id === o.id);
       const custoTotal = custos.reduce((sum, m) => sum + semIva(m), 0);
       const nome = o.descricao || o.item || o.tipo || 'Trabalho/ocorrência';
