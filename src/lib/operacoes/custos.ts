@@ -77,6 +77,11 @@ export function pctInvestidor(carro: Carro): number | null {
   return n >= 0 && n <= 100 ? n : null;
 }
 
+/**
+ * Contas da viatura. `margem` é a margem bruta: o valor final s/ IVA que fica para a Vianta,
+ * depois da compra, dos custos e da comissão do investidor.
+ * ⚠️ A mesma conta está na BD (função `vianta_margem_bruta`, coluna `carros.margem_bruta`).
+ */
 export function resumoCarro(carro: Carro, movs: Movimento[]) {
   // A fatura de compra (tipo 'Compra') é o preço de compra: não conta como custo.
   const custos = -movs

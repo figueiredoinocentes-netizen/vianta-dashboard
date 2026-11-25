@@ -47,6 +47,8 @@ export interface Carro {
   iva_venda?: number | string | null;
   /** % da margem bruta s/ IVA que fica para o investidor (0-100). Null = por definir. */
   pct_investidor?: number | string | null;
+  /** Valor final s/ IVA que fica para a Vianta. Calculado por trigger na BD (mesma conta que `resumoCarro`). */
+  margem_bruta?: number | string | null;
   data_compra?: string | null;
   data_venda?: string | null;
   /** 'Compra' (fatura de compra no Financeiro) | 'Consignação'. Viaturas antigas: null. */

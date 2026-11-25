@@ -86,32 +86,37 @@ function Linha({ label, cIva, sIva, nota }: { label: string; cIva: string; sIva:
   );
 }
 
-/** Margem do carro: bruta s/ IVA e, nas viaturas de investidor, a comissão e a parte da Vianta. */
+/** Margem bruta = valor final s/ IVA que fica para a Vianta (depois da comissão do investidor). */
 function MargemViatura({ r }: { r: ReturnType<typeof resumoCarro> }) {
   const tom = (n: number) => (n < 0 ? 'text-destructive' : 'text-emerald-500');
   return (
     <section className="space-y-1 rounded-lg border border-border p-3">
-      <div className="flex items-baseline justify-between text-xs">
-        <span>Margem bruta (s/ IVA)</span>
-        <span className={tom(r.margemBruta)}>{eur(r.margemBruta)}</span>
-      </div>
-      <div className="text-[11px] text-muted-foreground">Venda s/ IVA − compra s/ IVA − custos s/ IVA</div>
-      {r.investidor && r.pctInvestidor != null && (
-        <div className="flex justify-between text-xs">
-          <span>Comissão do investidor ({r.pctInvestidor}%)</span>
-          <span>− {eur(r.comissaoInvestidor)}</span>
-        </div>
-      )}
-      {r.faltaPct && (
-        <p className="text-[11px] text-amber-500">
-          Falta a comissão do investidor (Características → Comissão do investidor). Até lá a margem do carro é a
-          margem bruta.
-        </p>
+      {r.investidor && (
+        <>
+          <div className="flex items-baseline justify-between text-xs">
+            <span>Resultado s/ IVA (antes da comissão)</span>
+            <span>{eur(r.margemBruta)}</span>
+          </div>
+          {r.pctInvestidor != null && (
+            <div className="flex justify-between text-xs">
+              <span>Comissão do investidor ({r.pctInvestidor}%)</span>
+              <span>− {eur(r.comissaoInvestidor)}</span>
+            </div>
+          )}
+        </>
       )}
       <div className="flex items-baseline justify-between border-t border-border pt-1 text-sm font-semibold">
-        <span>Margem do carro{r.investidor ? ' (Vianta)' : ''}</span>
-        <span className={tom(r.margem)}>{eur(r.margem)}</span>
+        <span>Margem bruta (Vianta, s/ IVA)</span>
+        {r.faltaPct ? <span className="text-amber-500">—</span> : <span className={tom(r.margem)}>{eur(r.margem)}</span>}
       </div>
+      <div className="text-[11px] text-muted-foreground">
+        Venda − compra − custos{r.investidor ? ' − comissão do investidor' : ''}, tudo s/ IVA.
+      </div>
+      {r.faltaPct && (
+        <p className="text-[11px] text-amber-500">
+          Falta a comissão do investidor (Características → Comissão do investidor).
+        </p>
+      )}
     </section>
   );
 }
