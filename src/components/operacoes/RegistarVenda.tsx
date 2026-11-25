@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { errorMessage, useCentralWrites, useUpdateCarroField } from '@/hooks/useOperacoes';
 import { eur, ivaVenda, toNum } from '@/lib/operacoes/custos';
 import type { Carro } from '@/lib/operacoes/types';
-import { procurarLeads, useLeads, type Lead } from '@/lib/leads';
+import { useProcurarLeads, type Lead } from '@/lib/leads';
 import { nomeCarro } from '@/lib/operacoes/identidadeViatura';
 import { Field, NativeSelect } from './shared';
 
@@ -20,7 +20,6 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 export function RegistarVenda({ carro, onFechar }: { carro: Carro; onFechar: () => void }) {
   const { create } = useCentralWrites('financeiro');
   const update = useUpdateCarroField();
-  const leads = useLeads();
   const [data, setData] = useState(carro.data_venda?.slice(0, 10) || hoje());
   const [total, setTotal] = useState(carro.preco_venda ? String(carro.preco_venda) : '');
   const ivaIni = ivaVenda(carro);
@@ -32,7 +31,8 @@ export function RegistarVenda({ carro, onFechar }: { carro: Carro; onFechar: () 
 
   const t = toNum(total);
   const semIva = iva === '' ? null : round2(t / (1 + Number(iva) / 100));
-  const sugestoes = lead ? [] : procurarLeads(leads.data || [], procura);
+  const leads = useProcurarLeads(lead ? '' : procura);
+  const sugestoes = lead ? [] : leads.data || [];
 
   async function guardar() {
     if (!t) return toast.error('Indique o valor da venda (c/ IVA).');

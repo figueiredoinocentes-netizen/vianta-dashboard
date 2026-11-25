@@ -104,7 +104,23 @@ export const handler = async (event) => {
         id: v(l, c.id), nome: v(l, c.nome), email: v(l, c.email), telemovel: v(l, c.tel), oferta: v(l, c.oferta),
         data: v(l, c.data), fonte: v(l, c.fonte), campanha: v(l, c.campanha), adset: v(l, c.adset), criativo: v(l, c.criativo),
       }));
-    return { statusCode: 200, headers: { ...cors(origin), 'Cache-Control': 'private, max-age=120' }, body: JSON.stringify(leads) };
+    // Sem login no dashboard: nunca devolver a lista inteira (dados pessoais). Só pesquisa
+    // (?q=, mínimo 3 caracteres, até 8 resultados) ou leads pedidas por ID (?ids=a,b,c).
+    const qs = event.queryStringParameters || {};
+    const norm = (t) => (t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    let out = [];
+    if (qs.ids) {
+      const ids = new Set(String(qs.ids).split(',').map((x) => x.trim()).filter(Boolean).slice(0, 100));
+      out = leads.filter((l) => ids.has(l.id));
+    } else if (qs.q && String(qs.q).trim().length >= 3) {
+      const t = norm(String(qs.q).trim());
+      const dig = String(qs.q).replace(/\D/g, '');
+      out = leads
+        .filter((l) => norm(l.nome).includes(t) || norm(l.email).includes(t) || (dig.length >= 3 && l.telemovel.replace(/\D/g, '').includes(dig)))
+        .reverse()
+        .slice(0, 8);
+    }
+    return { statusCode: 200, headers: { ...cors(origin), 'Cache-Control': 'private, no-store' }, body: JSON.stringify(out) };
   } catch (e) {
     return { statusCode: 500, headers: cors(origin), body: JSON.stringify({ error: String((e && e.message) || e) }) };
   }

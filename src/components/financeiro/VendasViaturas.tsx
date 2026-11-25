@@ -6,7 +6,7 @@ import { errorMessage, useCarros, useFinanceiro, useRefreshOperacoes } from '@/h
 import { MAX_FATURA_MB, updateCentralField, uploadFatura } from '@/lib/operacoes/central';
 import { eur, toNum } from '@/lib/operacoes/custos';
 import type { Carro, Movimento } from '@/lib/operacoes/types';
-import { useLeads } from '@/lib/leads';
+import { useLeadsPorId } from '@/lib/leads';
 import { nomeCarro } from '@/lib/operacoes/identidadeViatura';
 
 const dataPt = (d: string | null) => (d ? d.slice(0, 10).split('-').reverse().join('/') : '—');
@@ -77,12 +77,11 @@ function Validar({ m, onFechar }: { m: Movimento; onFechar: () => void }) {
 export function VendasViaturas() {
   const { data: movs = [] } = useFinanceiro();
   const { data: carros = [] } = useCarros();
-  const leads = useLeads();
   const [aValidar, setAValidar] = useState<number | null>(null);
   const [verValidadas, setVerValidadas] = useState(false);
 
   const carroPorId = useMemo(() => new Map(carros.map((c) => [c.id, c])), [carros]);
-  const leadPorId = useMemo(() => new Map((leads.data || []).map((l) => [l.id, l])), [leads.data]);
+
   const vendas = useMemo(
     () =>
       movs
@@ -90,6 +89,8 @@ export function VendasViaturas() {
         .sort((a, b) => (b.data || '').localeCompare(a.data || '') || b.id - a.id),
     [movs],
   );
+  const leads = useLeadsPorId(vendas.map((m) => m.ghl_lead_id || ''));
+  const leadPorId = new Map((leads.data || []).map((l) => [l.id, l]));
   const porValidar = vendas.filter((m) => m.estado_validacao !== 'validado');
   const lista = verValidadas ? vendas : porValidar;
 
