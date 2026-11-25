@@ -10,8 +10,12 @@ import { AlertTriangle, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 
 const cancelled = (m: Movimento) => (m.descricao || '').startsWith('[ANULADA]');
 const isSaft = (m: Movimento) => (m.n_documento || '').startsWith('SAFT ');
-// As vendas de viaturas (tipo 'Venda') não entram: a receita vem do documento SAF-T importado.
+// Uma venda de viatura validada com um documento SAF-T conta pelo SAF-T (não duas vezes).
 const isSaftRevenue = (m: Movimento) => isSaft(m) && m.tipo !== 'Venda' && !cancelled(m) && toNum(m.valor) > 0;
+// Vendas de viaturas registadas no Financeiro (tipo 'Venda'), validadas ou ainda provisórias.
+const isCarSale = (m: Movimento) => m.tipo === 'Venda' && !isSaft(m) && toNum(m.valor) > 0;
+const isProvisional = (m: Movimento) => isCarSale(m) && m.estado_validacao !== 'validado';
+const isRevenue = (m: Movimento) => isSaftRevenue(m) || isCarSale(m);
 const isCost = (m: Movimento) => !isSaft(m) && (toNum(m.valor) < 0 || (toNum(m.valor) === 0 && (m.tipo === 'Custo' || m.tipo === 'Despesa')));
 const periodDate = (m: Movimento) => (m.data || '').slice(0, 10);
 const monthLabel = (ym: string) => nomeMes(ym).replace(/ de /, ' ').replace(/^./, (c) => c.toUpperCase());
@@ -31,10 +35,13 @@ export default function FinanceiroPL() {
     return d.startsWith(activeYear) && (!month || d.slice(0, 7) === month);
   };
   const periodMovements = useMemo(() => movements.filter(inPeriod), [movements, activeYear, month]);
-  const revenueRows = periodMovements.filter(isSaftRevenue);
+  const revenueRows = periodMovements.filter(isRevenue);
+  const saftRows = revenueRows.filter(isSaftRevenue);
+  const carSaleRows = revenueRows.filter(isCarSale);
+  const provisional = periodMovements.filter(isProvisional).reduce((s, m) => s + toNum(m.valor_sem_iva ?? m.valor), 0);
   const cancelledRows = periodMovements.filter((m) => isSaft(m) && cancelled(m));
   const costRows = periodMovements.filter(isCost);
-  const uncategorizedPositive = periodMovements.filter((m) => !isSaft(m) && !isCost(m) && toNum(m.valor) > 0);
+  const uncategorizedPositive = periodMovements.filter((m) => !isSaft(m) && !isCost(m) && !isCarSale(m) && toNum(m.valor) > 0);
 
   const receita = revenueRows.reduce((s, m) => s + toNum(m.valor_sem_iva ?? m.valor), 0);
   const custos = costRows.reduce((s, m) => s + Math.abs(toNum(m.valor_sem_iva ?? m.valor)), 0);
@@ -50,7 +57,7 @@ export default function FinanceiroPL() {
     for (const m of periodMovements) {
       const key = mesDe(m.data);
       if (!key) continue;
-      if (isSaftRevenue(m)) touch(key).receita += toNum(m.valor_sem_iva ?? m.valor);
+      if (isRevenue(m)) touch(key).receita += toNum(m.valor_sem_iva ?? m.valor);
       if (isCost(m)) touch(key).custos += Math.abs(toNum(m.valor_sem_iva ?? m.valor));
     }
     return [...map.values()].sort((a, b) => a.month.localeCompare(b.month)).map((r) => ({ ...r, resultado: r.receita - r.custos, label: monthLabel(r.month) }));
@@ -64,7 +71,7 @@ export default function FinanceiroPL() {
       return map.get(centre)!;
     };
     for (const m of periodMovements) {
-      if (isSaftRevenue(m)) touch(m.centro_custo || 'Geral').receita += toNum(m.valor_sem_iva ?? m.valor);
+      if (isRevenue(m)) touch(m.centro_custo || 'Geral').receita += toNum(m.valor_sem_iva ?? m.valor);
       if (isCost(m)) touch(m.centro_custo || 'Geral').custos += Math.abs(toNum(m.valor_sem_iva ?? m.valor));
     }
     return [...new Set([...CENTROS_CUSTO, ...map.keys()])].map((c) => {
@@ -109,12 +116,12 @@ export default function FinanceiroPL() {
 
         <div className="flex gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-800 dark:text-amber-300">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-          <p><b>Leitura provisória:</b> as faturas SAF-T importadas continuam com tipo “Custo” na base. Aqui são identificadas pelo nº de documento SAF-T, valor positivo e marca [ANULADA]. Valores apresentados sem IVA; custos considerados apenas quando têm valor registado. Confirma a classificação antes de usar como fecho contabilístico.</p>
+          <p><b>Leitura provisória:</b> as faturas SAF-T importadas continuam com tipo “Custo” na base. Aqui são identificadas pelo nº de documento SAF-T, valor positivo e marca [ANULADA]. As vendas de viaturas registadas no Financeiro também contam como receita, incluindo as provisórias (ainda sem fatura associada). Valores apresentados sem IVA; custos considerados apenas quando têm valor registado. Confirma a classificação antes de usar como fecho contabilístico.</p>
         </div>
 
         {isLoading ? <div className="h-24 animate-pulse rounded-xl bg-muted" /> : <>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <Kpi label="Receitas (ativas, s/ IVA)" value={eur(receita)} note={`${revenueRows.length} documentos SAF-T`} icon={<TrendingUp className="h-4 w-4" />} tone="text-emerald-600" />
+            <Kpi label="Receitas (ativas, s/ IVA)" value={eur(receita)} note={`${saftRows.length} documentos SAF-T + ${carSaleRows.length} ${carSaleRows.length === 1 ? 'venda' : 'vendas'} de viaturas${provisional ? ` · das quais provisórias: ${eur(provisional)}` : ''}`} icon={<TrendingUp className="h-4 w-4" />} tone="text-emerald-600" />
             <Kpi label="Custos registados (s/ IVA)" value={eur(custos)} note={`${costRows.length} movimentos com valor`} icon={<TrendingDown className="h-4 w-4" />} tone="text-rose-600" />
             <Kpi label="Resultado registado" value={eur(resultado)} note="Receitas − custos registados" icon={<Wallet className="h-4 w-4" />} tone={resultado >= 0 ? 'text-emerald-600' : 'text-rose-600'} />
             <Kpi label="Margem sobre receitas" value={receita ? `${margem.toFixed(1)}%` : '—'} note="Resultado ÷ receitas ativas" icon={<span className="font-bold">%</span>} tone="text-foreground" />
