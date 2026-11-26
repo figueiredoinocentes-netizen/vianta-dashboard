@@ -663,7 +663,7 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
               ))}
             </div>
           ) : (
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            <div className="mt-3 grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-2">
               {/* Pronto pagamento */}
               <div className="rounded-lg border border-emerald-500/50 bg-card p-3">
                 <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
