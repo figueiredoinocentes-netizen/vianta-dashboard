@@ -12,6 +12,7 @@ const TABLE_MAP = {
   ocorrencias: 'ocorrencias',
   sinistros: 'sinistros',
   estados_log: 'carros_estados_log',
+  configuracoes: 'configuracoes',
 };
 
 const PROD_ORIGIN = 'https://vianta-dashboard.netlify.app';

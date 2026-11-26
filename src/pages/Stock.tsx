@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { toast } from 'sonner';
-import { Car, ChevronLeft, ReceiptText, ChevronRight, Copy, FileText, Images, Search } from 'lucide-react';
+import { Car, ChevronLeft, Pencil, ReceiptText, ChevronRight, Copy, FileText, Images, Search } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -9,7 +9,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { normalizeText } from '@/lib/operacoes/constants';
 import type { Carro } from '@/lib/operacoes/types';
-import { useAlterarEstado, useCarros, useUpdateCarroField } from '@/hooks/useOperacoes';
+import { useAlterarEstado, useCarros, useConfiguracoes, useGuardarConfiguracao, useUpdateCarroField } from '@/hooks/useOperacoes';
+import { Textarea } from '@/components/ui/textarea';
 import { NomeViatura } from '@/components/operacoes/NomeViatura';
 import { nomeCarro } from '@/lib/operacoes/identidadeViatura';
 import { descricaoCombustivel } from '@/lib/operacoes/combustivel';
@@ -123,8 +124,27 @@ const ITENS_OFERTA_ALUGUER = [
   'App com histórico de despesas e ganhos',
 ];
 
+type Ofertas = { venda: string[]; aluguer: string[] };
+
 /** Pontos da oferta no texto copiado (sem a substituição garantida, por indicação do Francisco). */
-const ITENS_RESUMO_ALUGUER = ITENS_OFERTA_ALUGUER.filter((i) => !i.startsWith('Viatura de substituição'));
+const itensResumoAluguer = (itens: string[]) => itens.filter((i) => !i.startsWith('Viatura de substituição'));
+
+const linhas = (t: string | null | undefined) => (t || '').split('\n').map((l) => l.trim()).filter(Boolean);
+
+/**
+ * Pontos da Oferta Venda/Aluguer TVDE. Vêm da tabela `configuracoes` (editáveis no
+ * dashboard, iguais para todas as viaturas); sem lá estarem usa os pontos de base.
+ */
+function useOfertas(): Ofertas {
+  const { data } = useConfiguracoes();
+  const valor = (chave: string) => linhas(data?.find((c) => c.chave === chave)?.valor);
+  const venda = valor('oferta_venda');
+  const aluguer = valor('oferta_aluguer');
+  return {
+    venda: venda.length ? venda : ITENS_OFERTA_VENDA,
+    aluguer: aluguer.length ? aluguer : ITENS_OFERTA_ALUGUER,
+  };
+}
 
 /** Valores dos planos de pagamento da caução. */
 function planosCaucao(v: Carro) {
@@ -144,7 +164,7 @@ function urlProposta(v: Carro, gestao: Gestao) {
   return `${URL_PROPOSTAS}?carro=${v.id}&tipo=${gestao === 'Aluguer' ? 'aluguer' : 'venda'}`;
 }
 
-function resumoWhatsApp(v: Carro, gestao: Gestao) {
+function resumoWhatsApp(v: Carro, gestao: Gestao, ofertas: Ofertas) {
   const titulo = nomeCarro(v);
   const specs = [v.ano, vazio(v.kms_atuais) ? null : `${v.kms_atuais} km`, descricaoCombustivel(v), v.caixa, v.cor]
     .filter((x) => !vazio(x))
@@ -167,7 +187,7 @@ function resumoWhatsApp(v: Carro, gestao: Gestao) {
         .filter(Boolean)
         .join('\n'),
     );
-    blocos.push(['*Oferta Vianta:*', ...ITENS_RESUMO_ALUGUER.map((i) => `• ${i}`)].join('\n'));
+    blocos.push(['*Oferta Vianta:*', ...itensResumoAluguer(ofertas.aluguer).map((i) => `• ${i}`)].join('\n'));
     const c = planosCaucao(v);
     blocos.push(
       [
@@ -191,7 +211,7 @@ function resumoWhatsApp(v: Carro, gestao: Gestao) {
       .filter(([, x]) => !vazio(x))
       .map(([l, x]) => `• ${l}: ${eur(x, '/mês')}`);
     if (cred.length) blocos.push(['*Crédito (prestação):*', ...cred].join('\n'));
-    blocos.push(['*Oferta Vianta:*', ...itensOfertaVenda(v).map((i) => `• ${i}`)].join('\n'));
+    blocos.push(['*Oferta Vianta:*', ...itensOfertaVenda(v, ofertas.venda).map((i) => `• ${i}`)].join('\n'));
   }
   if (disponivel) blocos.push(disponivel);
   return blocos.join('\n\n');
@@ -385,9 +405,9 @@ function prazoValido(v: Carro, p: Prazo): boolean {
  * Pontos da oferta de Venda. Se a viatura ainda tem garantia da marca, mostra-a
  * no lugar da Garantia Standard Vianta; senão mantém a da Vianta.
  */
-function itensOfertaVenda(v: Carro): string[] {
+function itensOfertaVenda(v: Carro, base: string[]): string[] {
   const regra = regraMarca(v);
-  const itens = [...ITENS_OFERTA_VENDA];
+  const itens = [...base];
   if (!regra) return itens;
   const i = itens.findIndex((x) => x.startsWith('Garantia Standard Vianta'));
   if (prazoValido(v, regra.geral) && i >= 0) {
@@ -399,10 +419,74 @@ function itensOfertaVenda(v: Carro): string[] {
   return itens;
 }
 
-function PainelOferta({ titulo, itens }: { titulo: string; itens: string[] }) {
+/**
+ * Bloco da oferta. "Editar" altera o texto de base (um ponto por linha), que é
+ * partilhado: muda em todas as viaturas.
+ */
+function PainelOferta({
+  titulo,
+  itens,
+  chave,
+  base,
+}: {
+  titulo: string;
+  itens: string[];
+  chave: string;
+  base: string[];
+}) {
+  const guardar = useGuardarConfiguracao();
+  const [aEditar, setAEditar] = useState(false);
+  const [texto, setTexto] = useState('');
+  const [aGuardar, setAGuardar] = useState(false);
+
+  const abrir = () => {
+    setTexto(base.join('\n'));
+    setAEditar(true);
+  };
+  const gravar = async () => {
+    if (!linhas(texto).length) {
+      toast.error('Escreva pelo menos um ponto.');
+      return;
+    }
+    setAGuardar(true);
+    const ok = await guardar(chave, linhas(texto).join('\n'));
+    setAGuardar(false);
+    if (ok) {
+      toast.success('Oferta atualizada em todas as viaturas.');
+      setAEditar(false);
+    }
+  };
+
+  if (aEditar) {
+    return (
+      <div>
+        <h3 className="mb-1 text-xs text-muted-foreground">{titulo}</h3>
+        <p className="mb-2 text-xs text-muted-foreground">Um ponto por linha. A alteração aplica-se a todas as viaturas.</p>
+        <Textarea value={texto} onChange={(e) => setTexto(e.target.value)} rows={Math.max(6, linhas(texto).length + 1)} className="text-sm" />
+        <div className="mt-2 flex gap-2">
+          <Button size="sm" onClick={gravar} disabled={aGuardar}>
+            {aGuardar ? 'A guardar…' : 'Guardar'}
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => setAEditar(false)} disabled={aGuardar}>
+            Cancelar
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
-      <h3 className="mb-1 text-xs text-muted-foreground">{titulo}</h3>
+      <div className="mb-1 flex items-center justify-between gap-2">
+        <h3 className="text-xs text-muted-foreground">{titulo}</h3>
+        <button
+          type="button"
+          onClick={abrir}
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+        >
+          <Pencil className="h-3 w-3" /> Editar
+        </button>
+      </div>
       <ul className="grid gap-y-1.5 text-sm text-foreground">
         {itens.map((i) => (
           <li key={i} className="flex gap-2">
@@ -415,17 +499,14 @@ function PainelOferta({ titulo, itens }: { titulo: string; itens: string[] }) {
   );
 }
 
-function OfertaAluguer() {
-  return (
-    <PainelOferta
-      titulo="Oferta Aluguer TVDE"
-      itens={ITENS_OFERTA_ALUGUER}
-    />
-  );
+function OfertaAluguer({ ofertas }: { ofertas: Ofertas }) {
+  return <PainelOferta titulo="Oferta Aluguer TVDE" itens={ofertas.aluguer} chave="oferta_aluguer" base={ofertas.aluguer} />;
 }
 
-function OfertaVenda({ v }: { v: Carro }) {
-  return <PainelOferta titulo="Oferta Venda TVDE" itens={itensOfertaVenda(v)} />;
+function OfertaVenda({ v, ofertas }: { v: Carro; ofertas: Ofertas }) {
+  return (
+    <PainelOferta titulo="Oferta Venda TVDE" itens={itensOfertaVenda(v, ofertas.venda)} chave="oferta_venda" base={ofertas.venda} />
+  );
 }
 
 /** Linha só aparece se tiver valor — para o comercial não ler "—" em tudo. */
@@ -435,6 +516,7 @@ function Dado({ label, valor }: { label: string; valor: string | null }) {
 }
 
 function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
+  const ofertas = useOfertas();
   const fotos = fotosDe(v);
   const [foto, setFoto] = useState(0);
   const [aberta, setAberta] = useState(false);
@@ -471,7 +553,7 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
 
   const copiar = async () => {
     try {
-      await navigator.clipboard.writeText(resumoWhatsApp(v, gestao));
+      await navigator.clipboard.writeText(resumoWhatsApp(v, gestao, ofertas));
       toast.success('Resumo copiado');
     } catch {
       toast.error('Não foi possível copiar o resumo');
@@ -753,11 +835,11 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
         <div className="space-y-4">
           {gestao === 'Aluguer' ? (
             <>
-              <OfertaAluguer />
+              <OfertaAluguer ofertas={ofertas} />
               <CaucaoPlanos v={v} />
             </>
           ) : (
-            <OfertaVenda v={v} />
+            <OfertaVenda v={v} ofertas={ofertas} />
           )}
         </div>
         <section>

@@ -44,6 +44,39 @@ export const useSinistros = () => useCentralList<Sinistro>('sinistros');
 export const useEstadosLog = () => useCentralList<EstadoLog>('estados_log');
 export const useFinanceiro = () => useCentralList<Movimento>('financeiro');
 
+/** Texto partilhado (tabela `configuracoes`), igual para todas as viaturas. */
+export type Configuracao = { id: number; chave: string; valor: string | null };
+
+export function useConfiguracoes() {
+  return useQuery({
+    queryKey: [KEY, 'configuracoes'],
+    queryFn: () => listCentral<Configuracao>('configuracoes'),
+    staleTime: 30_000,
+    retry: false,
+  });
+}
+
+/** Grava (ou cria) uma configuração pela chave e atualiza a cache. */
+export function useGuardarConfiguracao() {
+  const qc = useQueryClient();
+  return async (chave: string, valor: string): Promise<boolean> => {
+    try {
+      const atuais = qc.getQueryData<Configuracao[]>([KEY, 'configuracoes']) || [];
+      const existente = atuais.find((c) => c.chave === chave);
+      if (existente) {
+        await updateCentralField('configuracoes', existente.id, 'valor', valor);
+      } else {
+        await createCentral('configuracoes', { chave, valor });
+      }
+      await qc.invalidateQueries({ queryKey: [KEY, 'configuracoes'] });
+      return true;
+    } catch (e) {
+      toast.error(`Erro ao guardar: ${errorMessage(e)}`);
+      return false;
+    }
+  };
+}
+
 export function useRefreshOperacoes() {
   const qc = useQueryClient();
   return () => qc.invalidateQueries({ queryKey: [KEY] });
