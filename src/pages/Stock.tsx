@@ -80,6 +80,10 @@ async function fotoComoJpeg(url: string, nome: string): Promise<File> {
   return new File([jpeg], nome, { type: 'image/jpeg' });
 }
 
+/** Venda com IVA a 23%: o IVA é dedutível para empresas e ENI. */
+const ivaDedutivel = (v: Carro) => Number(v.iva_venda) === 23;
+const TEXTO_IVA_DEDUTIVEL = 'IVA dedutível para Empresas e ENI (empresário em nome individual)';
+
 function precoPrincipal(v: Carro, gestao: Gestao) {
   return gestao === 'Aluguer'
     ? eur(v.valor_aluguer_semanal, '/sem')
@@ -162,6 +166,7 @@ function resumoWhatsApp(v: Carro, gestao: Gestao) {
     blocos.push(
       [
         `*Preço:* ${eur(v.preco_venda)}`,
+        ivaDedutivel(v) ? `*IVA:* 23% — ${TEXTO_IVA_DEDUTIVEL}` : '',
         vazio(v.categorias_tvde) ? '' : `*Categorias TVDE:* ${v.categorias_tvde}`,
       ]
         .filter(Boolean)
@@ -283,6 +288,9 @@ function CartaoViatura({
             .join(' · ') || '—'}
         </div>
         <BadgeEstado v={v} />
+        {gestao === 'Venda' && ivaDedutivel(v) && (
+          <div className="mt-1 text-[10px] font-semibold text-emerald-400">IVA dedutível · Empresas e ENI</div>
+        )}
         {gestao === 'Venda' && simulacaoCreditoIncompleta(v) && (
           <div className="mt-1 text-[10px] font-semibold text-amber-300">⚠ Sem simulação de crédito</div>
         )}
@@ -641,6 +649,11 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
               </div>
             ))}
           </div>
+          {gestao !== 'Aluguer' && ivaDedutivel(v) && (
+            <div className="mt-2 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs font-semibold text-emerald-300">
+              IVA a 23% · {TEXTO_IVA_DEDUTIVEL}
+            </div>
+          )}
           {gestao !== 'Aluguer' && (
             simulacaoCreditoIncompleta(v) ? (
               <div className="mt-2 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3">
