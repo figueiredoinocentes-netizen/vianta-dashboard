@@ -83,6 +83,11 @@ async function fotoComoJpeg(url: string, nome: string): Promise<File> {
 /** Venda com IVA a 23%: o IVA é dedutível para empresas e ENI. */
 const ivaDedutivel = (v: Carro) => Number(v.iva_venda) === 23;
 const TEXTO_IVA_DEDUTIVEL = 'IVA dedutível para Empresas e ENI (empresário em nome individual)';
+/** Preço de venda sem IVA (23%), arredondado ao euro. */
+function precoSemIva(v: Carro): number | null {
+  const n = valorNumerico(v, 'Venda');
+  return n == null ? null : Math.round(n / 1.23);
+}
 
 function precoPrincipal(v: Carro, gestao: Gestao) {
   return gestao === 'Aluguer'
@@ -166,7 +171,7 @@ function resumoWhatsApp(v: Carro, gestao: Gestao) {
     blocos.push(
       [
         `*Preço:* ${eur(v.preco_venda)}`,
-        ivaDedutivel(v) ? `*IVA:* 23% — ${TEXTO_IVA_DEDUTIVEL}` : '',
+        ivaDedutivel(v) ? `*Preço s/ IVA:* ${eur(precoSemIva(v))} — ${TEXTO_IVA_DEDUTIVEL}` : '',
         vazio(v.categorias_tvde) ? '' : `*Categorias TVDE:* ${v.categorias_tvde}`,
       ]
         .filter(Boolean)
@@ -635,25 +640,30 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
             </div>
           </div>
 
-          <div className={cn('mt-3 grid gap-2', gestao === 'Aluguer' ? 'grid-cols-2' : 'grid-cols-1')}>
+          <div className={cn('mt-3 grid gap-2', gestao === 'Aluguer' ? 'grid-cols-2' : ivaDedutivel(v) ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-1')}>
             {(gestao === 'Aluguer'
               ? [
                   ['Aluguer / sem', eur(v.valor_aluguer_semanal)],
                   ['Caução', eur(v.caucao)],
                 ]
-              : [['Preço venda', eur(v.preco_venda)]]
+              : ivaDedutivel(v)
+                ? [
+                    ['Preço venda c/ IVA', eur(v.preco_venda)],
+                    ['Preço venda s/ IVA', eur(precoSemIva(v))],
+                  ]
+                : [['Preço venda', eur(v.preco_venda)]]
             ).map(([label, valor]) => (
               <div key={label} className="rounded-lg bg-muted/40 px-2.5 py-2">
                 <div className="text-[11px] text-muted-foreground">{label}</div>
                 <div className="font-display text-base font-bold text-foreground">{valor}</div>
               </div>
             ))}
+            {gestao !== 'Aluguer' && ivaDedutivel(v) && (
+              <div className="col-span-2 flex items-center rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-2 text-xs font-semibold text-emerald-300 sm:col-span-1">
+                {TEXTO_IVA_DEDUTIVEL}
+              </div>
+            )}
           </div>
-          {gestao !== 'Aluguer' && ivaDedutivel(v) && (
-            <div className="mt-2 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs font-semibold text-emerald-300">
-              IVA a 23% · {TEXTO_IVA_DEDUTIVEL}
-            </div>
-          )}
           {gestao !== 'Aluguer' && (
             simulacaoCreditoIncompleta(v) ? (
               <div className="mt-2 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3">
