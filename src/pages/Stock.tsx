@@ -12,6 +12,7 @@ import type { Carro } from '@/lib/operacoes/types';
 import { useAlterarEstado, useCarros, useUpdateCarroField } from '@/hooks/useOperacoes';
 import { NomeViatura } from '@/components/operacoes/NomeViatura';
 import { nomeCarro } from '@/lib/operacoes/identidadeViatura';
+import { descricaoCombustivel } from '@/lib/operacoes/combustivel';
 import { ESTADOS_EDITAVEIS_VENDA, indisponivelParaOferta, visivelNoStockComercial } from '@/lib/operacoes/stockComercial';
 
 /**
@@ -126,7 +127,7 @@ function urlProposta(v: Carro, gestao: Gestao) {
 
 function resumoWhatsApp(v: Carro, gestao: Gestao) {
   const titulo = nomeCarro(v);
-  const specs = [v.ano, vazio(v.kms_atuais) ? null : `${v.kms_atuais} km`, v.combustivel, v.caixa, v.cor]
+  const specs = [v.ano, vazio(v.kms_atuais) ? null : `${v.kms_atuais} km`, descricaoCombustivel(v), v.caixa, v.cor]
     .filter((x) => !vazio(x))
     .join(' · ');
   const disponivel = (() => {
@@ -277,7 +278,7 @@ function CartaoViatura({
           </span>
         </div>
         <div className="truncate text-xs text-muted-foreground">
-          {[v.ano, vazio(v.kms_atuais) ? null : `${v.kms_atuais} km`, v.combustivel]
+          {[v.ano, vazio(v.kms_atuais) ? null : `${v.kms_atuais} km`, descricaoCombustivel(v)]
             .filter((x) => !vazio(x))
             .join(' · ') || '—'}
         </div>
@@ -714,7 +715,7 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
               ['Matrícula', t(v.matricula)],
               ['Ano', t(v.ano)],
               ['KMs atuais', vazio(v.kms_atuais) ? null : `${v.kms_atuais} km`],
-              ['Combustível', t(v.combustivel)],
+              ['Combustível', t(descricaoCombustivel(v))],
               ['Caixa', t(v.caixa)],
               ['Cor', t(v.cor)],
               ['Cavalos', t(v.cavalos)],

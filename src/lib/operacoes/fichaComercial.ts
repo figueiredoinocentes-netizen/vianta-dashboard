@@ -3,6 +3,7 @@
 
 import type { Carro } from './types';
 import { splitMarcaModelo } from './identidadeViatura';
+import { descricaoCombustivel } from './combustivel';
 
 const vazio = (v: unknown) => v == null || String(v).trim() === '';
 const txt = (v: unknown) => (vazio(v) ? '—' : String(v));
@@ -37,7 +38,7 @@ export function gerarFichaComercialHTML(carro: Carro): string {
   const identidade = splitMarcaModelo(v);
   const title = [identidade.marca, identidade.modelo].filter(Boolean).join(' ');
   const tituloVersao = v.versao ? `<span class="versao">${v.versao}</span>` : '';
-  const subtitulo = [v.matricula, v.ano, v.combustivel, v.kms_atuais ? `${fmtNum(v.kms_atuais)} km` : null]
+  const subtitulo = [v.matricula, v.ano, descricaoCombustivel(v), v.kms_atuais ? `${fmtNum(v.kms_atuais)} km` : null]
     .filter(Boolean).join(' · ');
 
   // Preço(s)
@@ -72,7 +73,7 @@ export function gerarFichaComercialHTML(carro: Carro): string {
     linha('Versão', v.versao) +
     linha('Matrícula', v.matricula) +
     linha('Ano', v.ano) +
-    linha('Combustível', v.combustivel) +
+    linha('Combustível', descricaoCombustivel(v)) +
     linha('Quilómetros', v.kms_atuais ? `${v.kms_atuais} km` : '—') +
     linha('Potência', v.cavalos ? `${v.cavalos} cv` : '—') +
     linha('Caixa', v.caixa) +

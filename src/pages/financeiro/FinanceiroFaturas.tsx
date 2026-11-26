@@ -10,7 +10,7 @@ import { FaturaDialog } from '@/components/financeiro/FaturaDialog';
 import { VendasViaturas } from '@/components/financeiro/VendasViaturas';
 import { FaturaThumb, FaturaViewer } from '@/components/financeiro/FaturaPreview';
 import { useCarros, useFinanceiro, useRefreshOperacoes } from '@/hooks/useOperacoes';
-import { eur, toNum } from '@/lib/operacoes/custos';
+import { eur } from '@/lib/operacoes/custos';
 import type { Movimento } from '@/lib/operacoes/types';
 import { CENTROS_CUSTO, eCusto, mesDe, naturezasSugeridas, nomeMes, valorSemIva } from '@/lib/financeiro';
 import { cn } from '@/lib/utils';
@@ -24,15 +24,6 @@ const TIPOS: [TipoFiltro, string][] = [
   ['todos', 'Todos'],
 ];
 const eVenda = (m: Movimento) => m.tipo === 'Venda';
-// Faturas de venda emitidas pela Vianta (importadas do SAF-T), exceto as já associadas a uma venda de viatura
-// (essas aparecem pela própria venda, para não contar duas vezes).
-const eFaturaVenda = (m: Movimento) =>
-  (m.n_documento || '').startsWith('SAFT ') &&
-  m.tipo !== 'Venda' &&
-  toNum(m.valor) > 0 &&
-  !(m.obs || '').startsWith('Associada à venda');
-const eAnulada = (m: Movimento) => (m.descricao || '').startsWith('[ANULADA]');
-const eReceita = (m: Movimento) => eVenda(m) || eFaturaVenda(m);
 
 const dataPt = (d: string | null) => (d ? d.slice(0, 10).split('-').reverse().join('/') : '');
 
@@ -58,9 +49,9 @@ export default function FinanceiroFaturas() {
     [movs],
   );
   const naturezas = useMemo(() => naturezasSugeridas(movs), [movs]);
-  // Vendas e recebimentos (vendas de viaturas + faturas de venda SAF-T): mostradas no filtro Vendas / Todos.
+  // Vendas de viaturas (receitas, tipo 'Venda'): mostradas no filtro Vendas / Todos.
   const vendas = useMemo(
-    () => movs.filter(eReceita).sort((a, b) => (b.data || '').localeCompare(a.data || '') || b.id - a.id),
+    () => movs.filter(eVenda).sort((a, b) => (b.data || '').localeCompare(a.data || '') || b.id - a.id),
     [movs],
   );
   const base = useMemo(
@@ -98,8 +89,8 @@ export default function FinanceiroFaturas() {
     }
     return t;
   }, [custos, natureza, mes]);
-  const totalCustosLista = lista.filter((m) => !eReceita(m)).reduce((a, m) => a + valorSemIva(m).valor, 0);
-  const totalVendasLista = lista.filter((m) => eReceita(m) && !eAnulada(m)).reduce((a, m) => a + valorSemIva(m).valor, 0);
+  const totalCustosLista = lista.filter((m) => !eVenda(m)).reduce((a, m) => a + valorSemIva(m).valor, 0);
+  const totalVendasLista = lista.filter(eVenda).reduce((a, m) => a + valorSemIva(m).valor, 0);
 
   const abrir = (mov: Movimento | null) => setDialog({ open: true, mov });
 
@@ -249,11 +240,8 @@ export default function FinanceiroFaturas() {
                           {m.estado_validacao === 'validado' ? 'venda validada' : 'venda provisória'}
                         </span>
                       )}
-                      {eFaturaVenda(m) && eAnulada(m) && (
-                        <span className="ml-1 rounded bg-rose-500/15 px-1 text-[10px] text-rose-500">anulada</span>
-                      )}
                     </TableCell>
-                    <TableCell className={cn('whitespace-nowrap text-right font-semibold', eReceita(m) && !eAnulada(m) && 'text-emerald-500', eAnulada(m) && 'text-muted-foreground line-through')}>
+                    <TableCell className={cn('whitespace-nowrap text-right font-semibold', eVenda(m) && 'text-emerald-500')}>
                       {eur(v.valor)}
                       {v.soTotal && (
                         <span className="ml-1 text-[10px] font-normal text-amber-500" title="Só foi registado o total c/ IVA">

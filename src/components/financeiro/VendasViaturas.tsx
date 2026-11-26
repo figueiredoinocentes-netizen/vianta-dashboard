@@ -184,7 +184,7 @@ export function VendasViaturas() {
   const vendas = useMemo(
     () =>
       movs
-        .filter((m) => m.tipo === 'Venda' && m.carro_id != null)
+        .filter((m) => m.tipo === 'Venda')
         .sort((a, b) => (b.data || '').localeCompare(a.data || '') || b.id - a.id),
     [movs],
   );
