@@ -746,6 +746,7 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
           {
             titulo: 'TVDE e garantias',
             linhas: [
+              ['Categorias TVDE', categoriasDe(v).length ? categoriasDe(v).join(', ') : null],
               ['Fim elegibilidade', t(v.fim_elegibilidade_tvde)],
               ['Garantia viatura', t(v.garantia_viatura)],
               ['Garantia bateria', t(v.garantia_bateria)],
