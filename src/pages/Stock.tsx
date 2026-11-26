@@ -735,11 +735,11 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
       )}
 
       {/* Categorias TVDE */}
-      <div className="mt-3 flex flex-wrap items-center gap-1.5">
-        <span className="mr-1 text-xs text-muted-foreground">Categorias TVDE</span>
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <span className="mr-1 text-sm text-muted-foreground">Categorias TVDE</span>
         {categorias.length ? (
           categorias.map((c) => (
-            <span key={c} className="rounded-full border border-border px-2.5 py-0.5 text-xs text-foreground/80">
+            <span key={c} className="rounded-full border border-border px-3.5 py-1 text-sm font-medium text-foreground">
               {c}
             </span>
           ))
