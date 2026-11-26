@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { Fragment, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { toast } from 'sonner';
-import { Car, ChevronLeft, ChevronRight, Copy, FileText, Images, Search } from 'lucide-react';
+import { Banknote, Car, ChevronLeft, CreditCard, ChevronRight, Copy, FileText, Images, Search } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -47,7 +47,17 @@ const vazio = (v: unknown) => v == null || String(v).trim() === '';
 const simulacaoCreditoIncompleta = (v: Carro) =>
   [v.credito_120_meses, v.credito_60_meses, v.credito_48_meses].some(vazio);
 const txt = (v: unknown) => (vazio(v) ? '—' : String(v));
-const eur = (v: unknown, sufixo = '') => (vazio(v) ? '—' : `${v} €${sufixo}`);
+/** Valor com ponto nos milhares: "40999" → "40.999", "1128,5" → "1.128,50". Texto não numérico fica igual. */
+function milhares(v: unknown): string {
+  let t = String(v).trim().replace(/\s/g, '').replace(/€/g, '');
+  if (/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(t)) t = t.replace(/\./g, ''); // já vinha com pontos
+  t = t.replace(',', '.');
+  const n = Number(t);
+  if (!Number.isFinite(n)) return String(v).trim();
+  const [int, dec] = (Number.isInteger(n) ? String(n) : n.toFixed(2)).split('.');
+  return int.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + (dec ? `,${dec}` : '');
+}
+const eur = (v: unknown, sufixo = '') => (vazio(v) ? '—' : `${milhares(v)} €${sufixo}`);
 const km = (v: unknown) => (vazio(v) ? '—' : `${v} km`);
 
 function dataPt(v: string | null | undefined) {
@@ -179,7 +189,7 @@ function resumoWhatsApp(v: Carro, gestao: Gestao) {
     );
     const cred = [['120 meses', v.credito_120_meses], ['60 meses', v.credito_60_meses], ['48 meses', v.credito_48_meses]]
       .filter(([, x]) => !vazio(x))
-      .map(([l, x]) => `• ${l}: ${x} €/mês`);
+      .map(([l, x]) => `• ${l}: ${eur(x, '/mês')}`);
     if (cred.length) blocos.push(['*Crédito (prestação):*', ...cred].join('\n'));
     blocos.push(['*Oferta Vianta:*', ...itensOfertaVenda(v).map((i) => `• ${i}`)].join('\n'));
   }
@@ -640,78 +650,90 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
             </div>
           </div>
 
-          <div className={cn('mt-3 grid gap-2', gestao === 'Aluguer' ? 'grid-cols-2' : ivaDedutivel(v) ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-1')}>
-            {(gestao === 'Aluguer'
-              ? [
-                  ['Aluguer / sem', eur(v.valor_aluguer_semanal)],
-                  ['Caução', eur(v.caucao)],
-                ]
-              : ivaDedutivel(v)
-                ? [
-                    ['Preço venda c/ IVA', eur(v.preco_venda)],
-                    ['Preço venda s/ IVA', eur(precoSemIva(v))],
-                  ]
-                : [['Preço venda', eur(v.preco_venda)]]
-            ).map(([label, valor]) => (
-              <div key={label} className="rounded-lg bg-muted/40 px-2.5 py-2">
-                <div className="text-[11px] text-muted-foreground">{label}</div>
-                <div className="font-display text-base font-bold text-foreground">{valor}</div>
-              </div>
-            ))}
-            {gestao !== 'Aluguer' && ivaDedutivel(v) && (
-              <div className="col-span-2 flex items-center rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-2 text-xs font-semibold text-emerald-300 sm:col-span-1">
-                {TEXTO_IVA_DEDUTIVEL}
-              </div>
-            )}
-          </div>
-          {gestao !== 'Aluguer' && (
-            simulacaoCreditoIncompleta(v) ? (
-              <div className="mt-2 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3">
-                <div className="text-xs font-semibold text-amber-300">⚠ Simulação de crédito em falta</div>
-                <p className="mt-1 text-xs text-amber-200/80">
-                  Faça o pedido ao intermediário de crédito e introduza os três valores recebidos.
-                </p>
-                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
-                  {([
-                    ['credito_120_meses', '120 meses'],
-                    ['credito_60_meses', '60 meses'],
-                    ['credito_48_meses', '48 meses'],
-                  ] as const).map(([campo, label]) => (
-                    <label key={campo} className="text-[11px] text-muted-foreground">
-                      {label} (€/mês)
-                      <Input
-                        inputMode="decimal"
-                        value={credito[campo]}
-                        onChange={(e) => setCredito((atual) => ({ ...atual, [campo]: e.target.value }))}
-                        className="mt-1 h-8 bg-background"
-                      />
-                    </label>
-                  ))}
+          {gestao === 'Aluguer' ? (
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              {[
+                ['Aluguer / sem', eur(v.valor_aluguer_semanal)],
+                ['Caução', eur(v.caucao)],
+              ].map(([label, valor]) => (
+                <div key={label} className="rounded-lg bg-muted/40 px-2.5 py-2">
+                  <div className="text-[11px] text-muted-foreground">{label}</div>
+                  <div className="font-display text-base font-bold text-foreground">{valor}</div>
                 </div>
-                <Button
-                  type="button"
-                  size="sm"
-                  className="mt-3"
-                  disabled={aGuardarCredito || Object.values(credito).some(vazio)}
-                  onClick={guardarCredito}
-                >
-                  {aGuardarCredito ? 'A guardar…' : 'Guardar simulação de crédito'}
-                </Button>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              {/* Pronto pagamento */}
+              <div className="rounded-lg border border-emerald-500/50 bg-card p-3">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
+                  <Banknote className="h-3.5 w-3.5" /> Pronto pagamento
+                </div>
+                <div className="mt-1 font-display text-2xl font-bold text-foreground">
+                  {eur(v.preco_venda)}
+                  {ivaDedutivel(v) && <span className="ml-1.5 text-xs font-normal text-muted-foreground">c/ IVA</span>}
+                </div>
+                {ivaDedutivel(v) && (
+                  <>
+                    <div className="text-sm text-muted-foreground">{eur(precoSemIva(v))} s/ IVA</div>
+                    <div className="mt-1.5 text-xs text-emerald-400">{TEXTO_IVA_DEDUTIVEL}</div>
+                  </>
+                )}
               </div>
-            ) : (
-              <div className="mt-2 grid grid-cols-3 gap-2">
-                {[
-                  ['Crédito 120 m', eur(v.credito_120_meses, '/mês')],
-                  ['Crédito 60 m', eur(v.credito_60_meses, '/mês')],
-                  ['Crédito 48 m', eur(v.credito_48_meses, '/mês')],
-                ].map(([label, valor]) => (
-                  <div key={label} className="rounded-lg border border-border px-2.5 py-1.5">
-                    <div className="text-[11px] text-muted-foreground">{label}</div>
-                    <div className="text-sm font-semibold text-foreground">{valor}</div>
+              {/* Com crédito */}
+              {simulacaoCreditoIncompleta(v) ? (
+                <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3">
+                  <div className="text-xs font-semibold text-amber-300">⚠ Simulação de crédito em falta</div>
+                  <p className="mt-1 text-xs text-amber-200/80">
+                    Faça o pedido ao intermediário de crédito e introduza os três valores recebidos.
+                  </p>
+                  <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                    {([
+                      ['credito_120_meses', '120 meses'],
+                      ['credito_60_meses', '60 meses'],
+                      ['credito_48_meses', '48 meses'],
+                    ] as const).map(([campo, label]) => (
+                      <label key={campo} className="text-[11px] text-muted-foreground">
+                        {label} (€/mês)
+                        <Input
+                          inputMode="decimal"
+                          value={credito[campo]}
+                          onChange={(e) => setCredito((atual) => ({ ...atual, [campo]: e.target.value }))}
+                          className="mt-1 h-8 bg-background"
+                        />
+                      </label>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="mt-3"
+                    disabled={aGuardarCredito || Object.values(credito).some(vazio)}
+                    onClick={guardarCredito}
+                  >
+                    {aGuardarCredito ? 'A guardar…' : 'Guardar simulação de crédito'}
+                  </Button>
+                </div>
+              ) : (
+                <div className="rounded-lg border border-sky-500/50 bg-card p-3">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-sky-400">
+                    <CreditCard className="h-3.5 w-3.5" /> Com crédito (prestação mensal)
+                  </div>
+                  <div className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
+                    {([
+                      ['120 meses', v.credito_120_meses],
+                      ['60 meses', v.credito_60_meses],
+                      ['48 meses', v.credito_48_meses],
+                    ] as const).map(([label, valor]) => (
+                      <Fragment key={label}>
+                        <span className="text-muted-foreground">{label}</span>
+                        <span className="text-right font-semibold text-foreground">{eur(valor, '/mês')}</span>
+                      </Fragment>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
