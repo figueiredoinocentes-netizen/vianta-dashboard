@@ -667,21 +667,16 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
           ))}
         </div>
       ) : (
-        <div
-          className={cn(
-            'mt-4 grid divide-y divide-border rounded-lg border border-border md:divide-x md:divide-y-0',
-            ivaDedutivel(v) ? 'md:grid-cols-3' : 'md:grid-cols-2',
-          )}
-        >
+        <div className="mt-4 grid rounded-lg border border-border md:grid-cols-2">
           <div className="px-4 py-3">
             <div className="text-xs text-muted-foreground">Pronto pagamento</div>
-            <div className="font-display text-3xl font-bold leading-tight text-foreground">
+            <div className="whitespace-nowrap font-display text-3xl font-bold leading-tight text-foreground">
               {eur(v.preco_venda)}
               {ivaDedutivel(v) && <span className="ml-1.5 text-xs font-normal text-muted-foreground">c/ IVA</span>}
             </div>
             {ivaDedutivel(v) && <div className="text-sm text-muted-foreground">{eur(precoSemIva(v))} s/ IVA</div>}
           </div>
-          <div className="px-4 py-3">
+          <div className="border-t border-border px-4 py-3 md:border-l md:border-t-0">
             <div className="text-xs text-muted-foreground">Crédito (prestação mensal)</div>
             {simulacaoCreditoIncompleta(v) ? (
               <div className="mt-1 rounded-md border border-amber-500/40 bg-amber-500/10 p-2.5">
@@ -720,8 +715,8 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
               <div className="mt-0.5 space-y-0.5">
                 {creditos.map(([label, valor], i) => (
                   <div key={label} className="flex items-baseline justify-between gap-3">
-                    <span className="text-xs text-muted-foreground">{label}</span>
-                    <span className={cn('font-display font-bold text-foreground', i === 0 ? 'text-3xl leading-tight' : 'text-base')}>
+                    <span className="whitespace-nowrap text-xs text-muted-foreground">{label}</span>
+                    <span className={cn('whitespace-nowrap font-display font-bold text-foreground', i === 0 ? 'text-3xl leading-tight' : 'text-base')}>
                       {eur(valor)}
                       <span className={cn('ml-0.5 font-normal text-muted-foreground', i === 0 ? 'text-sm' : 'text-xs')}>/mês</span>
                     </span>
@@ -731,7 +726,7 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
             )}
           </div>
           {ivaDedutivel(v) && (
-            <div className="flex items-center gap-2 px-4 py-3 text-sm text-foreground">
+            <div className="flex items-center gap-2 border-t border-border px-4 py-2.5 text-sm text-foreground md:col-span-2">
               <ReceiptText className="h-4 w-4 shrink-0 text-muted-foreground" />
               <span>{TEXTO_IVA_DEDUTIVEL}</span>
             </div>
