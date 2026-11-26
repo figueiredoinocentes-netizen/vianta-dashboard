@@ -259,8 +259,7 @@ export function NovaViaturaDialog({
             <Field label="Ano">
               <Input
                 type="number"
-                min={2010}
-                max={2026}
+                max={new Date().getFullYear() + 1}
                 value={form.ano}
                 onChange={(e) => set('ano', e.target.value)}
               />
