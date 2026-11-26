@@ -1,6 +1,6 @@
-import { Fragment, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { toast } from 'sonner';
-import { Banknote, Car, ChevronLeft, CreditCard, ChevronRight, Copy, FileText, Images, Search } from 'lucide-react';
+import { Car, ChevronLeft, ReceiptText, ChevronRight, Copy, FileText, Images, Search } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -206,17 +206,6 @@ function Linha({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-function Bloco({ titulo, children }: { titulo: string; children: ReactNode }) {
-  return (
-    <section className="mb-4 break-inside-avoid">
-      <h3 className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-primary/80">
-        {titulo}
-      </h3>
-      <div>{children}</div>
-    </section>
-  );
-}
-
 function BadgeEstado({ v }: { v: Carro }) {
   const disp = disponibilidade(v);
   const quando = dataPt(v.data_previsao_pronto);
@@ -412,12 +401,12 @@ function itensOfertaVenda(v: Carro): string[] {
 
 function PainelOferta({ titulo, itens }: { titulo: string; itens: string[] }) {
   return (
-    <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
-      <div className="text-[11px] font-semibold uppercase tracking-wider text-primary/80">{titulo}</div>
-      <ul className="mt-2 grid gap-x-6 gap-y-1 text-xs text-foreground">
+    <div>
+      <h3 className="mb-1 text-xs text-muted-foreground">{titulo}</h3>
+      <ul className="grid gap-y-1.5 text-sm text-foreground">
         {itens.map((i) => (
-          <li key={i} className="flex gap-1.5">
-            <span className="text-emerald-400">✓</span>
+          <li key={i} className="flex gap-2">
+            <span className="text-primary">✓</span>
             <span>{i}</span>
           </li>
         ))}
@@ -522,10 +511,42 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
     }
   };
 
+  const t = (x: unknown) => (vazio(x) ? null : String(x));
+  const subtitulo = [
+    t(v.ano),
+    vazio(v.kms_atuais) ? null : `${milhares(v.kms_atuais)} km`,
+    t(descricaoCombustivel(v)),
+    t(v.caixa),
+    t(v.cor),
+    t(v.matricula),
+  ].filter(Boolean).join(' · ');
+  const categorias = categoriasDe(v);
+  const fichaTecnica: [string, string | null][] = [
+    ['Matrícula', t(v.matricula)],
+    ['Ano', t(v.ano)],
+    ['Quilómetros', vazio(v.kms_atuais) ? null : `${milhares(v.kms_atuais)} km`],
+    ['Combustível', t(descricaoCombustivel(v))],
+    ['Caixa', t(v.caixa)],
+    ['Cor', t(v.cor)],
+    ['Potência', vazio(v.cavalos) ? null : `${v.cavalos} cv`],
+    ['Bagageira', vazio(v.volume_bagageira) ? null : `${v.volume_bagageira} L`],
+    ['Autonomia', vazio(v.autonomia_km) ? null : `${v.autonomia_km} km`],
+    ['Bateria', vazio(v.bateria_kwh) ? null : `${v.bateria_kwh} kWh`],
+    ['Estado da bateria', vazio(v.estado_bateria_pct) ? null : `${v.estado_bateria_pct}%`],
+    ['Fim elegibilidade TVDE', t(v.fim_elegibilidade_tvde)],
+    ['Garantia viatura', t(v.garantia_viatura)],
+    ['Garantia bateria', t(v.garantia_bateria)],
+  ];
+  const creditos = [
+    ['120 meses', v.credito_120_meses],
+    ['60 meses', v.credito_60_meses],
+    ['48 meses', v.credito_48_meses],
+  ] as const;
+
   return (
     <div className="min-w-0 rounded-xl border border-border bg-card p-4">
       <div className="flex flex-col gap-4 sm:flex-row">
-        {/* Foto pequena à esquerda */}
+        {/* Foto à esquerda */}
         <div className="w-full shrink-0 sm:w-56">
           <div
             className={cn(
@@ -592,42 +613,14 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
           </DialogContent>
         </Dialog>
 
-        {/* Identificação e valores à direita */}
+        {/* Identificação, estado e ações */}
         <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
-              <h2 className="font-display text-lg font-bold leading-tight text-foreground">
+              <h2 className="font-display text-xl font-bold leading-tight text-foreground">
                 <NomeViatura carro={v} fallback="Sem modelo" />
               </h2>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                {[v.matricula, v.cor, v.caixa].filter((x) => !vazio(x)).join(' · ') || '—'}
-              </p>
-              <div className="mt-1.5">
-                {gestao === 'Venda' ? <EstadoComercial carro={v} /> : <BadgeEstado v={v} />}
-              </div>
-              {reservada && (
-                <div className="mt-2 rounded-md border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-xs text-yellow-200">
-                  Acordo verbal — não apresentar nem enviar proposta desta viatura a outros clientes.
-                </div>
-              )}
-              <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-primary/80">
-                  Categorias TVDE
-                </span>
-                {vazio(v.categorias_tvde) ? (
-                  <span className="text-sm text-muted-foreground">—</span>
-                ) : (
-                  String(v.categorias_tvde)
-                    .split(/[,;/]/)
-                    .map((c) => c.trim())
-                    .filter(Boolean)
-                    .map((c) => (
-                      <span key={c} className="rounded bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">
-                        {c}
-                      </span>
-                    ))
-                )}
-              </div>
+              <p className="mt-1 text-sm text-muted-foreground">{subtitulo || '—'}</p>
             </div>
             <div className="flex shrink-0 flex-wrap justify-end gap-2">
               <Button variant="outline" size="sm" onClick={copiar} disabled={reservada}>
@@ -649,155 +642,136 @@ function Ficha({ v, gestao }: { v: Carro; gestao: Gestao }) {
               )}
             </div>
           </div>
-
-          {gestao === 'Aluguer' ? (
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              {[
-                ['Aluguer / sem', eur(v.valor_aluguer_semanal)],
-                ['Caução', eur(v.caucao)],
-              ].map(([label, valor]) => (
-                <div key={label} className="rounded-lg bg-muted/40 px-2.5 py-2">
-                  <div className="text-[11px] text-muted-foreground">{label}</div>
-                  <div className="font-display text-base font-bold text-foreground">{valor}</div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="mt-3 grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-2">
-              {/* Pronto pagamento */}
-              <div className="rounded-lg border border-emerald-500/50 bg-card p-3">
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
-                  <Banknote className="h-3.5 w-3.5" /> Pronto pagamento
-                </div>
-                <div className="mt-1 font-display text-2xl font-bold text-foreground">
-                  {eur(v.preco_venda)}
-                  {ivaDedutivel(v) && <span className="ml-1.5 text-xs font-normal text-muted-foreground">c/ IVA</span>}
-                </div>
-                {ivaDedutivel(v) && (
-                  <>
-                    <div className="text-sm text-muted-foreground">{eur(precoSemIva(v))} s/ IVA</div>
-                    <div className="mt-1.5 text-xs text-emerald-400">{TEXTO_IVA_DEDUTIVEL}</div>
-                  </>
-                )}
-              </div>
-              {/* Com crédito */}
-              {simulacaoCreditoIncompleta(v) ? (
-                <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3">
-                  <div className="text-xs font-semibold text-amber-300">⚠ Simulação de crédito em falta</div>
-                  <p className="mt-1 text-xs text-amber-200/80">
-                    Faça o pedido ao intermediário de crédito e introduza os três valores recebidos.
-                  </p>
-                  <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
-                    {([
-                      ['credito_120_meses', '120 meses'],
-                      ['credito_60_meses', '60 meses'],
-                      ['credito_48_meses', '48 meses'],
-                    ] as const).map(([campo, label]) => (
-                      <label key={campo} className="text-[11px] text-muted-foreground">
-                        {label} (€/mês)
-                        <Input
-                          inputMode="decimal"
-                          value={credito[campo]}
-                          onChange={(e) => setCredito((atual) => ({ ...atual, [campo]: e.target.value }))}
-                          className="mt-1 h-8 bg-background"
-                        />
-                      </label>
-                    ))}
-                  </div>
-                  <Button
-                    type="button"
-                    size="sm"
-                    className="mt-3"
-                    disabled={aGuardarCredito || Object.values(credito).some(vazio)}
-                    onClick={guardarCredito}
-                  >
-                    {aGuardarCredito ? 'A guardar…' : 'Guardar simulação de crédito'}
-                  </Button>
-                </div>
-              ) : (
-                <div className="rounded-lg border border-sky-500/50 bg-card p-3">
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-sky-400">
-                    <CreditCard className="h-3.5 w-3.5" /> Com crédito (prestação mensal)
-                  </div>
-                  <div className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
-                    {([
-                      ['120 meses', v.credito_120_meses],
-                      ['60 meses', v.credito_60_meses],
-                      ['48 meses', v.credito_48_meses],
-                    ] as const).map(([label, valor]) => (
-                      <Fragment key={label}>
-                        <span className="text-muted-foreground">{label}</span>
-                        <span className="text-right font-semibold text-foreground">{eur(valor, '/mês')}</span>
-                      </Fragment>
-                    ))}
-                  </div>
-                </div>
-              )}
+          <div className="mt-3">
+            {gestao === 'Venda' ? <EstadoComercial carro={v} /> : <BadgeEstado v={v} />}
+          </div>
+          {reservada && (
+            <div className="mt-2 rounded-md border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-xs text-yellow-200">
+              Acordo verbal — não apresentar nem enviar proposta desta viatura a outros clientes.
             </div>
           )}
         </div>
       </div>
 
-      {/* Oferta + caução em largura total, por baixo da foto */}
-      <div className={cn('mt-4 grid items-start gap-3 [&>*]:mt-0', gestao !== 'Aluguer' && 'lg:grid-cols-2')}>
-        {gestao === 'Aluguer' ? (
-          <>
-            <OfertaAluguer />
-            <CaucaoPlanos v={v} />
-          </>
+      {/* Faixa de preço */}
+      {gestao === 'Aluguer' ? (
+        <div className="mt-4 grid grid-cols-2 divide-x divide-border rounded-lg border border-border">
+          {[
+            ['Aluguer semanal', eur(v.valor_aluguer_semanal)],
+            ['Caução', eur(v.caucao)],
+          ].map(([label, valor]) => (
+            <div key={label} className="px-4 py-3">
+              <div className="text-xs text-muted-foreground">{label}</div>
+              <div className="font-display text-2xl font-bold text-foreground">{valor}</div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div
+          className={cn(
+            'mt-4 grid divide-y divide-border rounded-lg border border-border md:divide-x md:divide-y-0',
+            ivaDedutivel(v) ? 'md:grid-cols-3' : 'md:grid-cols-2',
+          )}
+        >
+          <div className="px-4 py-3">
+            <div className="text-xs text-muted-foreground">Pronto pagamento</div>
+            <div className="font-display text-3xl font-bold leading-tight text-foreground">
+              {eur(v.preco_venda)}
+              {ivaDedutivel(v) && <span className="ml-1.5 text-xs font-normal text-muted-foreground">c/ IVA</span>}
+            </div>
+            {ivaDedutivel(v) && <div className="text-sm text-muted-foreground">{eur(precoSemIva(v))} s/ IVA</div>}
+          </div>
+          <div className="px-4 py-3">
+            <div className="text-xs text-muted-foreground">Crédito (prestação mensal)</div>
+            {simulacaoCreditoIncompleta(v) ? (
+              <div className="mt-1 rounded-md border border-amber-500/40 bg-amber-500/10 p-2.5">
+                <div className="text-xs font-semibold text-amber-300">⚠ Simulação de crédito em falta</div>
+                <p className="mt-1 text-xs text-amber-200/80">
+                  Faça o pedido ao intermediário de crédito e introduza os três valores recebidos.
+                </p>
+                <div className="mt-2 grid grid-cols-3 gap-2">
+                  {([
+                    ['credito_120_meses', '120 m'],
+                    ['credito_60_meses', '60 m'],
+                    ['credito_48_meses', '48 m'],
+                  ] as const).map(([campo, label]) => (
+                    <label key={campo} className="text-[11px] text-muted-foreground">
+                      {label} (€/mês)
+                      <Input
+                        inputMode="decimal"
+                        value={credito[campo]}
+                        onChange={(e) => setCredito((atual) => ({ ...atual, [campo]: e.target.value }))}
+                        className="mt-1 h-8 bg-background"
+                      />
+                    </label>
+                  ))}
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  className="mt-2"
+                  disabled={aGuardarCredito || Object.values(credito).some(vazio)}
+                  onClick={guardarCredito}
+                >
+                  {aGuardarCredito ? 'A guardar…' : 'Guardar simulação de crédito'}
+                </Button>
+              </div>
+            ) : (
+              <div className="mt-0.5 space-y-0.5">
+                {creditos.map(([label, valor], i) => (
+                  <div key={label} className="flex items-baseline justify-between gap-3">
+                    <span className="text-xs text-muted-foreground">{label}</span>
+                    <span className={cn('font-display font-bold text-foreground', i === 0 ? 'text-3xl leading-tight' : 'text-base')}>
+                      {eur(valor)}
+                      <span className={cn('ml-0.5 font-normal text-muted-foreground', i === 0 ? 'text-sm' : 'text-xs')}>/mês</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          {ivaDedutivel(v) && (
+            <div className="flex items-center gap-2 px-4 py-3 text-sm text-foreground">
+              <ReceiptText className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <span>{TEXTO_IVA_DEDUTIVEL}</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Categorias TVDE */}
+      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+        <span className="mr-1 text-xs text-muted-foreground">Categorias TVDE</span>
+        {categorias.length ? (
+          categorias.map((c) => (
+            <span key={c} className="rounded-full border border-border px-2.5 py-0.5 text-xs text-foreground/80">
+              {c}
+            </span>
+          ))
         ) : (
-          <OfertaVenda v={v} />
+          <span className="text-sm text-muted-foreground">—</span>
         )}
       </div>
 
-      {/* Só os dados que existem, agrupados */}
-      {(() => {
-        const t = (x: unknown) => (vazio(x) ? null : String(x));
-        const blocos: { titulo: string; linhas: [string, string | null][] }[] = [
-          {
-            titulo: 'Viatura',
-            linhas: [
-              ['Matrícula', t(v.matricula)],
-              ['Ano', t(v.ano)],
-              ['KMs atuais', vazio(v.kms_atuais) ? null : `${v.kms_atuais} km`],
-              ['Combustível', t(descricaoCombustivel(v))],
-              ['Caixa', t(v.caixa)],
-              ['Cor', t(v.cor)],
-              ['Cavalos', t(v.cavalos)],
-              ['Bagageira', vazio(v.volume_bagageira) ? null : `${v.volume_bagageira} L`],
-            ],
-          },
-          {
-            titulo: 'Elétrico',
-            linhas: [
-              ['Autonomia', vazio(v.autonomia_km) ? null : `${v.autonomia_km} km`],
-              ['Bateria', vazio(v.bateria_kwh) ? null : `${v.bateria_kwh} kWh`],
-              ['Estado da bateria', vazio(v.estado_bateria_pct) ? null : `${v.estado_bateria_pct}%`],
-            ],
-          },
-          {
-            titulo: 'TVDE e garantias',
-            linhas: [
-              ['Categorias TVDE', categoriasDe(v).length ? categoriasDe(v).join(', ') : null],
-              ['Fim elegibilidade', t(v.fim_elegibilidade_tvde)],
-              ['Garantia viatura', t(v.garantia_viatura)],
-              ['Garantia bateria', t(v.garantia_bateria)],
-            ],
-          },
-        ];
-        const visiveis = blocos.filter((b) => b.linhas.some(([, x]) => x != null));
-        return (
-          <div className="mt-4 border-t border-border pt-4 md:columns-2 md:gap-8 xl:columns-3">
-            {visiveis.map((b) => (
-              <Bloco key={b.titulo} titulo={b.titulo}>
-                {b.linhas.map(([l, x]) => (
-                  <Dado key={l} label={l} valor={x} />
-                ))}
-              </Bloco>
-            ))}
-          </div>
-        );
-      })()}
+      {/* Oferta + ficha técnica */}
+      <div className="mt-5 grid items-start gap-6 border-t border-border pt-4 lg:grid-cols-2">
+        <div className="space-y-4">
+          {gestao === 'Aluguer' ? (
+            <>
+              <OfertaAluguer />
+              <CaucaoPlanos v={v} />
+            </>
+          ) : (
+            <OfertaVenda v={v} />
+          )}
+        </div>
+        <section>
+          <h3 className="mb-1 text-xs text-muted-foreground">Ficha técnica</h3>
+          {fichaTecnica.map(([l, x]) => (
+            <Dado key={l} label={l} valor={x} />
+          ))}
+        </section>
+      </div>
     </div>
   );
 }
